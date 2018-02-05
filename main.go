@@ -1,7 +1,11 @@
 package main
 
-import "github.com/vkuznecovas/mouthful/api"
+import (
+	"github.com/vkuznecovas/mouthful/api"
+	"github.com/vkuznecovas/mouthful/db/sqlite"
+)
 
 func main() {
-	api.StartServer()
+	db := sqlite.CreateTestDatabase()
+	api.GetServer(&db).Run()
 }

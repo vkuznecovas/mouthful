@@ -8,10 +8,43 @@
   version = "v2.0.0"
 
 [[projects]]
+  name = "github.com/boj/redistore"
+  packages = ["."]
+  revision = "fc113767cd6b051980f260d6dbe84b2740c46ab0"
+  version = "v1.2"
+
+[[projects]]
+  branch = "master"
+  name = "github.com/bradfitz/gomemcache"
+  packages = ["memcache"]
+  revision = "1952afaa557dc08e8e0d89eafab110fb501c1a2b"
+
+[[projects]]
+  branch = "master"
+  name = "github.com/bradleypeabody/gorilla-sessions-memcache"
+  packages = ["."]
+  revision = "75ee37df8664a47cd5d9eb84d41e1f2b08086893"
+
+[[projects]]
   name = "github.com/davecgh/go-spew"
   packages = ["spew"]
   revision = "346938d642f2ec3594ed81d874461961cd0faa76"
   version = "v1.1.0"
+
+[[projects]]
+  name = "github.com/garyburd/redigo"
+  packages = [
+    "internal",
+    "redis"
+  ]
+  revision = "d1ed5c67e5794de818ea85e6b522fda02623a484"
+  version = "v1.4.0"
+
+[[projects]]
+  branch = "master"
+  name = "github.com/gin-contrib/sessions"
+  packages = ["."]
+  revision = "cccdeef56346e7037ca92de250c2b55ef5e7ffe3"
 
 [[projects]]
   branch = "master"
@@ -36,6 +69,24 @@
   version = "v1.0.0"
 
 [[projects]]
+  name = "github.com/gorilla/context"
+  packages = ["."]
+  revision = "1ea25387ff6f684839d82767c1733ff4d4d15d0a"
+  version = "v1.1"
+
+[[projects]]
+  name = "github.com/gorilla/securecookie"
+  packages = ["."]
+  revision = "667fe4e3466a040b780561fe9b51a83a3753eefc"
+  version = "v1.1"
+
+[[projects]]
+  name = "github.com/gorilla/sessions"
+  packages = ["."]
+  revision = "ca9ada44574153444b00d3fd9c8559e4cc95f896"
+  version = "v1.1"
+
+[[projects]]
   branch = "master"
   name = "github.com/jmoiron/sqlx"
   packages = [
@@ -43,6 +94,12 @@
     "reflectx"
   ]
   revision = "05cef0741ade10ca668982355b3f3f0bcf0ff0a8"
+
+[[projects]]
+  branch = "master"
+  name = "github.com/kidstuff/mongostore"
+  packages = ["."]
+  revision = "256d65ac5b0e35e7c5ebb3f175c0bed1e5c2b253"
 
 [[projects]]
   name = "github.com/mattn/go-isatty"
@@ -88,6 +145,18 @@
 
 [[projects]]
   branch = "v2"
+  name = "gopkg.in/mgo.v2"
+  packages = [
+    ".",
+    "bson",
+    "internal/json",
+    "internal/sasl",
+    "internal/scram"
+  ]
+  revision = "3f83fa5005286a7fe593b055f0d7771a7dce4655"
+
+[[projects]]
+  branch = "v2"
   name = "gopkg.in/yaml.v2"
   packages = ["."]
   revision = "d670f9405373e636a5a2765eea47fac0c9bc91a4"
@@ -95,6 +164,6 @@
 [solve-meta]
   analyzer-name = "dep"
   analyzer-version = 1
-  inputs-digest = "07769d859a5992aa6bbf96e160ef5121a594bd733229939f49655770f98c8b59"
+  inputs-digest = "4dc400f339ae602a00605a307bdc605fbce4a1b2bd19acbe595a7d31614a53c8"
   solver-name = "gps-cdcl"
   solver-version = 1

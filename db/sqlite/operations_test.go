@@ -183,3 +183,23 @@ func TestDeleteComment(t *testing.T) {
 	assert.NotNil(t, err)
 	assert.Equal(t, global.ErrCommentNotFound, err)
 }
+
+func TestGetAllThreadsEmptyDatabase(t *testing.T) {
+	database := setupTestDb()
+	threads, err := database.GetAllThreads()
+	assert.Nil(t, err)
+	assert.Len(t, threads, 0)
+}
+
+func TestGetAllThreads(t *testing.T) {
+	database := setupTestDb()
+	err := database.CreateThread("/test")
+	assert.Nil(t, err)
+	err = database.CreateThread("/test1")
+	assert.Nil(t, err)
+	threads, err := database.GetAllThreads()
+	assert.Nil(t, err)
+	assert.Len(t, threads, 2)
+	assert.Equal(t, "/test", threads[0].Path)
+	assert.Equal(t, "/test1", threads[1].Path)
+}

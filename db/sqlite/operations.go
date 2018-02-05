@@ -125,3 +125,9 @@ func (db *Database) DeleteComment(id int) error {
 	}
 	return nil
 }
+
+// GetAllThreads gets all the threads found in the database
+func (db *Database) GetAllThreads() (threads []model.Thread, err error) {
+	err = db.DB.Select(&threads, "select * from thread")
+	return threads, err
+}

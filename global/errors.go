@@ -11,5 +11,8 @@ var ErrInternalServerError = errors.New("Internal server error")
 // ErrBadRequest -> 400 basicly
 var ErrBadRequest = errors.New("Bad request")
 
+// ErrUnauthorized -> 401 basicly
+var ErrUnauthorized = errors.New("Unauthorized")
+
 // ErrCommentNotFound indicates that the comment does not exist
 var ErrCommentNotFound = errors.New("Comment not found")

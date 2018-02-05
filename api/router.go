@@ -1,8 +1,11 @@
 package api
 
 import (
+	"fmt"
 	"log"
+	"os"
 
+	"github.com/gin-contrib/sessions"
 	"github.com/vkuznecovas/mouthful/api/model"
 
 	"github.com/gin-gonic/gin"
@@ -48,6 +51,21 @@ func (r *router) GetComments(c *gin.Context) {
 	c.JSON(200, comments)
 }
 
+// GetAllThreads returns an array of threads
+func (r *router) GetAllThreads(c *gin.Context) {
+	if !r.isAdmin(c) {
+		c.AbortWithStatusJSON(401, global.ErrCommentNotFound)
+		return
+	}
+	threads, err := r.db.GetAllThreads()
+	if err != nil {
+		log.Println(err)
+		c.AbortWithStatusJSON(500, global.ErrInternalServerError)
+		return
+	}
+	c.JSON(200, threads)
+}
+
 // CreateComment creates a comment from CreateCommentBody in JSON form
 func (r *router) CreateComment(c *gin.Context) {
 	var createCommentBody model.CreateCommentBody
@@ -72,6 +90,10 @@ func (r *router) CreateComment(c *gin.Context) {
 
 // UpdateComment updates the provided comment in body
 func (r *router) UpdateComment(c *gin.Context) {
+	if !r.isAdmin(c) {
+		c.AbortWithStatusJSON(401, global.ErrCommentNotFound)
+		return
+	}
 	var updateCommentBody model.UpdateCommentBody
 	err := c.BindJSON(&updateCommentBody)
 	if err != nil {
@@ -119,6 +141,11 @@ func (r *router) UpdateComment(c *gin.Context) {
 
 // DeleteComment deletes comment by given id
 func (r *router) DeleteComment(c *gin.Context) {
+	if !r.isAdmin(c) {
+		c.AbortWithStatusJSON(401, global.ErrCommentNotFound)
+		return
+	}
+	fmt.Println(c.Cookie("mouthful-session"))
 	var deleteCommentBody model.DeleteCommentBody
 	err := c.BindJSON(&deleteCommentBody)
 	if err != nil {
@@ -136,5 +163,35 @@ func (r *router) DeleteComment(c *gin.Context) {
 		c.AbortWithStatusJSON(500, global.ErrInternalServerError)
 		return
 	}
+	c.AbortWithStatus(204)
+}
+
+func (r *router) isAdmin(c *gin.Context) bool {
+	session := sessions.Default(c)
+	isAdmin := session.Get("isAdmin")
+	isAdminParsed, ok := isAdmin.(bool)
+	if !ok {
+		return false
+	}
+	return isAdminParsed
+}
+
+func (r *router) Login(c *gin.Context) {
+	var loginBody model.LoginBody
+	err := c.BindJSON(&loginBody)
+
+	if err != nil {
+		log.Println(err)
+		c.AbortWithStatusJSON(400, global.ErrBadRequest)
+		return
+	}
+	// TODO: config this
+	if loginBody.Password != os.Getenv("ADMIN_PASSWORD") {
+		c.AbortWithStatusJSON(401, global.ErrBadRequest)
+		return
+	}
+	session := sessions.Default(c)
+	session.Set("isAdmin", true)
+	session.Save()
 	c.AbortWithStatus(204)
 }

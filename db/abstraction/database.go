@@ -11,4 +11,5 @@ type Database interface {
 	UpdateComment(id int, body, author string, confirmed bool) error
 	DeleteComment(id int) error
 	GetComment(id int) (model.Comment, error)
+	GetAllThreads() ([]model.Thread, error)
 }
