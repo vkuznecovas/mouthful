@@ -54,7 +54,7 @@ func (r *router) GetComments(c *gin.Context) {
 // GetAllThreads returns an array of threads
 func (r *router) GetAllThreads(c *gin.Context) {
 	if !r.isAdmin(c) {
-		c.AbortWithStatusJSON(401, global.ErrCommentNotFound)
+		c.AbortWithStatusJSON(401, global.ErrUnauthorized)
 		return
 	}
 	threads, err := r.db.GetAllThreads()
@@ -64,6 +64,21 @@ func (r *router) GetAllThreads(c *gin.Context) {
 		return
 	}
 	c.JSON(200, threads)
+}
+
+// GetAllComments returns an array of comments
+func (r *router) GetAllComments(c *gin.Context) {
+	if !r.isAdmin(c) {
+		c.AbortWithStatusJSON(401, global.ErrUnauthorized)
+		return
+	}
+	comments, err := r.db.GetAllComments()
+	if err != nil {
+		log.Println(err)
+		c.AbortWithStatusJSON(500, global.ErrInternalServerError)
+		return
+	}
+	c.JSON(200, comments)
 }
 
 // CreateComment creates a comment from CreateCommentBody in JSON form
@@ -91,7 +106,7 @@ func (r *router) CreateComment(c *gin.Context) {
 // UpdateComment updates the provided comment in body
 func (r *router) UpdateComment(c *gin.Context) {
 	if !r.isAdmin(c) {
-		c.AbortWithStatusJSON(401, global.ErrCommentNotFound)
+		c.AbortWithStatusJSON(401, global.ErrUnauthorized)
 		return
 	}
 	var updateCommentBody model.UpdateCommentBody
@@ -142,7 +157,7 @@ func (r *router) UpdateComment(c *gin.Context) {
 // DeleteComment deletes comment by given id
 func (r *router) DeleteComment(c *gin.Context) {
 	if !r.isAdmin(c) {
-		c.AbortWithStatusJSON(401, global.ErrCommentNotFound)
+		c.AbortWithStatusJSON(401, global.ErrUnauthorized)
 		return
 	}
 	fmt.Println(c.Cookie("mouthful-session"))

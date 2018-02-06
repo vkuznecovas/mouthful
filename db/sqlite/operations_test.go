@@ -203,3 +203,30 @@ func TestGetAllThreads(t *testing.T) {
 	assert.Equal(t, "/test", threads[0].Path)
 	assert.Equal(t, "/test1", threads[1].Path)
 }
+
+func TestGetAllCommentsEmptyDatabase(t *testing.T) {
+	database := setupTestDb()
+	comments, err := database.GetAllComments()
+	assert.Nil(t, err)
+	assert.Len(t, comments, 0)
+}
+
+func TestGetAllComments(t *testing.T) {
+	database := setupTestDb()
+	author := "author"
+	body := "body"
+	path := "/test"
+	err := database.CreateComment(body, author, path, false)
+	assert.Nil(t, err)
+	err = database.CreateComment(body, author, path, true)
+	assert.Nil(t, err)
+	comments, err := database.GetAllComments()
+	assert.Nil(t, err)
+	assert.Len(t, comments, 2)
+	assert.Equal(t, body, comments[0].Body)
+	assert.Equal(t, body, comments[1].Body)
+	assert.Equal(t, false, comments[0].Confirmed)
+	assert.Equal(t, true, comments[1].Confirmed)
+	assert.Equal(t, author, comments[0].Author)
+	assert.Equal(t, author, comments[1].Author)
+}

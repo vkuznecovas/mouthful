@@ -25,5 +25,6 @@ func GetServer(db *abstraction.Database) *gin.Engine {
 	r.DELETE("/comments", sessions.Sessions("mouthful-session", store), router.DeleteComment)
 	r.POST("/admin/login", sessions.Sessions("mouthful-session", store), router.Login)
 	r.GET("/threads", sessions.Sessions("mouthful-session", store), router.GetAllThreads)
+	r.GET("/comments/all", sessions.Sessions("mouthful-session", store), router.GetAllComments)
 	return r
 }

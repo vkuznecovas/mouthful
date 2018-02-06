@@ -12,4 +12,5 @@ type Database interface {
 	DeleteComment(id int) error
 	GetComment(id int) (model.Comment, error)
 	GetAllThreads() ([]model.Thread, error)
+	GetAllComments() ([]model.Comment, error)
 }

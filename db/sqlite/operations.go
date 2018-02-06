@@ -131,3 +131,9 @@ func (db *Database) GetAllThreads() (threads []model.Thread, err error) {
 	err = db.DB.Select(&threads, "select * from thread")
 	return threads, err
 }
+
+// GetAllComments gets all the comments found in the database
+func (db *Database) GetAllComments() (comments []model.Comment, err error) {
+	err = db.DB.Select(&comments, "select * from comment")
+	return comments, err
+}
