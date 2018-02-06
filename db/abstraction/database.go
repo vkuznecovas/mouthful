@@ -13,4 +13,5 @@ type Database interface {
 	GetComment(id int) (model.Comment, error)
 	GetAllThreads() ([]model.Thread, error)
 	GetAllComments() ([]model.Comment, error)
+	GetDatabaseDialect() string
 }

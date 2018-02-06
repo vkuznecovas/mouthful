@@ -3,41 +3,42 @@ package api
 import (
 	"fmt"
 	"log"
-	"os"
 
 	"github.com/gin-contrib/sessions"
-	"github.com/vkuznecovas/mouthful/api/model"
-
 	"github.com/gin-gonic/gin"
+	"github.com/vkuznecovas/mouthful/api/model"
+	configModel "github.com/vkuznecovas/mouthful/config/model"
 	"github.com/vkuznecovas/mouthful/db/abstraction"
 	"github.com/vkuznecovas/mouthful/global"
 )
 
-type router struct {
-	db abstraction.Database
+type Router struct {
+	db     *abstraction.Database
+	config *configModel.Config
 }
 
 // New returns a new instance of router
-func New(db abstraction.Database) *router {
-	r := router{db: db}
+func New(db *abstraction.Database, config *configModel.Config) *Router {
+	r := Router{db: db, config: config}
 	return &r
 }
 
 // Status responds with 200 when asked
-func (r *router) Status(c *gin.Context) {
+func (r *Router) Status(c *gin.Context) {
 	c.JSON(200, gin.H{
 		"message": "OK",
 	})
 }
 
 // GetComments returns the comments from thread that is passed as query parameter uri
-func (r *router) GetComments(c *gin.Context) {
+func (r *Router) GetComments(c *gin.Context) {
 	path := c.Query("uri")
 	if path == "" {
 		c.AbortWithStatusJSON(400, global.ErrThreadNotFound)
 		return
 	}
-	comments, err := r.db.GetCommentsByThread(path)
+	db := *r.db
+	comments, err := db.GetCommentsByThread(path)
 
 	if err != nil {
 		if err == global.ErrThreadNotFound {
@@ -52,12 +53,13 @@ func (r *router) GetComments(c *gin.Context) {
 }
 
 // GetAllThreads returns an array of threads
-func (r *router) GetAllThreads(c *gin.Context) {
+func (r *Router) GetAllThreads(c *gin.Context) {
 	if !r.isAdmin(c) {
 		c.AbortWithStatusJSON(401, global.ErrUnauthorized)
 		return
 	}
-	threads, err := r.db.GetAllThreads()
+	db := *r.db
+	threads, err := db.GetAllThreads()
 	if err != nil {
 		log.Println(err)
 		c.AbortWithStatusJSON(500, global.ErrInternalServerError)
@@ -67,12 +69,13 @@ func (r *router) GetAllThreads(c *gin.Context) {
 }
 
 // GetAllComments returns an array of comments
-func (r *router) GetAllComments(c *gin.Context) {
+func (r *Router) GetAllComments(c *gin.Context) {
 	if !r.isAdmin(c) {
 		c.AbortWithStatusJSON(401, global.ErrUnauthorized)
 		return
 	}
-	comments, err := r.db.GetAllComments()
+	db := *r.db
+	comments, err := db.GetAllComments()
 	if err != nil {
 		log.Println(err)
 		c.AbortWithStatusJSON(500, global.ErrInternalServerError)
@@ -82,7 +85,7 @@ func (r *router) GetAllComments(c *gin.Context) {
 }
 
 // CreateComment creates a comment from CreateCommentBody in JSON form
-func (r *router) CreateComment(c *gin.Context) {
+func (r *Router) CreateComment(c *gin.Context) {
 	var createCommentBody model.CreateCommentBody
 	err := c.BindJSON(&createCommentBody)
 	if err != nil {
@@ -90,11 +93,12 @@ func (r *router) CreateComment(c *gin.Context) {
 		c.AbortWithStatusJSON(400, global.ErrBadRequest)
 		return
 	}
-	if createCommentBody.Email != nil {
+	if r.config.Honeypot && createCommentBody.Email != nil {
 		c.AbortWithStatus(204)
 		return
 	}
-	err = r.db.CreateComment(createCommentBody.Body, createCommentBody.Author, createCommentBody.Path, false)
+	db := *r.db
+	err = db.CreateComment(createCommentBody.Body, createCommentBody.Author, createCommentBody.Path, false)
 	if err != nil {
 		log.Println(err)
 		c.AbortWithStatusJSON(500, global.ErrInternalServerError)
@@ -104,7 +108,7 @@ func (r *router) CreateComment(c *gin.Context) {
 }
 
 // UpdateComment updates the provided comment in body
-func (r *router) UpdateComment(c *gin.Context) {
+func (r *Router) UpdateComment(c *gin.Context) {
 	if !r.isAdmin(c) {
 		c.AbortWithStatusJSON(401, global.ErrUnauthorized)
 		return
@@ -121,8 +125,8 @@ func (r *router) UpdateComment(c *gin.Context) {
 		c.AbortWithStatusJSON(400, global.ErrBadRequest)
 		return
 	}
-
-	comment, err := r.db.GetComment(updateCommentBody.CommentId)
+	db := *r.db
+	comment, err := db.GetComment(updateCommentBody.CommentId)
 	if err != nil {
 		if err == global.ErrCommentNotFound {
 			c.AbortWithStatusJSON(404, global.ErrCommentNotFound)
@@ -144,8 +148,7 @@ func (r *router) UpdateComment(c *gin.Context) {
 	if updateCommentBody.Confirmed != nil {
 		confirmed = *updateCommentBody.Confirmed
 	}
-
-	err = r.db.UpdateComment(updateCommentBody.CommentId, body, author, confirmed)
+	err = db.UpdateComment(updateCommentBody.CommentId, body, author, confirmed)
 	if err != nil {
 		log.Println(err)
 		c.AbortWithStatusJSON(500, global.ErrInternalServerError)
@@ -155,7 +158,7 @@ func (r *router) UpdateComment(c *gin.Context) {
 }
 
 // DeleteComment deletes comment by given id
-func (r *router) DeleteComment(c *gin.Context) {
+func (r *Router) DeleteComment(c *gin.Context) {
 	if !r.isAdmin(c) {
 		c.AbortWithStatusJSON(401, global.ErrUnauthorized)
 		return
@@ -168,7 +171,8 @@ func (r *router) DeleteComment(c *gin.Context) {
 		c.AbortWithStatusJSON(400, global.ErrBadRequest)
 		return
 	}
-	err = r.db.DeleteComment(deleteCommentBody.CommentId)
+	db := *r.db
+	err = db.DeleteComment(deleteCommentBody.CommentId)
 	if err != nil {
 		if err == global.ErrCommentNotFound {
 			c.AbortWithStatusJSON(404, global.ErrCommentNotFound)
@@ -181,7 +185,7 @@ func (r *router) DeleteComment(c *gin.Context) {
 	c.AbortWithStatus(204)
 }
 
-func (r *router) isAdmin(c *gin.Context) bool {
+func (r *Router) isAdmin(c *gin.Context) bool {
 	session := sessions.Default(c)
 	isAdmin := session.Get("isAdmin")
 	isAdminParsed, ok := isAdmin.(bool)
@@ -191,7 +195,8 @@ func (r *router) isAdmin(c *gin.Context) bool {
 	return isAdminParsed
 }
 
-func (r *router) Login(c *gin.Context) {
+// Login logs the user in
+func (r *Router) Login(c *gin.Context) {
 	var loginBody model.LoginBody
 	err := c.BindJSON(&loginBody)
 
@@ -200,11 +205,12 @@ func (r *router) Login(c *gin.Context) {
 		c.AbortWithStatusJSON(400, global.ErrBadRequest)
 		return
 	}
-	// TODO: config this
-	if loginBody.Password != os.Getenv("ADMIN_PASSWORD") {
+
+	if loginBody.Password != r.config.Moderation.AdminPassword {
 		c.AbortWithStatusJSON(401, global.ErrBadRequest)
 		return
 	}
+
 	session := sessions.Default(c)
 	session.Set("isAdmin", true)
 	session.Save()

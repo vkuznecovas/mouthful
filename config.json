@@ -1,0 +1,14 @@
+{
+    "honeypot": false,
+    "moderation": {
+        "enabled": true,
+        "adminPassword": "somepassword",
+        "sessionSecret": "somesecret",
+        "sessionName": "some-name",
+        "sessionDurationSeconds": 21600
+    },
+    "database": {
+        "dialect": "sqlite3",
+        "database": ":memory:"
+    }
+}

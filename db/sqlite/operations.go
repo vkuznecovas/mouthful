@@ -137,3 +137,8 @@ func (db *Database) GetAllComments() (comments []model.Comment, err error) {
 	err = db.DB.Select(&comments, "select * from comment")
 	return comments, err
 }
+
+// GetDatabaseDialect returns the current database dialect
+func (db *Database) GetDatabaseDialect() string {
+	return "sqlite3"
+}
