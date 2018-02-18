@@ -2,9 +2,10 @@ package api
 
 import (
 	"fmt"
-	"time"
 
+	"github.com/gin-contrib/cors"
 	"github.com/gin-contrib/sessions"
+	"github.com/gin-contrib/static"
 	"github.com/gin-gonic/gin"
 	"github.com/vkuznecovas/mouthful/config/model"
 	"github.com/vkuznecovas/mouthful/db/abstraction"
@@ -28,7 +29,13 @@ func CheckModerationVariables(config *model.Config) error {
 // GetServer returns an instance of the mouthful server
 func GetServer(db *abstraction.Database, config *model.Config) (*gin.Engine, error) {
 	r := gin.Default()
+	// same as
+	// config := cors.DefaultConfig()
+	// config.AllowAllOrigins = true
+	// router.Use(cors.New(config))
+	r.Use(cors.Default())
 	router := New(db, config)
+	r.Use(static.Serve("/", static.LocalFile("./admin/build", true)))
 	r.GET("/status", router.Status)
 	r.GET("/comments", router.GetComments)
 	r.POST("/comments", router.CreateComment)
@@ -40,7 +47,7 @@ func GetServer(db *abstraction.Database, config *model.Config) (*gin.Engine, err
 		}
 		store := sessions.NewCookieStore([]byte(config.Moderation.SessionSecret))
 		store.Options(sessions.Options{
-			MaxAge: int(time.Second * time.Duration(config.Moderation.SessionDurationSeconds)), //30min
+			MaxAge: 0, //int(time.Second * time.Duration(config.Moderation.SessionDurationSeconds)), //30min
 			Path:   "/",
 		})
 		r.PATCH("/comments", sessions.Sessions("mouthful-session", store), router.UpdateComment)

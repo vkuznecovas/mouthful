@@ -15,11 +15,12 @@ var sqliteQueries = []string{
 	)`,
 	`CREATE TABLE IF NOT EXISTS Comment(
 		Id INTEGER PRIMARY KEY AUTOINCREMENT,
-		ThreadId id not null,
+		ThreadId INTEGER not null,
 		Body text not null,
 		Author varchar(255) not null,
 		Confirmed bool not null default false,
 		CreatedAt TIMESTAMP DEFAULT CURRENT_TIMESTAMP not null,
+		ReplyTo INTEGER default null,
 		FOREIGN KEY(ThreadId) references Thread(Id)
 	)`,
 }
@@ -53,7 +54,7 @@ func (db *Database) GetThread(path string) (thread model.Thread, err error) {
 }
 
 // CreateComment takes in a body, author, and path and creates a comment for the given thread. If thread does not exist, it creates one
-func (db *Database) CreateComment(body string, author string, path string, confirmed bool) error {
+func (db *Database) CreateComment(body string, author string, path string, confirmed bool, replyTo *int) error {
 	thread, err := db.GetThread(path)
 	if err != nil {
 		if err == global.ErrThreadNotFound {
@@ -61,11 +62,22 @@ func (db *Database) CreateComment(body string, author string, path string, confi
 			if err != nil {
 				return err
 			}
-			return db.CreateComment(body, author, path, confirmed)
+			return db.CreateComment(body, author, path, confirmed, replyTo)
 		}
 		return err
 	}
-	_, err = db.DB.Exec(db.DB.Rebind("INSERT INTO comment(threadId, body, author, confirmed, createdAt) VALUES(?,?,?,?,?)"), thread.Id, body, author, confirmed, time.Now().UTC())
+	if replyTo != nil {
+		comment, err := db.GetComment(*replyTo)
+		if err != nil {
+			return err
+		}
+		// We allow for only a single layer of nesting. (Maybe just for now? who knows.)
+		// Check if the comment is a reply to this thread, and the comment you're replying to actually is a part of the thread
+		if comment.ReplyTo != nil || comment.ThreadId != thread.Id {
+			return global.ErrWrongReplyTo
+		}
+	}
+	_, err = db.DB.Exec(db.DB.Rebind("INSERT INTO comment(threadId, body, author, confirmed, createdAt, replyTo) VALUES(?,?,?,?,?,?)"), thread.Id, body, author, confirmed, time.Now().UTC(), replyTo)
 	return err
 }
 

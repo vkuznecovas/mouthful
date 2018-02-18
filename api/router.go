@@ -34,7 +34,7 @@ func (r *Router) Status(c *gin.Context) {
 func (r *Router) GetComments(c *gin.Context) {
 	path := c.Query("uri")
 	if path == "" {
-		c.AbortWithStatusJSON(400, global.ErrThreadNotFound)
+		c.AbortWithStatusJSON(400, global.ErrThreadNotFound.Error())
 		return
 	}
 	db := *r.db
@@ -42,11 +42,11 @@ func (r *Router) GetComments(c *gin.Context) {
 
 	if err != nil {
 		if err == global.ErrThreadNotFound {
-			c.AbortWithStatusJSON(404, global.ErrThreadNotFound)
+			c.AbortWithStatusJSON(404, global.ErrThreadNotFound.Error())
 			return
 		}
 		log.Println(err)
-		c.AbortWithStatusJSON(500, global.ErrInternalServerError)
+		c.AbortWithStatusJSON(500, global.ErrInternalServerError.Error())
 		return
 	}
 	c.JSON(200, comments)
@@ -55,14 +55,14 @@ func (r *Router) GetComments(c *gin.Context) {
 // GetAllThreads returns an array of threads
 func (r *Router) GetAllThreads(c *gin.Context) {
 	if !r.isAdmin(c) {
-		c.AbortWithStatusJSON(401, global.ErrUnauthorized)
+		c.AbortWithStatusJSON(401, global.ErrUnauthorized.Error())
 		return
 	}
 	db := *r.db
 	threads, err := db.GetAllThreads()
 	if err != nil {
 		log.Println(err)
-		c.AbortWithStatusJSON(500, global.ErrInternalServerError)
+		c.AbortWithStatusJSON(500, global.ErrInternalServerError.Error())
 		return
 	}
 	c.JSON(200, threads)
@@ -71,14 +71,14 @@ func (r *Router) GetAllThreads(c *gin.Context) {
 // GetAllComments returns an array of comments
 func (r *Router) GetAllComments(c *gin.Context) {
 	if !r.isAdmin(c) {
-		c.AbortWithStatusJSON(401, global.ErrUnauthorized)
+		c.AbortWithStatusJSON(401, global.ErrUnauthorized.Error())
 		return
 	}
 	db := *r.db
 	comments, err := db.GetAllComments()
 	if err != nil {
 		log.Println(err)
-		c.AbortWithStatusJSON(500, global.ErrInternalServerError)
+		c.AbortWithStatusJSON(500, global.ErrInternalServerError.Error())
 		return
 	}
 	c.JSON(200, comments)
@@ -90,7 +90,7 @@ func (r *Router) CreateComment(c *gin.Context) {
 	err := c.BindJSON(&createCommentBody)
 	if err != nil {
 		log.Println(err)
-		c.AbortWithStatusJSON(400, global.ErrBadRequest)
+		c.AbortWithStatusJSON(400, global.ErrBadRequest.Error())
 		return
 	}
 	if r.config.Honeypot && createCommentBody.Email != nil {
@@ -98,10 +98,14 @@ func (r *Router) CreateComment(c *gin.Context) {
 		return
 	}
 	db := *r.db
-	err = db.CreateComment(createCommentBody.Body, createCommentBody.Author, createCommentBody.Path, false)
+	err = db.CreateComment(createCommentBody.Body, createCommentBody.Author, createCommentBody.Path, false, createCommentBody.ReplyTo)
 	if err != nil {
+		if err == global.ErrWrongReplyTo {
+			c.AbortWithStatusJSON(400, global.ErrWrongReplyTo.Error())
+			return
+		}
 		log.Println(err)
-		c.AbortWithStatusJSON(500, global.ErrInternalServerError)
+		c.AbortWithStatusJSON(500, global.ErrInternalServerError.Error())
 		return
 	}
 	c.AbortWithStatus(204)
@@ -110,14 +114,14 @@ func (r *Router) CreateComment(c *gin.Context) {
 // UpdateComment updates the provided comment in body
 func (r *Router) UpdateComment(c *gin.Context) {
 	if !r.isAdmin(c) {
-		c.AbortWithStatusJSON(401, global.ErrUnauthorized)
+		c.AbortWithStatusJSON(401, global.ErrUnauthorized.Error())
 		return
 	}
 	var updateCommentBody model.UpdateCommentBody
 	err := c.BindJSON(&updateCommentBody)
 	if err != nil {
 		log.Println(err)
-		c.AbortWithStatusJSON(400, global.ErrBadRequest)
+		c.AbortWithStatusJSON(400, global.ErrBadRequest.Error())
 		return
 	}
 
@@ -129,10 +133,10 @@ func (r *Router) UpdateComment(c *gin.Context) {
 	comment, err := db.GetComment(updateCommentBody.CommentId)
 	if err != nil {
 		if err == global.ErrCommentNotFound {
-			c.AbortWithStatusJSON(404, global.ErrCommentNotFound)
+			c.AbortWithStatusJSON(404, global.ErrCommentNotFound.Error())
 			return
 		}
-		c.AbortWithStatusJSON(500, global.ErrInternalServerError)
+		c.AbortWithStatusJSON(500, global.ErrInternalServerError.Error())
 		return
 	}
 
@@ -151,7 +155,7 @@ func (r *Router) UpdateComment(c *gin.Context) {
 	err = db.UpdateComment(updateCommentBody.CommentId, body, author, confirmed)
 	if err != nil {
 		log.Println(err)
-		c.AbortWithStatusJSON(500, global.ErrInternalServerError)
+		c.AbortWithStatusJSON(500, global.ErrInternalServerError.Error())
 		return
 	}
 	c.AbortWithStatus(204)
@@ -160,7 +164,7 @@ func (r *Router) UpdateComment(c *gin.Context) {
 // DeleteComment deletes comment by given id
 func (r *Router) DeleteComment(c *gin.Context) {
 	if !r.isAdmin(c) {
-		c.AbortWithStatusJSON(401, global.ErrUnauthorized)
+		c.AbortWithStatusJSON(401, global.ErrUnauthorized.Error())
 		return
 	}
 	fmt.Println(c.Cookie("mouthful-session"))
@@ -168,18 +172,18 @@ func (r *Router) DeleteComment(c *gin.Context) {
 	err := c.BindJSON(&deleteCommentBody)
 	if err != nil {
 		log.Println(err)
-		c.AbortWithStatusJSON(400, global.ErrBadRequest)
+		c.AbortWithStatusJSON(400, global.ErrBadRequest.Error())
 		return
 	}
 	db := *r.db
 	err = db.DeleteComment(deleteCommentBody.CommentId)
 	if err != nil {
 		if err == global.ErrCommentNotFound {
-			c.AbortWithStatusJSON(404, global.ErrCommentNotFound)
+			c.AbortWithStatusJSON(404, global.ErrCommentNotFound.Error())
 			return
 		}
 		log.Println(err)
-		c.AbortWithStatusJSON(500, global.ErrInternalServerError)
+		c.AbortWithStatusJSON(500, global.ErrInternalServerError.Error())
 		return
 	}
 	c.AbortWithStatus(204)
@@ -202,12 +206,12 @@ func (r *Router) Login(c *gin.Context) {
 
 	if err != nil {
 		log.Println(err)
-		c.AbortWithStatusJSON(400, global.ErrBadRequest)
+		c.AbortWithStatusJSON(400, global.ErrBadRequest.Error())
 		return
 	}
 
 	if loginBody.Password != r.config.Moderation.AdminPassword {
-		c.AbortWithStatusJSON(401, global.ErrBadRequest)
+		c.AbortWithStatusJSON(401, global.ErrBadRequest.Error())
 		return
 	}
 
