@@ -2,11 +2,10 @@ import { h, Component } from 'preact';
 import style from './style';
 
 
-export default class Thread extends Component {
+export default class Comment extends Component {
 	constructor(props) {
 		super(props);
-		console.log("props", props)
-		this.state = { thread: props.thread, comments: props.comments.sort((a, b) => a.CreatedAt < b.CreatedAt) };
+		this.state = { comment: comment, replies: props.replies };
 		this.reload = props.reload.bind(this);
 		this.deleteComment = this.deleteComment.bind(this)
 		this.updateComment = this.updateComment.bind(this)

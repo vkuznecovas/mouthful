@@ -124,6 +124,7 @@ func (db *Database) UpdateComment(id int, body, author string, confirmed bool) e
 
 // DeleteComment deletes the comment by id
 func (db *Database) DeleteComment(id int) error {
+	// TODO - if we delete a comment with null REPLY TO - check if we need to update the references.
 	res, err := db.DB.Exec(db.DB.Rebind("delete from comment where id=?"), id)
 	if err != nil {
 		return err

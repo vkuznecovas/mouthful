@@ -3,3 +3,4 @@
 
 ## TODO
 dynamodb
+soft delete
