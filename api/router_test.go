@@ -675,13 +675,6 @@ func TestGetCommentsUnconfirmed(t *testing.T) {
 			assert.Equal(t, "", r.Body.String())
 			assert.Equal(t, 204, r.Code)
 		})
-	conf := true
-	bodyUpdate := model.UpdateCommentBody{
-		CommentId: 1,
-		Confirmed: &conf,
-	}
-	bodyBytes, err = json.Marshal(bodyUpdate)
-	assert.Nil(t, err)
 	r.GET("/v1/comments?uri="+url.QueryEscape(body.Path)).
 		SetDebug(debug).
 		Run(server, func(r gofight.HTTPResponse, rq gofight.HTTPRequest) {

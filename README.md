@@ -4,6 +4,6 @@
 
 
 ## TODO
-dynamodb
-config to affect admin panel as well
-Remove the test config, replace with example
+* dynamodb
+* config to affect admin panel as well
+* Remove the test config, replace with example
