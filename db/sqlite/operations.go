@@ -3,6 +3,7 @@ package sqlite
 import (
 	"time"
 
+	// We absolutely need the sqlite driver here, this whole package depends on it
 	_ "github.com/mattn/go-sqlite3"
 	"github.com/vkuznecovas/mouthful/db/model"
 	"github.com/vkuznecovas/mouthful/global"
@@ -26,6 +27,7 @@ var sqliteQueries = []string{
 	)`,
 }
 
+// InitializeDatabase runs the queries for an initial database seed
 func (db *Database) InitializeDatabase() error {
 	for _, v := range sqliteQueries {
 		db.DB.MustExec(v)

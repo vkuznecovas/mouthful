@@ -12,6 +12,7 @@ import (
 	"github.com/vkuznecovas/mouthful/global"
 )
 
+// Router handles all the different routes as well as stores our  config and db objects
 type Router struct {
 	db     *abstraction.Database
 	config *configModel.Config

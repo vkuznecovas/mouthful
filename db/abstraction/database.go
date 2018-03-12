@@ -4,7 +4,7 @@ import (
 	"github.com/vkuznecovas/mouthful/db/model"
 )
 
-// Db is a database instance for your selected DB
+// Database is a database instance for your selected DB
 type Database interface {
 	InitializeDatabase() error
 	CreateThread(path string) error

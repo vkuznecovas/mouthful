@@ -8,7 +8,7 @@ import (
 
 // TODO: tests
 
-// Db is a database instance for sqlite
+// Database is a database instance for sqlite
 type Database struct {
 	DB *sqlx.DB
 }

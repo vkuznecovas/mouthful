@@ -1,5 +1,6 @@
 package model
 
+// Database - a config object representing our database
 type Database struct {
 	Dialect  string
 	Database string
@@ -8,6 +9,8 @@ type Database struct {
 	Host     string
 	Port     string
 }
+
+// Moderation - moderation section of our config
 type Moderation struct {
 	Enabled                bool
 	SessionSecret          string
@@ -15,6 +18,8 @@ type Moderation struct {
 	AdminPassword          string
 	SessionDurationSeconds int
 }
+
+// Config  - root of our config
 type Config struct {
 	Database   Database
 	Honeypot   bool

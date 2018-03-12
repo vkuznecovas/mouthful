@@ -185,6 +185,7 @@ func TestDeleteComment(t *testing.T) {
 		Confirmed: &conf,
 	}
 	bodyBytes, err = json.Marshal(bodyUpdate)
+	assert.Nil(t, err)
 	cookies := GetSessionCookie(&testDB, r)
 	r.PATCH("/v1/admin/comments").
 		SetBody(string(bodyBytes[:])).
@@ -269,6 +270,7 @@ func TestCreateComment(t *testing.T) {
 		Confirmed: &conf,
 	}
 	bodyBytes, err = json.Marshal(bodyUpdate)
+	assert.Nil(t, err)
 	r.PATCH("/v1/admin/comments").
 		SetBody(string(bodyBytes[:])).
 		SetDebug(debug).
@@ -318,6 +320,7 @@ func TestCreateCommentBadReplyTo(t *testing.T) {
 		Confirmed: &conf,
 	}
 	bodyBytes, err = json.Marshal(bodyUpdate)
+	assert.Nil(t, err)
 	replyTo := 1
 	body2 := model.CreateCommentBody{
 		Path:    "/1027/test/tttttttttt",
@@ -326,6 +329,7 @@ func TestCreateCommentBadReplyTo(t *testing.T) {
 		ReplyTo: &replyTo,
 	}
 	bodyBytes, err = json.Marshal(body2)
+	assert.Nil(t, err)
 	r.POST("/v1/comments").
 		SetBody(string(bodyBytes[:])).
 		SetDebug(debug).
@@ -390,6 +394,7 @@ func TestCreateCommentReplyTo(t *testing.T) {
 		Confirmed: &conf,
 	}
 	bodyBytes, err = json.Marshal(bodyUpdate)
+	assert.Nil(t, err)
 	r.PATCH("/v1/admin/comments").
 		SetBody(string(bodyBytes[:])).
 		SetDebug(debug).
@@ -676,6 +681,7 @@ func TestGetCommentsUnconfirmed(t *testing.T) {
 		Confirmed: &conf,
 	}
 	bodyBytes, err = json.Marshal(bodyUpdate)
+	assert.Nil(t, err)
 	r.GET("/v1/comments?uri="+url.QueryEscape(body.Path)).
 		SetDebug(debug).
 		Run(server, func(r gofight.HTTPResponse, rq gofight.HTTPRequest) {
@@ -924,6 +930,7 @@ func TestRestoreDeletedComment(t *testing.T) {
 		Confirmed: &conf,
 	}
 	bodyBytes, err = json.Marshal(bodyUpdate)
+	assert.Nil(t, err)
 	cookies := GetSessionCookie(&testDB, r)
 	r.PATCH("/v1/admin/comments").
 		SetBody(string(bodyBytes[:])).

@@ -11,6 +11,7 @@ import (
 	"github.com/vkuznecovas/mouthful/db/abstraction"
 )
 
+// CheckModerationVariables checks to see if the required moderation flags have been set in the config or not
 func CheckModerationVariables(config *model.Config) error {
 	sessionSecret := config.Moderation.SessionSecret
 	if sessionSecret == "" {
