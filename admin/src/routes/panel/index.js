@@ -26,6 +26,7 @@ export default class Panel extends Component {
 		this.hidePending = this.hidePending.bind(this);
 		this.reload = this.reload.bind(this);
 		this.showDeleted = this.showDeleted.bind(this);
+		this.updateComment = this.updateComment.bind(this);
 	}
 
 	showPending() {
@@ -70,6 +71,25 @@ export default class Panel extends Component {
 		http.send()
 	}
 
+	updateComment(commentId, body, author, confirmed) {
+		if (typeof window == "undefined") { return }
+		var http = new XMLHttpRequest();
+		var url = "http://localhost:7777/v1/admin/comments";
+		http.open("PATCH", url, true);
+		var context = this;
+		http.onreadystatechange = function () {
+			if (http.readyState == 4 && http.status == 204) {
+				context.reload()
+			} else if (http.readyState == 4 && http.status == 401) {
+				context.reload()
+			} else {
+				context.reload()
+			}
+		}
+		http.send(JSON.stringify({ CommentId: commentId, Body: body, Author: author, Confirmed: confirmed }))
+	}
+	
+
 	loggedIn() {
 		this.setState({ authorized: true })
 		this.setState({ loaded: false })
@@ -85,7 +105,9 @@ export default class Panel extends Component {
 			this.loadComments(this)
 		}
 		if (!this.state.authorized) {
-			return (<Login onLogin={this.loggedIn} />)
+			return (<div class={style.container}>
+			<Login onLogin={this.loggedIn} />
+			</div>)
 		}
 		// if we have no threads or comments
 		if (!(this.state.threads && this.state.comments && this.state.threads.length && this.state.comments.length)) {
@@ -111,11 +133,11 @@ export default class Panel extends Component {
 
 			c = c.filter(filter)
 			if (c.length != 0) {
-				return <Thread key={"___thread" + t.Id} thread={t} comments={c} reload={this.reload} />
+				return <Thread key={"___thread" + t.Id} thread={t} comments={c} reload={this.reload} updateComment={this.updateComment} />
 			}
 			return null;
 		})
-		var resultDiv = threads.filter(x => x != null).length > 0 ? threads : <div>"Nothing to display"</div>
+		var resultDiv = threads.filter(x => x != null).length > 0 ? threads : <div class={style.nothing}>Nothing to display</div>
 		return (
 			<div class={style.container}>
 			<div class={style.profile}>

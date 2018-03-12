@@ -38,11 +38,13 @@
 	padding-left: 10px;
 	text-align: left;
 	border-left: 5px solid #3A0E85;
+	margin-bottom: 10px;
 }
 .commentReply { 
 	padding-left: 10px;
 	text-align: left;
 	border-left: 3px solid #A384DD;
+	margin-top: 8px;
 }
 .smallButton {
 	background-color: #A384DD;
@@ -63,4 +65,29 @@
 	font-weight: 800;
 	font-size: 20px;
 	margin-bottom: 5px;
+}
+.nothing {
+	margin-top:10px;
+	font-size: 20px;
+	font-weight: 600;
+}
+.passwordTitle {
+	margin-top: 10px;
+	margin-right: 5px;
+	font-size: 15px;
+	font-weight: 600;
+}
+.passwordSubmit {
+	color: white;
+	background-color: #A384DD;
+	border: none;
+	margin-left: 5px;
+}
+.passwordSubmit:hover{
+	background-color: #3A0E85;
+	cursor: pointer;
+}
+.commentBody {
+	width: 100%;
+	min-height: 50px;
 }

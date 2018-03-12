@@ -39,11 +39,9 @@ export default class Login extends Component {
 		return (
 			<div class={style.login}>
 				<form onSubmit={this.handleSubmit}>
-					<label>
-						Password:
+					<label class={style.passwordTitle}>Password:</label>
 					<input type="password" value={this.state.value} onChange={this.handleChange} />
-					</label>
-					<input type="submit" value="Submit" />
+					<input class={style.passwordSubmit}type="submit" value="Submit" />
 				</form>
 			</div>
 		);
