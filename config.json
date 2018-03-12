@@ -9,6 +9,6 @@
     },
     "database": {
         "dialect": "sqlite3",
-        "database": ":memory:"
+        "database": "./test.db"
     }
 }

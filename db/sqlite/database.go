@@ -24,7 +24,7 @@ func CreateDatabase(databaseConfig model.Database) (abstraction.Database, error)
 		db = d
 	} else {
 		// TODO: this should come from a file as well
-		d, err := sqlx.Connect("sqlite3", "./"+databaseConfig.Database)
+		d, err := sqlx.Connect("sqlite3", databaseConfig.Database)
 		if err != nil {
 			return nil, err
 		}

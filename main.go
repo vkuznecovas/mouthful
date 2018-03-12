@@ -21,5 +21,9 @@ func main() {
 	if err != nil {
 		panic(err)
 	}
-	api.GetServer(&database).Run()
+	service, err := api.GetServer(&database, config)
+	if err != nil {
+		panic(err)
+	}
+	service.Run()
 }

@@ -2,9 +2,10 @@ package api
 
 import (
 	"fmt"
-	"time"
 
+	"github.com/gin-contrib/cors"
 	"github.com/gin-contrib/sessions"
+	"github.com/gin-contrib/static"
 	"github.com/gin-gonic/gin"
 	"github.com/vkuznecovas/mouthful/config/model"
 	"github.com/vkuznecovas/mouthful/db/abstraction"
@@ -28,10 +29,17 @@ func CheckModerationVariables(config *model.Config) error {
 // GetServer returns an instance of the mouthful server
 func GetServer(db *abstraction.Database, config *model.Config) (*gin.Engine, error) {
 	r := gin.Default()
+	// same as
+	// config := cors.DefaultConfig()
+	// config.AllowAllOrigins = true
+	// router.Use(cors.New(config))
+	r.Use(cors.Default())
 	router := New(db, config)
+	r.Use(static.Serve("/", static.LocalFile("./admin/build", true)))
 	r.GET("/status", router.Status)
-	r.GET("/comments", router.GetComments)
-	r.POST("/comments", router.CreateComment)
+	v1 := r.Group("/v1")
+	v1.GET("/comments", router.GetComments)
+	v1.POST("/comments", router.CreateComment)
 
 	if config.Moderation.Enabled {
 		err := CheckModerationVariables(config)
@@ -40,14 +48,15 @@ func GetServer(db *abstraction.Database, config *model.Config) (*gin.Engine, err
 		}
 		store := sessions.NewCookieStore([]byte(config.Moderation.SessionSecret))
 		store.Options(sessions.Options{
-			MaxAge: int(time.Second * time.Duration(config.Moderation.SessionDurationSeconds)), //30min
+			MaxAge: 0, //int(time.Second * time.Duration(config.Moderation.SessionDurationSeconds)), //30min
 			Path:   "/",
 		})
-		r.PATCH("/comments", sessions.Sessions("mouthful-session", store), router.UpdateComment)
-		r.DELETE("/comments", sessions.Sessions("mouthful-session", store), router.DeleteComment)
-		r.POST("/admin/login", sessions.Sessions("mouthful-session", store), router.Login)
-		r.GET("/threads", sessions.Sessions("mouthful-session", store), router.GetAllThreads)
-		r.GET("/comments/all", sessions.Sessions("mouthful-session", store), router.GetAllComments)
+		v1.PATCH("/admin/comments", sessions.Sessions("mouthful-session", store), router.UpdateComment)
+		v1.DELETE("/admin/comments", sessions.Sessions("mouthful-session", store), router.DeleteComment)
+		v1.POST("/admin/login", sessions.Sessions("mouthful-session", store), router.Login)
+		v1.POST("/admin/comments/restore", sessions.Sessions("mouthful-session", store), router.RestoreDeletedComment)
+		v1.GET("/admin/threads", sessions.Sessions("mouthful-session", store), router.GetAllThreads)
+		v1.GET("/admin/comments/all", sessions.Sessions("mouthful-session", store), router.GetAllComments)
 	}
 
 	return r, nil

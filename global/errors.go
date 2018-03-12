@@ -16,3 +16,6 @@ var ErrUnauthorized = errors.New("Unauthorized")
 
 // ErrCommentNotFound indicates that the comment does not exist
 var ErrCommentNotFound = errors.New("Comment not found")
+
+// ErrWrongReplyTo indicates that the comments replyTo comment Id is invalid
+var ErrWrongReplyTo = errors.New("Can't reply to this comment")
