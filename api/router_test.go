@@ -52,7 +52,7 @@ func TestGetCommentsNoComments(t *testing.T) {
 	r := gofight.New()
 	server, err := api.GetServer(&testDB, &config)
 	assert.Nil(t, err)
-	r.GET("/comments?uri="+url.PathEscape("/2017/16")).
+	r.GET("/v1/comments?uri="+url.PathEscape("/v1/2017/16")).
 		SetDebug(debug).
 		Run(server, func(r gofight.HTTPResponse, rq gofight.HTTPRequest) {
 			assert.Equal(t, 404, r.Code)
@@ -64,7 +64,7 @@ func TestGetCommentsBadQuery(t *testing.T) {
 	r := gofight.New()
 	server, err := api.GetServer(&testDB, &config)
 	assert.Nil(t, err)
-	r.GET("/comments?uri=").
+	r.GET("/v1/comments?uri=").
 		SetDebug(debug).
 		Run(server, func(r gofight.HTTPResponse, rq gofight.HTTPRequest) {
 			assert.Equal(t, 400, r.Code)
@@ -86,14 +86,14 @@ func TestCreateCommentSpamTrap(t *testing.T) {
 	}
 	bodyBytes, err := json.Marshal(body)
 	assert.Nil(t, err)
-	r.POST("/comments").
+	r.POST("/v1/comments").
 		SetBody(string(bodyBytes[:])).
 		SetDebug(debug).
 		Run(server, func(r gofight.HTTPResponse, rq gofight.HTTPRequest) {
 			assert.Equal(t, "", r.Body.String())
 			assert.Equal(t, 204, r.Code)
 		})
-	r.GET("/comments/"+url.QueryEscape(body.Path)).
+	r.GET("/v1/comments/"+url.QueryEscape(body.Path)).
 		SetDebug(debug).
 		Run(server, func(r gofight.HTTPResponse, rq gofight.HTTPRequest) {
 			assert.Equal(t, "404 page not found", r.Body.String())
@@ -106,7 +106,7 @@ func TestCreateCommentBadRequst(t *testing.T) {
 	r := gofight.New()
 	server, err := api.GetServer(&testDB, &config)
 	assert.Nil(t, err)
-	r.POST("/comments").
+	r.POST("/v1/comments").
 		SetBody(string("sadasdasdasd")).
 		SetDebug(debug).
 		Run(server, func(r gofight.HTTPResponse, rq gofight.HTTPRequest) {
@@ -119,7 +119,7 @@ func GetSessionCookie(db *abstraction.Database, r *gofight.RequestConfig) gofigh
 	cookieValue := ""
 	os.Setenv("ADMIN_PASSWORD", "test")
 	server, _ := api.GetServer(db, &config)
-	r.POST("/admin/login").
+	r.POST("/v1/admin/login").
 		SetBody(`{"password": "test"}`).
 		SetDebug(debug).
 		Run(server, func(r gofight.HTTPResponse, rq gofight.HTTPRequest) {
@@ -134,7 +134,7 @@ func TestDeleteCommentBadRequst(t *testing.T) {
 	assert.Nil(t, err)
 	r := gofight.New()
 	cookies := GetSessionCookie(&testDB, r)
-	r.DELETE("/comments").
+	r.DELETE("/v1/admin/comments").
 		SetBody(string("sadasdasdasd")).
 		SetCookie(cookies).
 		SetDebug(debug).
@@ -150,7 +150,7 @@ func TestDeleteCommentNonExistant(t *testing.T) {
 	assert.Nil(t, err)
 	r := gofight.New()
 	cookies := GetSessionCookie(&testDB, r)
-	r.DELETE("/comments").
+	r.DELETE("/v1/admin/comments").
 		SetBody(string("{\"commentId\": 1}")).
 		SetCookie(cookies).
 		SetDebug(debug).
@@ -172,7 +172,7 @@ func TestDeleteComment(t *testing.T) {
 	}
 	bodyBytes, err := json.Marshal(body)
 	assert.Nil(t, err)
-	r.POST("/comments").
+	r.POST("/v1/comments").
 		SetBody(string(bodyBytes[:])).
 		SetDebug(debug).
 		Run(server, func(r gofight.HTTPResponse, rq gofight.HTTPRequest) {
@@ -186,7 +186,7 @@ func TestDeleteComment(t *testing.T) {
 	}
 	bodyBytes, err = json.Marshal(bodyUpdate)
 	cookies := GetSessionCookie(&testDB, r)
-	r.PATCH("/comments").
+	r.PATCH("/v1/admin/comments").
 		SetBody(string(bodyBytes[:])).
 		SetDebug(debug).
 		SetCookie(cookies).
@@ -194,7 +194,7 @@ func TestDeleteComment(t *testing.T) {
 			assert.Equal(t, "", r.Body.String())
 			assert.Equal(t, 204, r.Code)
 		})
-	r.GET("/comments?uri="+url.QueryEscape(body.Path)).
+	r.GET("/v1/comments?uri="+url.QueryEscape(body.Path)).
 		SetDebug(debug).
 		Run(server, func(r gofight.HTTPResponse, rq gofight.HTTPRequest) {
 			assert.Equal(t, 200, r.Code)
@@ -207,14 +207,14 @@ func TestDeleteComment(t *testing.T) {
 			assert.Equal(t, "body", comments[0].Body)
 			assert.Equal(t, "author", comments[0].Author)
 		})
-	r.DELETE("/comments").
+	r.DELETE("/v1/admin/comments").
 		SetBody(string("{\"commentId\": 1}")).
 		SetDebug(debug).
 		SetCookie(cookies).
 		Run(server, func(r gofight.HTTPResponse, rq gofight.HTTPRequest) {
 			assert.Equal(t, 204, r.Code)
 		})
-	r.GET("/comments?uri="+url.QueryEscape(body.Path)).
+	r.GET("/v1/comments?uri="+url.QueryEscape(body.Path)).
 		SetDebug(debug).
 		Run(server, func(r gofight.HTTPResponse, rq gofight.HTTPRequest) {
 			assert.Equal(t, 200, r.Code)
@@ -234,7 +234,7 @@ func TestUpdateCommentBadRequst(t *testing.T) {
 	assert.Nil(t, err)
 	r := gofight.New()
 	cookies := GetSessionCookie(&testDB, r)
-	r.PATCH("/comments").
+	r.PATCH("/v1/admin/comments").
 		SetBody(string("sadasdasdasd")).
 		SetDebug(debug).
 		SetCookie(cookies).
@@ -256,7 +256,7 @@ func TestCreateComment(t *testing.T) {
 	}
 	bodyBytes, err := json.Marshal(body)
 	assert.Nil(t, err)
-	r.POST("/comments").
+	r.POST("/v1/comments").
 		SetBody(string(bodyBytes[:])).
 		SetDebug(debug).
 		Run(server, func(r gofight.HTTPResponse, rq gofight.HTTPRequest) {
@@ -269,7 +269,7 @@ func TestCreateComment(t *testing.T) {
 		Confirmed: &conf,
 	}
 	bodyBytes, err = json.Marshal(bodyUpdate)
-	r.PATCH("/comments").
+	r.PATCH("/v1/admin/comments").
 		SetBody(string(bodyBytes[:])).
 		SetDebug(debug).
 		SetCookie(cookies).
@@ -277,7 +277,7 @@ func TestCreateComment(t *testing.T) {
 			assert.Equal(t, "", r.Body.String())
 			assert.Equal(t, 204, r.Code)
 		})
-	r.GET("/comments?uri="+url.QueryEscape(body.Path)).
+	r.GET("/v1/comments?uri="+url.QueryEscape(body.Path)).
 		SetDebug(debug).
 		Run(server, func(r gofight.HTTPResponse, rq gofight.HTTPRequest) {
 			assert.Equal(t, 200, r.Code)
@@ -304,7 +304,7 @@ func TestCreateCommentBadReplyTo(t *testing.T) {
 	}
 	bodyBytes, err := json.Marshal(body)
 	assert.Nil(t, err)
-	r.POST("/comments").
+	r.POST("/v1/comments").
 		SetBody(string(bodyBytes[:])).
 		SetDebug(debug).
 		Run(server, func(r gofight.HTTPResponse, rq gofight.HTTPRequest) {
@@ -326,7 +326,7 @@ func TestCreateCommentBadReplyTo(t *testing.T) {
 		ReplyTo: &replyTo,
 	}
 	bodyBytes, err = json.Marshal(body2)
-	r.POST("/comments").
+	r.POST("/v1/comments").
 		SetBody(string(bodyBytes[:])).
 		SetDebug(debug).
 		Run(server, func(r gofight.HTTPResponse, rq gofight.HTTPRequest) {
@@ -348,7 +348,7 @@ func TestCreateCommentReplyTo(t *testing.T) {
 	}
 	bodyBytes, err := json.Marshal(body)
 	assert.Nil(t, err)
-	r.POST("/comments").
+	r.POST("/v1/comments").
 		SetBody(string(bodyBytes[:])).
 		SetDebug(debug).
 		Run(server, func(r gofight.HTTPResponse, rq gofight.HTTPRequest) {
@@ -362,7 +362,7 @@ func TestCreateCommentReplyTo(t *testing.T) {
 		Confirmed: &conf,
 	}
 	bodyBytes, err = json.Marshal(bodyUpdate)
-	r.PATCH("/comments").
+	r.PATCH("/v1/admin/comments").
 		SetBody(string(bodyBytes[:])).
 		SetDebug(debug).
 		SetCookie(cookies).
@@ -378,7 +378,7 @@ func TestCreateCommentReplyTo(t *testing.T) {
 		ReplyTo: &replyTo,
 	}
 	bodyBytes, err = json.Marshal(body2)
-	r.POST("/comments").
+	r.POST("/v1/comments").
 		SetBody(string(bodyBytes[:])).
 		SetDebug(debug).
 		Run(server, func(r gofight.HTTPResponse, rq gofight.HTTPRequest) {
@@ -390,7 +390,7 @@ func TestCreateCommentReplyTo(t *testing.T) {
 		Confirmed: &conf,
 	}
 	bodyBytes, err = json.Marshal(bodyUpdate)
-	r.PATCH("/comments").
+	r.PATCH("/v1/admin/comments").
 		SetBody(string(bodyBytes[:])).
 		SetDebug(debug).
 		SetCookie(cookies).
@@ -398,7 +398,7 @@ func TestCreateCommentReplyTo(t *testing.T) {
 			assert.Equal(t, "", r.Body.String())
 			assert.Equal(t, 204, r.Code)
 		})
-	r.GET("/comments?uri="+url.QueryEscape(body.Path)).
+	r.GET("/v1/comments?uri="+url.QueryEscape(body.Path)).
 		SetDebug(debug).
 		Run(server, func(r gofight.HTTPResponse, rq gofight.HTTPRequest) {
 			assert.Equal(t, 200, r.Code)
@@ -425,7 +425,7 @@ func TestLoginBadPassword(t *testing.T) {
 	assert.Nil(t, err)
 	server, err := api.GetServer(&testDB, &config)
 	assert.Nil(t, err)
-	r.POST("/admin/login").
+	r.POST("/v1/admin/login").
 		SetBody(string(bodyBytes[:])).
 		SetDebug(debug).
 		Run(server, func(r gofight.HTTPResponse, rq gofight.HTTPRequest) {
@@ -444,7 +444,7 @@ func TestLoginGoodPassword(t *testing.T) {
 	server, err := api.GetServer(&testDB, &config)
 	assert.Nil(t, err)
 	assert.Nil(t, err)
-	r.POST("/admin/login").
+	r.POST("/v1/admin/login").
 		SetBody(string(bodyBytes[:])).
 		SetDebug(debug).
 		Run(server, func(r gofight.HTTPResponse, rq gofight.HTTPRequest) {
@@ -464,7 +464,7 @@ func TestLoginInvalidRequest(t *testing.T) {
 	assert.Nil(t, err)
 	server, err := api.GetServer(&testDB, &config)
 	assert.Nil(t, err)
-	r.POST("/admin/login").
+	r.POST("/v1/admin/login").
 		SetBody(string(bodyBytes[:])).
 		SetDebug(debug).
 		Run(server, func(r gofight.HTTPResponse, rq gofight.HTTPRequest) {
@@ -480,7 +480,7 @@ func TestGetAllCommentsUnauthorized(t *testing.T) {
 	assert.Nil(t, err)
 	server, err := api.GetServer(&testDB, &config)
 	assert.Nil(t, err)
-	r.GET("/comments/all").
+	r.GET("/v1/admin/comments/all").
 		SetBody(string(bodyBytes[:])).
 		SetDebug(debug).
 		Run(server, func(r gofight.HTTPResponse, rq gofight.HTTPRequest) {
@@ -496,7 +496,7 @@ func TestUpdateCommentUnauthorized(t *testing.T) {
 	assert.Nil(t, err)
 	server, err := api.GetServer(&testDB, &config)
 	assert.Nil(t, err)
-	r.PATCH("/comments").
+	r.PATCH("/v1/admin/comments").
 		SetBody(string(bodyBytes[:])).
 		SetDebug(debug).
 		Run(server, func(r gofight.HTTPResponse, rq gofight.HTTPRequest) {
@@ -512,7 +512,7 @@ func TestDeleteCommentUnauthorized(t *testing.T) {
 	assert.Nil(t, err)
 	server, err := api.GetServer(&testDB, &config)
 	assert.Nil(t, err)
-	r.DELETE("/comments").
+	r.DELETE("/v1/admin/comments").
 		SetBody(string(bodyBytes[:])).
 		SetDebug(debug).
 		Run(server, func(r gofight.HTTPResponse, rq gofight.HTTPRequest) {
@@ -528,7 +528,7 @@ func TestGetThreadsUnauthorized(t *testing.T) {
 	assert.Nil(t, err)
 	server, err := api.GetServer(&testDB, &config)
 	assert.Nil(t, err)
-	r.GET("/threads").
+	r.GET("/v1/admin/threads").
 		SetBody(string(bodyBytes[:])).
 		SetDebug(debug).
 		Run(server, func(r gofight.HTTPResponse, rq gofight.HTTPRequest) {
@@ -542,7 +542,7 @@ func TestGetThreadsEmpty(t *testing.T) {
 	assert.Nil(t, err)
 	r := gofight.New()
 	cookies := GetSessionCookie(&testDB, r)
-	r.GET("/threads").
+	r.GET("/v1/admin/threads").
 		SetDebug(debug).
 		SetCookie(cookies).
 		Run(server, func(r gofight.HTTPResponse, rq gofight.HTTPRequest) {
@@ -562,7 +562,7 @@ func TestGetCommentsEmpty(t *testing.T) {
 	assert.Nil(t, err)
 	r := gofight.New()
 	cookies := GetSessionCookie(&testDB, r)
-	r.GET("/comments/all").
+	r.GET("/v1/admin/comments/all").
 		SetDebug(debug).
 		SetCookie(cookies).
 		Run(server, func(r gofight.HTTPResponse, rq gofight.HTTPRequest) {
@@ -588,7 +588,7 @@ func TestGetThreads(t *testing.T) {
 	}
 	bodyBytes, err := json.Marshal(body)
 	assert.Nil(t, err)
-	r.POST("/comments").
+	r.POST("/v1/comments").
 		SetBody(string(bodyBytes[:])).
 		SetDebug(debug).
 		Run(server, func(r gofight.HTTPResponse, rq gofight.HTTPRequest) {
@@ -597,7 +597,7 @@ func TestGetThreads(t *testing.T) {
 		})
 	cookies := GetSessionCookie(&testDB, r)
 	assert.Nil(t, err)
-	r.GET("/threads").
+	r.GET("/v1/admin/threads").
 		SetBody(string(bodyBytes[:])).
 		SetDebug(debug).
 		SetCookie(cookies).
@@ -625,7 +625,7 @@ func TestGetComments(t *testing.T) {
 	}
 	bodyBytes, err := json.Marshal(commentBody)
 	assert.Nil(t, err)
-	r.POST("/comments").
+	r.POST("/v1/comments").
 		SetBody(string(bodyBytes[:])).
 		SetDebug(debug).
 		Run(server, func(r gofight.HTTPResponse, rq gofight.HTTPRequest) {
@@ -634,7 +634,7 @@ func TestGetComments(t *testing.T) {
 		})
 	cookies := GetSessionCookie(&testDB, r)
 	assert.Nil(t, err)
-	r.GET("/comments/all").
+	r.GET("/v1/admin/comments/all").
 		SetBody(string(bodyBytes[:])).
 		SetDebug(debug).
 		SetCookie(cookies).
@@ -663,7 +663,7 @@ func TestGetCommentsUnconfirmed(t *testing.T) {
 	assert.Nil(t, err)
 	server, err := api.GetServer(&testDB, &config)
 	assert.Nil(t, err)
-	r.POST("/comments").
+	r.POST("/v1/comments").
 		SetBody(string(bodyBytes[:])).
 		SetDebug(debug).
 		Run(server, func(r gofight.HTTPResponse, rq gofight.HTTPRequest) {
@@ -676,7 +676,7 @@ func TestGetCommentsUnconfirmed(t *testing.T) {
 		Confirmed: &conf,
 	}
 	bodyBytes, err = json.Marshal(bodyUpdate)
-	r.GET("/comments?uri="+url.QueryEscape(body.Path)).
+	r.GET("/v1/comments?uri="+url.QueryEscape(body.Path)).
 		SetDebug(debug).
 		Run(server, func(r gofight.HTTPResponse, rq gofight.HTTPRequest) {
 			assert.Equal(t, 200, r.Code)
@@ -703,7 +703,7 @@ func TestUpdateCommentNonExistant(t *testing.T) {
 	}
 	bodyBytes, err := json.Marshal(bodyUpdate)
 	assert.Nil(t, err)
-	r.PATCH("/comments").
+	r.PATCH("/v1/admin/comments").
 		SetBody(string(bodyBytes[:])).
 		SetDebug(debug).
 		SetCookie(cookies).
@@ -726,7 +726,7 @@ func TestUpdateCommentInvalidBody(t *testing.T) {
 	}
 	bodyBytes, err := json.Marshal(body)
 	assert.Nil(t, err)
-	r.POST("/comments").
+	r.POST("/v1/comments").
 		SetBody(string(bodyBytes[:])).
 		SetDebug(debug).
 		Run(server, func(r gofight.HTTPResponse, rq gofight.HTTPRequest) {
@@ -739,7 +739,7 @@ func TestUpdateCommentInvalidBody(t *testing.T) {
 	}
 	bodyBytes, err = json.Marshal(bodyUpdate)
 	assert.Nil(t, err)
-	r.PATCH("/comments").
+	r.PATCH("/v1/admin/comments").
 		SetBody(string(bodyBytes[:])).
 		SetDebug(debug).
 		SetCookie(cookies).
@@ -760,7 +760,7 @@ func TestUpdateComment(t *testing.T) {
 	}
 	bodyBytes, err := json.Marshal(body)
 	assert.Nil(t, err)
-	r.POST("/comments").
+	r.POST("/v1/comments").
 		SetBody(string(bodyBytes[:])).
 		SetDebug(debug).
 		Run(server, func(r gofight.HTTPResponse, rq gofight.HTTPRequest) {
@@ -768,7 +768,7 @@ func TestUpdateComment(t *testing.T) {
 			assert.Equal(t, 204, r.Code)
 		})
 
-	r.GET("/comments?uri="+url.QueryEscape(body.Path)).
+	r.GET("/v1/comments?uri="+url.QueryEscape(body.Path)).
 		SetDebug(debug).
 		Run(server, func(r gofight.HTTPResponse, rq gofight.HTTPRequest) {
 			assert.Equal(t, 200, r.Code)
@@ -786,14 +786,14 @@ func TestUpdateComment(t *testing.T) {
 	}
 	bodyBytes, err = json.Marshal(bodyUpdate)
 	assert.Nil(t, err)
-	r.PATCH("/comments").
+	r.PATCH("/v1/admin/comments").
 		SetBody(string(bodyBytes[:])).
 		SetDebug(debug).
 		SetCookie(cookies).
 		Run(server, func(r gofight.HTTPResponse, rq gofight.HTTPRequest) {
 			assert.Equal(t, 204, r.Code)
 		})
-	r.GET("/comments?uri="+url.QueryEscape(body.Path)).
+	r.GET("/v1/comments?uri="+url.QueryEscape(body.Path)).
 		SetDebug(debug).
 		Run(server, func(r gofight.HTTPResponse, rq gofight.HTTPRequest) {
 			assert.Equal(t, 200, r.Code)
@@ -815,14 +815,14 @@ func TestUpdateComment(t *testing.T) {
 	}
 	bodyBytes, err = json.Marshal(bodyUpdate)
 	assert.Nil(t, err)
-	r.PATCH("/comments").
+	r.PATCH("/v1/admin/comments").
 		SetBody(string(bodyBytes[:])).
 		SetDebug(debug).
 		SetCookie(cookies).
 		Run(server, func(r gofight.HTTPResponse, rq gofight.HTTPRequest) {
 			assert.Equal(t, 204, r.Code)
 		})
-	r.GET("/comments?uri="+url.QueryEscape(body.Path)).
+	r.GET("/v1/comments?uri="+url.QueryEscape(body.Path)).
 		SetDebug(debug).
 		Run(server, func(r gofight.HTTPResponse, rq gofight.HTTPRequest) {
 			assert.Equal(t, 200, r.Code)
@@ -844,14 +844,14 @@ func TestUpdateComment(t *testing.T) {
 	}
 	bodyBytes, err = json.Marshal(bodyUpdate)
 	assert.Nil(t, err)
-	r.PATCH("/comments").
+	r.PATCH("/v1/admin/comments").
 		SetBody(string(bodyBytes[:])).
 		SetDebug(debug).
 		SetCookie(cookies).
 		Run(server, func(r gofight.HTTPResponse, rq gofight.HTTPRequest) {
 			assert.Equal(t, 204, r.Code)
 		})
-	r.GET("/comments?uri="+url.QueryEscape(body.Path)).
+	r.GET("/v1/comments?uri="+url.QueryEscape(body.Path)).
 		SetDebug(debug).
 		Run(server, func(r gofight.HTTPResponse, rq gofight.HTTPRequest) {
 			assert.Equal(t, 200, r.Code)
@@ -865,4 +865,124 @@ func TestUpdateComment(t *testing.T) {
 			assert.Equal(t, "test", comments[0].Author)
 			assert.Equal(t, true, comments[0].Confirmed)
 		})
+}
+
+func TestRestoreDeletedCommentBadRequst(t *testing.T) {
+	testDB := sqlite.CreateTestDatabase()
+	server, err := api.GetServer(&testDB, &config)
+	assert.Nil(t, err)
+	r := gofight.New()
+	cookies := GetSessionCookie(&testDB, r)
+	r.POST("/v1/admin/comments/restore").
+		SetBody(string("sadasdasdasd")).
+		SetCookie(cookies).
+		SetDebug(debug).
+		Run(server, func(r gofight.HTTPResponse, rq gofight.HTTPRequest) {
+			fmt.Println(r.Code)
+			assert.Equal(t, 400, r.Code)
+		})
+}
+
+func TestRestoreDeletedCommentNonExistant(t *testing.T) {
+	testDB := sqlite.CreateTestDatabase()
+	server, err := api.GetServer(&testDB, &config)
+	assert.Nil(t, err)
+	r := gofight.New()
+	cookies := GetSessionCookie(&testDB, r)
+	r.DELETE("/v1/admin/comments/restore").
+		SetBody(string("{\"commentId\": 1}")).
+		SetCookie(cookies).
+		SetDebug(debug).
+		Run(server, func(r gofight.HTTPResponse, rq gofight.HTTPRequest) {
+			assert.Equal(t, 404, r.Code)
+		})
+}
+
+func TestRestoreDeletedComment(t *testing.T) {
+	testDB := sqlite.CreateTestDatabase()
+	r := gofight.New()
+	server, err := api.GetServer(&testDB, &config)
+	assert.Nil(t, err)
+
+	body := model.CreateCommentBody{
+		Path:   "/1027/test/",
+		Body:   "body",
+		Author: "author",
+	}
+	bodyBytes, err := json.Marshal(body)
+	assert.Nil(t, err)
+	r.POST("/v1/comments").
+		SetBody(string(bodyBytes[:])).
+		SetDebug(debug).
+		Run(server, func(r gofight.HTTPResponse, rq gofight.HTTPRequest) {
+			assert.Equal(t, "", r.Body.String())
+			assert.Equal(t, 204, r.Code)
+		})
+	conf := true
+	bodyUpdate := model.UpdateCommentBody{
+		CommentId: 1,
+		Confirmed: &conf,
+	}
+	bodyBytes, err = json.Marshal(bodyUpdate)
+	cookies := GetSessionCookie(&testDB, r)
+	r.PATCH("/v1/admin/comments").
+		SetBody(string(bodyBytes[:])).
+		SetDebug(debug).
+		SetCookie(cookies).
+		Run(server, func(r gofight.HTTPResponse, rq gofight.HTTPRequest) {
+			assert.Equal(t, "", r.Body.String())
+			assert.Equal(t, 204, r.Code)
+		})
+	r.GET("/v1/comments?uri="+url.QueryEscape(body.Path)).
+		SetDebug(debug).
+		Run(server, func(r gofight.HTTPResponse, rq gofight.HTTPRequest) {
+			assert.Equal(t, 200, r.Code)
+			var comments []dbmodel.Comment
+			body, err := ioutil.ReadAll(r.Body)
+			assert.Nil(t, err)
+			err = json.Unmarshal(body, &comments)
+			assert.Nil(t, err)
+			assert.Len(t, comments, 1)
+			assert.Equal(t, "body", comments[0].Body)
+			assert.Equal(t, "author", comments[0].Author)
+		})
+	r.DELETE("/v1/admin/comments").
+		SetBody(string("{\"commentId\": 1}")).
+		SetDebug(debug).
+		SetCookie(cookies).
+		Run(server, func(r gofight.HTTPResponse, rq gofight.HTTPRequest) {
+			assert.Equal(t, 204, r.Code)
+		})
+	r.GET("/v1/comments?uri="+url.QueryEscape(body.Path)).
+		SetDebug(debug).
+		Run(server, func(r gofight.HTTPResponse, rq gofight.HTTPRequest) {
+			assert.Equal(t, 200, r.Code)
+			var comments []dbmodel.Comment
+			body, err := ioutil.ReadAll(r.Body)
+			assert.Nil(t, err)
+			err = json.Unmarshal(body, &comments)
+			assert.Nil(t, err)
+			assert.Len(t, comments, 0)
+
+		})
+	r.POST("/v1/admin/comments/restore").
+		SetBody(string("{\"commentId\": 1}")).
+		SetDebug(debug).
+		SetCookie(cookies).
+		Run(server, func(r gofight.HTTPResponse, rq gofight.HTTPRequest) {
+			assert.Equal(t, 204, r.Code)
+		})
+	r.GET("/v1/comments?uri="+url.QueryEscape(body.Path)).
+		SetDebug(debug).
+		Run(server, func(r gofight.HTTPResponse, rq gofight.HTTPRequest) {
+			assert.Equal(t, 200, r.Code)
+			var comments []dbmodel.Comment
+			body, err := ioutil.ReadAll(r.Body)
+			assert.Nil(t, err)
+			err = json.Unmarshal(body, &comments)
+			assert.Nil(t, err)
+			assert.Len(t, comments, 1)
+
+		})
+
 }

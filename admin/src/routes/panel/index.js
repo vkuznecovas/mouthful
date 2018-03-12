@@ -7,11 +7,9 @@ const handleStateChange = (http, context, key) => {
 	if (http.readyState == 4 && http.status == 200) {
 		var stateChange = { loaded: true, authorized: true }
 		stateChange[key] = JSON.parse(http.responseText)
-		console.log('key', key);
-		console.log(JSON.stringify(JSON.parse(http.responseText)));
 		context.setState(stateChange)
 	} else if (http.readyState == 4 && http.status == 401) {
-		context.setState({ authorized: false, loaded: false })
+		context.setState({ authorized: false, loaded: true })
 	} else {
 		// TODO
 	}
@@ -20,28 +18,36 @@ const handleStateChange = (http, context, key) => {
 export default class Panel extends Component {
 	constructor() {
 		super();
-		this.state = { threads: [], comments: [], authorized: false, loaded: false, showPending: false };
+		this.state = { threads: [], comments: [], authorized: false, loaded: false, showPending: false, showDeleted: false };
 		this.loadThreads = this.loadThreads.bind(this);
 		this.loadComments = this.loadComments.bind(this);
 		this.loggedIn = this.loggedIn.bind(this);
 		this.showPending = this.showPending.bind(this);
 		this.hidePending = this.hidePending.bind(this);
 		this.reload = this.reload.bind(this);
+		this.showDeleted = this.showDeleted.bind(this);
 	}
 
 	showPending() {
 		this.setState({ showPending: true })
+		this.setState({ showDeleted: false})
 	}
 
 	hidePending() {
 		this.setState({ showPending: false })
+		this.setState({ showDeleted: false })
+	}
+
+	showDeleted() {
+		this.setState({ showPending: false })
+		this.setState({ showDeleted: true })
 	}
 
 	loadThreads(context) {
 		if (typeof window == "undefined") { return }
 
 		var http = new XMLHttpRequest();
-		var url = "http://localhost:7777/threads";
+		var url = "http://localhost:7777/v1/admin/threads";
 		http.open("GET", url, true);
 
 		http.onreadystatechange = function () {
@@ -54,7 +60,7 @@ export default class Panel extends Component {
 		if (typeof window == "undefined") { return }
 
 		var http = new XMLHttpRequest();
-		var url = "http://localhost:7777/comments/all";
+		var url = "http://localhost:7777/v1/admin/comments/all";
 		http.open("GET", url, true);
 
 		http.onreadystatechange = function () {
@@ -66,6 +72,7 @@ export default class Panel extends Component {
 
 	loggedIn() {
 		this.setState({ authorized: true })
+		this.setState({ loaded: false })
 	}
 
 	reload() {
@@ -84,34 +91,43 @@ export default class Panel extends Component {
 		if (!(this.state.threads && this.state.comments && this.state.threads.length && this.state.comments.length)) {
 			return <div class={style.profile}>No comments yet!</div>
 		}
-
 		var threads = this.state.threads.map(t => {
 			var comments = this.state.comments
+			const pendingFilter = x => {
+				return !x.Confirmed && x.DeletedAt == null
+			}
+			const showAll = x => {
+				return x.DeletedAt == null
+			}
+			const deletedFilter = x => {
+				return x.DeletedAt != null
+			}
+			
 			var c = comments.filter(x => {
-				if (x.ThreadId == t.Id) {
-					if (this.state.showPending) {
-						return !x.Confirmed
-					}
-					return x.Confirmed;
-				}
-				return false;
+				return x.ThreadId == t.Id
 			})
+			let filter = this.state.showPending ? pendingFilter : showAll
+			filter = this.state.showDeleted ? deletedFilter : filter
+
+			c = c.filter(filter)
 			if (c.length != 0) {
 				return <Thread key={"___thread" + t.Id} thread={t} comments={c} reload={this.reload} />
 			}
 			return null;
 		})
-		console.log("threads", threads);
-
+		var resultDiv = threads.filter(x => x != null).length > 0 ? threads : <div>"Nothing to display"</div>
 		return (
+			<div class={style.container}>
 			<div class={style.profile}>
-				<div class="buttons">
-					<div onClick={this.showPending}>Pending</div>
-					<div onClick={this.hidePending}>Verified</div>
+				<div class={style.buttons}>
+					<div class={this.state.showPending ? style.buttonActive : style.button} onClick={this.showPending}>Show unconfirmed</div>
+					<div class={this.state.showPending == false && this.state.showDeleted == false ? style.buttonActive : style.button} onClick={this.hidePending}>Show all</div>
+					<div class={this.state.showDeleted ? style.buttonActive : style.button  } onClick={this.showDeleted}>Show deleted</div>
 				</div>
 				<div>
-					{threads.filter(x => x != null)}
+					{resultDiv}
 				</div>
+			</div>
 			</div>
 		);
 	}

@@ -21,7 +21,7 @@ export default class Login extends Component {
         
 		event.preventDefault();		
 		var http = new XMLHttpRequest();
-		var url = "http://localhost:7777/admin/login";
+		var url = "http://localhost:7777/v1/admin/login";
 		http.open("POST", url, true);
 		
 		//Send the proper header information along with the request

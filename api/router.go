@@ -189,8 +189,36 @@ func (r *Router) DeleteComment(c *gin.Context) {
 	c.AbortWithStatus(204)
 }
 
+// RestoreDeletedComment restores the deleted comment by given id
+func (r *Router) RestoreDeletedComment(c *gin.Context) {
+	if !r.isAdmin(c) {
+		c.AbortWithStatusJSON(401, global.ErrUnauthorized.Error())
+		return
+	}
+	fmt.Println(c.Cookie("mouthful-session"))
+	var deleteCommentBody model.DeleteCommentBody
+	err := c.BindJSON(&deleteCommentBody)
+	if err != nil {
+		log.Println(err)
+		c.AbortWithStatusJSON(400, global.ErrBadRequest.Error())
+		return
+	}
+	db := *r.db
+	err = db.RestoreDeletedComment(deleteCommentBody.CommentId)
+	if err != nil {
+		if err == global.ErrCommentNotFound {
+			c.AbortWithStatusJSON(404, global.ErrCommentNotFound.Error())
+			return
+		}
+		log.Println(err)
+		c.AbortWithStatusJSON(500, global.ErrInternalServerError.Error())
+		return
+	}
+	c.AbortWithStatus(204)
+}
+
 func (r *Router) isAdmin(c *gin.Context) bool {
-	return true
+	// return true // TODO remove once tested
 	session := sessions.Default(c)
 	isAdmin := session.Get("isAdmin")
 	isAdminParsed, ok := isAdmin.(bool)

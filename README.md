@@ -4,3 +4,4 @@
 ## TODO
 dynamodb
 soft delete
+Remove the test config, replace with example

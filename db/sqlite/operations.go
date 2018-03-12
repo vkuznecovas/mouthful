@@ -21,6 +21,7 @@ var sqliteQueries = []string{
 		Confirmed bool not null default false,
 		CreatedAt TIMESTAMP DEFAULT CURRENT_TIMESTAMP not null,
 		ReplyTo INTEGER default null,
+		DeletedAt TIMESTAMP DEFAULT null,
 		FOREIGN KEY(ThreadId) references Thread(Id)
 	)`,
 }
@@ -69,10 +70,14 @@ func (db *Database) CreateComment(body string, author string, path string, confi
 	if replyTo != nil {
 		comment, err := db.GetComment(*replyTo)
 		if err != nil {
+			if err == global.ErrCommentNotFound {
+				return global.ErrWrongReplyTo
+			}
 			return err
 		}
 		// We allow for only a single layer of nesting. (Maybe just for now? who knows.)
 		// Check if the comment is a reply to this thread, and the comment you're replying to actually is a part of the thread
+
 		if comment.ReplyTo != nil || comment.ThreadId != thread.Id {
 			return global.ErrWrongReplyTo
 		}
@@ -87,7 +92,7 @@ func (db *Database) GetCommentsByThread(path string) (comments []model.Comment, 
 	if err != nil {
 		return nil, err
 	}
-	err = db.DB.Select(&comments, db.DB.Rebind("select * from comment where threadId=? and confirmed=?"), thread.Id, true)
+	err = db.DB.Select(&comments, db.DB.Rebind("select * from comment where threadId=? and confirmed=? and deletedAt is null"), thread.Id, true)
 	if err != nil {
 		return nil, err
 	}
@@ -122,10 +127,26 @@ func (db *Database) UpdateComment(id int, body, author string, confirmed bool) e
 	return nil
 }
 
-// DeleteComment deletes the comment by id
+// DeleteComment soft-deletes the comment by id
 func (db *Database) DeleteComment(id int) error {
 	// TODO - if we delete a comment with null REPLY TO - check if we need to update the references.
-	res, err := db.DB.Exec(db.DB.Rebind("delete from comment where id=?"), id)
+	res, err := db.DB.Exec(db.DB.Rebind("update comment set deletedAt = CURRENT_TIMESTAMP where id=?"), id)
+	if err != nil {
+		return err
+	}
+	affected, err := res.RowsAffected()
+	if err != nil {
+		return err
+	}
+	if affected == 0 {
+		return global.ErrCommentNotFound
+	}
+	return nil
+}
+
+// RestoreDeletedComment restores the soft-deleted comment
+func (db *Database) RestoreDeletedComment(id int) error {
+	res, err := db.DB.Exec(db.DB.Rebind("update comment set deletedAt = null where id=?"), id)
 	if err != nil {
 		return err
 	}

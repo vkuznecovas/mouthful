@@ -37,8 +37,9 @@ func GetServer(db *abstraction.Database, config *model.Config) (*gin.Engine, err
 	router := New(db, config)
 	r.Use(static.Serve("/", static.LocalFile("./admin/build", true)))
 	r.GET("/status", router.Status)
-	r.GET("/comments", router.GetComments)
-	r.POST("/comments", router.CreateComment)
+	v1 := r.Group("/v1")
+	v1.GET("/comments", router.GetComments)
+	v1.POST("/comments", router.CreateComment)
 
 	if config.Moderation.Enabled {
 		err := CheckModerationVariables(config)
@@ -50,11 +51,12 @@ func GetServer(db *abstraction.Database, config *model.Config) (*gin.Engine, err
 			MaxAge: 0, //int(time.Second * time.Duration(config.Moderation.SessionDurationSeconds)), //30min
 			Path:   "/",
 		})
-		r.PATCH("/comments", sessions.Sessions("mouthful-session", store), router.UpdateComment)
-		r.DELETE("/comments", sessions.Sessions("mouthful-session", store), router.DeleteComment)
-		r.POST("/admin/login", sessions.Sessions("mouthful-session", store), router.Login)
-		r.GET("/threads", sessions.Sessions("mouthful-session", store), router.GetAllThreads)
-		r.GET("/comments/all", sessions.Sessions("mouthful-session", store), router.GetAllComments)
+		v1.PATCH("/admin/comments", sessions.Sessions("mouthful-session", store), router.UpdateComment)
+		v1.DELETE("/admin/comments", sessions.Sessions("mouthful-session", store), router.DeleteComment)
+		v1.POST("/admin/login", sessions.Sessions("mouthful-session", store), router.Login)
+		v1.POST("/admin/comments/restore", sessions.Sessions("mouthful-session", store), router.RestoreDeletedComment)
+		v1.GET("/admin/threads", sessions.Sessions("mouthful-session", store), router.GetAllThreads)
+		v1.GET("/admin/comments/all", sessions.Sessions("mouthful-session", store), router.GetAllComments)
 	}
 
 	return r, nil
