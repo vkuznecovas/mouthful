@@ -76,7 +76,7 @@ export default class Thread extends Component {
 		// this is a terrible hack for showing unconfirmeds
 		if (this.props.comments.filter(comment => comment.ReplyTo == null && comment.DeletedAt == null).length == 0) {
 			comments = this.props.comments.map(comment => {
-				return <div class={style.comment}>
+				return <div class={style.comment} key={"___comment" + comment.Id}>
 					<div class={style.author}>By: <input type="text" value={comment.Author} onChange={(e) => {
 						this.handleAuthorChange(comment.Id, e.target.value)
 					}}></input></div>
@@ -94,7 +94,7 @@ export default class Thread extends Component {
 		} else {
 			comments = this.props.comments.filter(comment => comment.ReplyTo == null || comment.DeletedAt != null).map(comment => {
 				var replies = this.props.comments.filter(x => x.ReplyTo === comment.Id).map(x => {
-					return <div class={style.commentReply}>
+					return <div class={style.commentReply} key={"___comment" + x.Id}>
 						<div  class={style.author}>By: <input type="text" value={x.Author} onChange={(e) => {
 						this.handleAuthorChange(x.Id, e.target.value)
 					}}></input></div>
@@ -109,7 +109,7 @@ export default class Thread extends Component {
 						</div>
 					</div>
 				});
-				return <div class={style.comment}>
+				return <div class={style.comment} key={"___comment" + comment.Id}>
 					<div class={style.author}>By: <input type="text" value={comment.Author} onChange={(e) => {
 						this.handleAuthorChange(comment.Id, e.target.value)
 					}}></input></div>

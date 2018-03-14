@@ -1,0 +1,51 @@
+.mouthful_wrapper {
+	.mouthful_submit {
+		background-color: #A384DD;
+		display: inline-block;
+		color: white;
+		padding: 10px 5px;
+	}
+	.mouthful_submit:hover{
+		background-color: #3A0E85;
+		cursor: pointer;
+	}
+	.mouthful_comment {
+		padding-left: 10px;
+		text-align: left;
+		border-left: 5px solid #3A0E85;
+		margin-bottom: 10px;
+	}
+	.mouthful_comment_reply { 
+		padding-left: 10px;
+		text-align: left;
+		border-left: 3px solid #A384DD;
+		margin-top: 8px;
+	}
+	.mouthful_date {
+		color: #8259C8;
+		margin-bottom: 5px;
+	}
+	.mouthful_author {
+		font-weight: 800;
+		font-size: 20px;
+		margin-bottom: 5px;
+	}
+	.mouthful_comment_body {
+		width: 96%;
+	}
+	.mouthful_form {
+		display: block;
+		margin-bottom: 10px;
+	}
+	.mouthful_author_input {
+		padding: 10px 10px;
+		margin-bottom:  5px;
+		display: block;
+	}
+	.mouthful_comment_input {
+		padding: 10px 10px;
+		margin-bottom: 5px;
+		width: 96%;
+		display: block;
+	}
+}

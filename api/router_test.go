@@ -52,7 +52,33 @@ func TestGetCommentsNoComments(t *testing.T) {
 	r := gofight.New()
 	server, err := api.GetServer(&testDB, &config)
 	assert.Nil(t, err)
-	r.GET("/v1/comments?uri="+url.PathEscape("/v1/2017/16")).
+	r.GET("/v1/comments?uri="+url.PathEscape("/2017/16")).
+		SetDebug(debug).
+		Run(server, func(r gofight.HTTPResponse, rq gofight.HTTPRequest) {
+			assert.Equal(t, 404, r.Code)
+		})
+}
+
+func TestGetCommentsUnconfirmedComments(t *testing.T) {
+	testDB := sqlite.CreateTestDatabase()
+	r := gofight.New()
+	server, err := api.GetServer(&testDB, &config)
+	assert.Nil(t, err)
+	body := model.CreateCommentBody{
+		Path:   "/2017/16",
+		Body:   "body",
+		Author: "author",
+	}
+	bodyBytes, err := json.Marshal(body)
+	assert.Nil(t, err)
+	r.POST("/v1/comments").
+		SetBody(string(bodyBytes[:])).
+		SetDebug(debug).
+		Run(server, func(r gofight.HTTPResponse, rq gofight.HTTPRequest) {
+			assert.Equal(t, "", r.Body.String())
+			assert.Equal(t, 204, r.Code)
+		})
+	r.GET("/v1/comments?uri="+url.PathEscape("/2017/16")).
 		SetDebug(debug).
 		Run(server, func(r gofight.HTTPResponse, rq gofight.HTTPRequest) {
 			assert.Equal(t, 404, r.Code)
@@ -79,7 +105,7 @@ func TestCreateCommentSpamTrap(t *testing.T) {
 	server, err := api.GetServer(&testDB, &config)
 	assert.Nil(t, err)
 	body := model.CreateCommentBody{
-		Path:   "2017/16",
+		Path:   "/2017/16",
 		Body:   "body",
 		Author: "author",
 		Email:  &email,

@@ -50,7 +50,11 @@ func (r *Router) GetComments(c *gin.Context) {
 		c.AbortWithStatusJSON(500, global.ErrInternalServerError.Error())
 		return
 	}
-	c.JSON(200, comments)
+	if comments != nil {
+		c.JSON(200, comments)
+		return
+	}
+	c.AbortWithStatusJSON(404, global.ErrThreadNotFound.Error())
 }
 
 // GetAllThreads returns an array of threads
@@ -99,7 +103,8 @@ func (r *Router) CreateComment(c *gin.Context) {
 		return
 	}
 	db := *r.db
-	err = db.CreateComment(createCommentBody.Body, createCommentBody.Author, createCommentBody.Path, false, createCommentBody.ReplyTo)
+	confirmed := !r.config.Moderation.Enabled
+	err = db.CreateComment(createCommentBody.Body, createCommentBody.Author, createCommentBody.Path, confirmed, createCommentBody.ReplyTo)
 	if err != nil {
 		if err == global.ErrWrongReplyTo {
 			c.AbortWithStatusJSON(400, global.ErrWrongReplyTo.Error())

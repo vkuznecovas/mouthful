@@ -19,7 +19,7 @@ type Moderation struct {
 	SessionDurationSeconds int
 }
 
-// Config  - root of our config
+// Config - root of our config
 type Config struct {
 	Database   Database
 	Honeypot   bool

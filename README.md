@@ -7,3 +7,7 @@
 * dynamodb
 * config to affect admin panel as well
 * Remove the test config, replace with example
+* rate limiting
+* build and generate configs for both client/admin
+* consume config in client/admin
+* test cases with moderation off
