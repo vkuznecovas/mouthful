@@ -135,7 +135,7 @@ export default class App extends Component {
         }
       }
     }
-    http.send(JSON.stringify({ Body: context.state.forms[formIndex].comment, Author: context.state.forms[formIndex].author, Path: window.location.pathname, ReplyTo:  null }))
+    http.send(JSON.stringify({ Body: context.state.forms[formIndex].comment, Author: context.state.forms[formIndex].author, Path: window.location.pathname, ReplyTo: replyTo }))
   }
 
 
