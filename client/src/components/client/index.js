@@ -6,7 +6,7 @@ const useStyle = true;
 const moderationEnabled = false;
 const authorInputRefPrefix = "__mouthful_author_input_";
 const commentInputRefPrefix = "__mouthful_comment_input_";
-const commentRefPrefix = "__moutful_comment_";
+const commentRefPrefix = "__mouthful_comment_";
 const defaultComments = 5;
 function getStyle(c) {
   return useStyle ? style[c] : c
@@ -37,8 +37,6 @@ const handleStateChange = (http, context) => {
           comment: "",
           email: null,
           replyTo: x.ReplyTo ? x.ReplyTo : x.Id,
-          authorValidation: false,
-          commentValidation: false
         }
       })
       forms = forms.concat(formsToAppend)
@@ -247,11 +245,9 @@ export default class App extends Component {
     if (!form) {
       return null
     }
-    var authorValidationClass = form.authorValidation ? (" " + getStyle("moutful_validation_error")) : ""
-    var commentValidationClass = form.commentValidation ? (" " + getStyle("moutful_validation_error")) : ""
     return (<div class={getStyle(form.visible ? "mouthful_form" : "mouthful_form_invisible")}>
       <input
-        class={getStyle("mouthful_author_input") + authorValidationClass}
+        class={getStyle("mouthful_author_input")}
         type="text" name="author"
         placeholder="Name (required)"
         value={this.state.forms[this.findFormIndex(id)].author}
@@ -268,7 +264,7 @@ export default class App extends Component {
         onChange={(e) => this.handleEmailChange(id, e.target.value)}>
       </input>
       <textarea
-        class={getStyle("mouthful_comment_input") + commentValidationClass}
+        class={getStyle("mouthful_comment_input")}
         rows="3"
         name="commentBody"
         placeholder="Type comment here..."

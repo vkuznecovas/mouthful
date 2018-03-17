@@ -66,14 +66,6 @@
         font-size: 20px;
         margin-bottom: 5px;
     }
-    .moutful_validation_error:focus {
-        outline-color: #99072e;
-        transition-property: outline-color;
-        transition-duration: 1s;
-        transition-timing-function: ease-out;
-        transition-delay: 0s; // transition: outline-color 1s ease-out;
-        // transition: outline-color 1s 0s ease-aout;
-    }
     .mouthful_comment_body {
 		width: 96%;
 		margin: 20px 0;
