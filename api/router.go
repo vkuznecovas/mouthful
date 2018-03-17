@@ -98,10 +98,12 @@ func (r *Router) CreateComment(c *gin.Context) {
 		c.AbortWithStatusJSON(400, global.ErrBadRequest.Error())
 		return
 	}
+	createCommentBody.Body = global.ParseAndSaniziteMarkdown(createCommentBody.Body)
 	if r.config.Honeypot && createCommentBody.Email != nil {
-		c.AbortWithStatus(204)
+		c.AbortWithStatusJSON(200, createCommentBody)
 		return
 	}
+
 	db := *r.db
 	confirmed := !r.config.Moderation.Enabled
 	err = db.CreateComment(createCommentBody.Body, createCommentBody.Author, createCommentBody.Path, confirmed, createCommentBody.ReplyTo)
@@ -114,7 +116,7 @@ func (r *Router) CreateComment(c *gin.Context) {
 		c.AbortWithStatusJSON(500, global.ErrInternalServerError.Error())
 		return
 	}
-	c.AbortWithStatus(204)
+	c.AbortWithStatusJSON(200, createCommentBody)
 }
 
 // UpdateComment updates the provided comment in body

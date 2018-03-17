@@ -28,7 +28,8 @@
     "preact": "^8.2.5",
     "preact-compat": "^3.17.0",
     "preact-habitat": "^3.1.0",
-    "preact-router": "^2.5.7"
+    "preact-router": "^2.5.7",
+    "showdown": "1.8.6"
   },
   "jest": {
     "verbose": true,
