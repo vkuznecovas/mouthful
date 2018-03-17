@@ -76,51 +76,51 @@ export default class Thread extends Component {
 		// this is a terrible hack for showing unconfirmeds
 		if (this.props.comments.filter(comment => comment.ReplyTo == null && comment.DeletedAt == null).length == 0) {
 			comments = this.props.comments.map(comment => {
-				return <div class={style.comment} key={"___comment" + comment.Id}>
+				return <div class={style.mouthful_comment} key={"___comment" + comment.Id}>
 					<div class={style.author}>By: <input type="text" value={comment.Author} onChange={(e) => {
 						this.handleAuthorChange(comment.Id, e.target.value)
 					}}></input></div>
 					<div class={style.date}>{formatDate(comment.CreatedAt)}</div>
-					<div><textarea class={style.commentBody} value={comment.Body} onChange={(e) => {
+					<div><textarea class={style.mouthful_comment_body} value={comment.Body} onChange={(e) => {
 						this.handleBodyChange(comment.Id, e.target.value)
 					}}></textarea></div>
 					<div class={style.buttons}>
-						<div class={style.smallButton}  onClick={() => this.props.updateComment(comment.Id, comment.Body, comment.Author, comment.Confirmed)}>Update</div>
-						{comment.DeletedAt == null ? <div class={style.smallButton}  onClick={() => this.deleteComment(comment.Id)}>Delete</div> : <div class={style.smallButton} onClick={() => this.undoDelete(comment.Id)}>Undo delete</div>}
-						{comment.Confirmed ? "" : <div class={style.smallButton} onClick={() => this.props.updateComment(comment.Id, null, null, true)}>Confirm</div>}
+						<div class={style.mouthful_reply_button}  onClick={() => this.props.updateComment(comment.Id, comment.Body, comment.Author, comment.Confirmed)}>Update</div>
+						{comment.DeletedAt == null ? <div class={style.mouthful_reply_button}  onClick={() => this.deleteComment(comment.Id)}>Delete</div> : <div class={style.mouthful_reply_button} onClick={() => this.undoDelete(comment.Id)}>Undo delete</div>}
+						{comment.Confirmed ? "" : <div class={style.mouthful_reply_button} onClick={() => this.props.updateComment(comment.Id, null, null, true)}>Confirm</div>}
 					</div>
 				</div>;
 			})
 		} else {
 			comments = this.props.comments.filter(comment => comment.ReplyTo == null || comment.DeletedAt != null).map(comment => {
 				var replies = this.props.comments.filter(x => x.ReplyTo === comment.Id).map(x => {
-					return <div class={style.commentReply} key={"___comment" + x.Id}>
-						<div  class={style.author}>By: <input type="text" value={x.Author} onChange={(e) => {
+					return <div class={style.mouthful_comment_reply} key={"___comment" + x.Id}>
+						<div  class={style.mouthful_author}>By: <input type="text" value={x.Author} onChange={(e) => {
 						this.handleAuthorChange(x.Id, e.target.value)
 					}}></input></div>
-						<div class={style.date}>{formatDate(x.CreatedAt)}</div>
-						<div><textarea class={style.commentBody}  value={x.Body} onChange={(e) => {
+						<div class={style.mouthful_date}>{formatDate(x.CreatedAt)}</div>
+						<div><textarea class={style.mouthful_comment_body}  value={x.Body} onChange={(e) => {
 						this.handleBodyChange(x.Id, e.target.value)
 					}}></textarea></div>
-						<div class={style.buttons}>
-							<div class={style.smallButton} onClick={() => this.props.updateComment(x.Id, x.Body, x.Author, x.Confirmed)}>Update</div>
-							{x.DeletedAt == null ? <div class={style.smallButton} onClick={() => this.deleteComment(x.Id)}>Delete</div> : <div class={style.smallButton} onClick={() => this.undoDelete(x.Id)}>Undo delete</div>}
-							{x.Confirmed ? "" : <div class={style.smallButton} onClick={() => this.props.updateComment(x.Id, null, null, true)}>Confirm</div> }
+						<div>
+							<div class={style.mouthful_reply_button} onClick={() => this.props.updateComment(x.Id, x.Body, x.Author, x.Confirmed)}>Update</div>
+							{x.DeletedAt == null ? <div class={style.mouthful_reply_button} onClick={() => this.deleteComment(x.Id)}>Delete</div> : <div class={style.smallButton} onClick={() => this.undoDelete(x.Id)}>Undo delete</div>}
+							{x.Confirmed ? "" : <div class={style.mouthful_reply_button} onClick={() => this.props.updateComment(x.Id, null, null, true)}>Confirm</div> }
 						</div>
 					</div>
 				});
-				return <div class={style.comment} key={"___comment" + comment.Id}>
-					<div class={style.author}>By: <input type="text" value={comment.Author} onChange={(e) => {
+				return <div class={style.mouthful_comment} key={"___comment" + comment.Id}>
+					<div class={style.mouthful_author}>By: <input type="text" value={comment.Author} onChange={(e) => {
 						this.handleAuthorChange(comment.Id, e.target.value)
 					}}></input></div>
-					<div class={style.date}>{formatDate(comment.CreatedAt)}</div>
-					<div><textarea class={style.commentBody} value={comment.Body} onChange={(e) => {
+					<div class={style.mouthful_date}>{formatDate(comment.CreatedAt)}</div>
+					<div><textarea class={style.mouthful_comment_body} value={comment.Body} onChange={(e) => {
 						this.handleBodyChange(comment.Id, e.target.value)
 					}}></textarea></div>
-					<div class={style.buttons}>
-						<div class={style.smallButton} onClick={() => this.props.updateComment(comment.Id, comment.Body, comment.Author, comment.Confirmed)}>Update</div>
-						{comment.DeletedAt == null ? <div class={style.smallButton} onClick={() => this.deleteComment(comment.Id)}>Delete</div> : <div class={style.smallButton} onClick={() => this.undoDelete(comment.Id)}>Undo delete</div>}
-						{comment.Confirmed ? "" : <div class={style.smallButton} onClick={() => this.props.updateComment(comment.Id, null, null, true)}>Confirm</div> }
+					<div >
+						<div class={style.mouthful_reply_button} onClick={() => this.props.updateComment(comment.Id, comment.Body, comment.Author, comment.Confirmed)}>Update</div>
+						{comment.DeletedAt == null ? <div class={style.mouthful_reply_button} onClick={() => this.deleteComment(comment.Id)}>Delete</div> : <div class={style.mouthful_reply_button} onClick={() => this.undoDelete(comment.Id)}>Undo delete</div>}
+						{comment.Confirmed ? "" : <div class={style.mouthful_reply_button} onClick={() => this.props.updateComment(comment.Id, null, null, true)}>Confirm</div> }
 					</div>
 					<div style="margin-left:30px">
 						{replies}

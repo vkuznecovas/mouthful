@@ -37,11 +37,11 @@ export default class Login extends Component {
 	}
 	render() {
 		return (
-			<div class={style.login}>
+			<div class={style.mouthful_login}>
 				<form onSubmit={this.handleSubmit}>
 					<label class={style.passwordTitle}>Password:</label>
 					<input type="password" value={this.state.value} onChange={this.handleChange} />
-					<input class={style.passwordSubmit}type="submit" value="Submit" />
+					<input class={style.mouthful_submit}type="submit" value="Submit" />
 				</form>
 			</div>
 		);

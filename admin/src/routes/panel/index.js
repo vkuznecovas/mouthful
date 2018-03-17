@@ -18,7 +18,7 @@ const handleStateChange = (http, context, key) => {
 export default class Panel extends Component {
 	constructor() {
 		super();
-		this.state = { threads: [], comments: [], authorized: false, loaded: false, showPending: false, showDeleted: false };
+		this.state = { threads: [], comments: [], authorized: false, loaded: false, showPending: true, showDeleted: false };
 		this.loadThreads = this.loadThreads.bind(this);
 		this.loadComments = this.loadComments.bind(this);
 		this.loggedIn = this.loggedIn.bind(this);
@@ -105,7 +105,7 @@ export default class Panel extends Component {
 			this.loadComments(this)
 		}
 		if (!this.state.authorized) {
-			return (<div class={style.container}>
+			return (<div class={style.mouthful_container}>
 			<Login onLogin={this.loggedIn} />
 			</div>)
 		}
@@ -139,12 +139,12 @@ export default class Panel extends Component {
 		})
 		var resultDiv = threads.filter(x => x != null).length > 0 ? threads : <div class={style.nothing}>Nothing to display</div>
 		return (
-			<div class={style.container}>
-			<div class={style.profile}>
-				<div class={style.buttons}>
-					<div class={this.state.showPending ? style.buttonActive : style.button} onClick={this.showPending}>Show unconfirmed</div>
-					<div class={this.state.showPending == false && this.state.showDeleted == false ? style.buttonActive : style.button} onClick={this.hidePending}>Show all</div>
-					<div class={this.state.showDeleted ? style.buttonActive : style.button  } onClick={this.showDeleted}>Show deleted</div>
+			<div class={style.mouthful_container}>
+			<div class={style.mouthful_wrapper}>
+				<div class={style.mouthful_buttons}>
+					<div class={this.state.showPending ? style.mouthful_buttonActive : style.mouthful_button} onClick={this.showPending}>Show unconfirmed</div>
+					<div class={this.state.showPending == false && this.state.showDeleted == false ? style.mouthful_buttonActive : style.mouthful_button} onClick={this.hidePending}>Show all</div>
+					<div class={this.state.showDeleted ? style.mouthful_buttonActive : style.mouthful_button  } onClick={this.showDeleted}>Show deleted</div>
 				</div>
 				<div>
 					{resultDiv}

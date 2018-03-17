@@ -14,3 +14,4 @@
 * Save the raw input of the comment in the database - maybe? what's the purpose?
 * multilang support
 * save cookie for author name and prefil if it exists >>>>> test this on a service
+* make admin panel great again

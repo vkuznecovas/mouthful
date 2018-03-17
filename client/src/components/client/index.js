@@ -3,7 +3,7 @@ import style from "./style";
 import timeago from "./timeago"
 import cookies from "./cookies"
 const useStyle = true;
-const moderationEnabled = true;
+const moderationEnabled = false;
 const authorInputRefPrefix = "__mouthful_author_input_";
 const commentInputRefPrefix = "__mouthful_comment_input_";
 const commentRefPrefix = "__moutful_comment_";
@@ -144,11 +144,15 @@ export default class App extends Component {
       return
     }
     var form = this.state.forms[formIndex];
-    if (form.author == "") {
+    var authorCopy = form.author.replace(/\s/g,'');
+
+    if (authorCopy == "" || authorCopy.length < 3) {
       this.focus(authorInputRefPrefix + form.id)
       return
     }
-    if (form.comment == "") {
+
+    var commentCopy = form.comment.replace(/\s/g,'');
+    if (commentCopy == "" || commentCopy.length < 3) {
       this.focus(commentInputRefPrefix + form.id)
       return
     }
