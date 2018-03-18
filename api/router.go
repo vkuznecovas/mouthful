@@ -50,7 +50,11 @@ func (r *Router) GetComments(c *gin.Context) {
 		c.AbortWithStatusJSON(500, global.ErrInternalServerError.Error())
 		return
 	}
-	c.JSON(200, comments)
+	if comments != nil {
+		c.JSON(200, comments)
+		return
+	}
+	c.AbortWithStatusJSON(404, global.ErrThreadNotFound.Error())
 }
 
 // GetAllThreads returns an array of threads
@@ -94,12 +98,15 @@ func (r *Router) CreateComment(c *gin.Context) {
 		c.AbortWithStatusJSON(400, global.ErrBadRequest.Error())
 		return
 	}
+	createCommentBody.Body = global.ParseAndSaniziteMarkdown(createCommentBody.Body)
 	if r.config.Honeypot && createCommentBody.Email != nil {
-		c.AbortWithStatus(204)
+		c.AbortWithStatusJSON(200, createCommentBody)
 		return
 	}
+
 	db := *r.db
-	err = db.CreateComment(createCommentBody.Body, createCommentBody.Author, createCommentBody.Path, false, createCommentBody.ReplyTo)
+	confirmed := !r.config.Moderation.Enabled
+	err = db.CreateComment(createCommentBody.Body, createCommentBody.Author, createCommentBody.Path, confirmed, createCommentBody.ReplyTo)
 	if err != nil {
 		if err == global.ErrWrongReplyTo {
 			c.AbortWithStatusJSON(400, global.ErrWrongReplyTo.Error())
@@ -109,7 +116,7 @@ func (r *Router) CreateComment(c *gin.Context) {
 		c.AbortWithStatusJSON(500, global.ErrInternalServerError.Error())
 		return
 	}
-	c.AbortWithStatus(204)
+	c.AbortWithStatusJSON(200, createCommentBody)
 }
 
 // UpdateComment updates the provided comment in body

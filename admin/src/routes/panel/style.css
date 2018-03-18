@@ -1,93 +1,187 @@
-.profile {
-	padding: 56px 20px;
-	min-height: 100%;
-	width: 100%;
+.mouthful_wrapper {
+    padding: 56px 20px;
+    min-height: 100%;
+    width: 100%;
 }
-.login {
-	padding: 56px 20px;
-	min-height: 100%;
-	width: 100%;
+
+.mouthful_login {
+    padding: 56px 20px;
+    min-height: 100%;
+    width: 100%;
 }
-.button {
-	background-color: #A384DD;
-	display: inline-block;
-	color: white;
-	padding: 10px 5px;
+
+.mouthful_button {
+    background-color: #ce1458;
+    display: inline-block;
+    color: white;
+    padding: 10px 5px;
 }
-.buttonActive {
-	background-color: #3A0E85;
-	display: inline-block;
-	color: white;
-	padding: 10px 5px;
+
+.mouthful_buttonActive {
+    background-color: rgb(247, 0, 33);
+    display: inline-block;
+    color: white;
+    padding: 10px 5px;
 }
-.buttons {
-	display: inline-block;
-	margin-top: 5px;
+
+.mouthful_buttons {
+    display: inline-block;
+    margin-top: 5px;
 }
-.button:hover{
-	background-color: #3A0E85;
-	cursor: pointer;
+
+.mouthful_button:hover {
+    background-color:  rgb(247, 0, 33);
+    cursor: pointer;
 }
-.container{
-		margin: auto;
-		width: 70%;
-		padding: 10px;
-		text-align: center;
+
+.mouthful_container {
+    margin: auto;
+    width: 70%;
+    padding: 10px;
+    text-align: center;
 }
-.comment {
-	padding-left: 10px;
-	text-align: left;
-	border-left: 5px solid #3A0E85;
-	margin-bottom: 10px;
+
+.mouthful_date {
+    color: #ce1458;
+    margin-bottom: 5px;
 }
-.commentReply { 
-	padding-left: 10px;
-	text-align: left;
-	border-left: 3px solid #A384DD;
-	margin-top: 8px;
-}
-.smallButton {
-	background-color: #A384DD;
-	display: inline-block;
-	color: white;
-	margin: 0 4px;
-	padding: 3px 3px;
-}
-.smallButton:hover{
-	background-color: #3A0E85;
-	cursor: pointer;
-}
-.date {
-	color: #8259C8;
-	margin-bottom: 5px;
-}
-.author {
-	font-weight: 800;
-	font-size: 20px;
-	margin-bottom: 5px;
-}
+
 .nothing {
-	margin-top:10px;
-	font-size: 20px;
-	font-weight: 600;
+    margin-top: 10px;
+    font-size: 20px;
+    font-weight: 600;
 }
+
 .passwordTitle {
-	margin-top: 10px;
-	margin-right: 5px;
-	font-size: 15px;
-	font-weight: 600;
+    margin-top: 10px;
+    margin-right: 5px;
+    font-size: 15px;
+    font-weight: 600;
 }
-.passwordSubmit {
-	color: white;
-	background-color: #A384DD;
-	border: none;
-	margin-left: 5px;
+
+
+.mouthful_submit {
+    padding: 4px 8px;
+    margin-right: 10px;
+    border-color: #ce1458;
+    border-style: solid;
+    border-width: thin;
+    border-radius: 5px;
+    background-color: white;
+
+    font-size: 17px;
 }
-.passwordSubmit:hover{
-	background-color: #3A0E85;
-	cursor: pointer;
+
+.mouthful_reply_button {
+    padding: 4px 8px;
+    margin-right: 10px;
+    background-color: white;
+    border-color: #ce1458;
+    border-style: solid;
+    border-width: thin;
+    border-radius: 5px;
+	font-size: 14px;
+	display:inline-block;
 }
-.commentBody {
-	width: 100%;
-	min-height: 50px;
+
+.mouthful_moderation {
+    margin-left: 5px;
+    font-size: 12px;
+    color: #ce1458;
+    font-style: italic;
+}
+
+.mouthful_reply_button:hover {
+    color: #ce1458;
+    text-decoration: underline;
+    cursor: pointer;
+}
+
+.mouthful_submit:hover {
+    color: #ce1458;
+    text-decoration: underline;
+    cursor: pointer;
+}
+
+.mouthful_comment {
+    margin: 20px 0;
+    border-left: 4px solid #8e8e8d;
+	padding-left: 12px;
+	text-align: left;
+}
+
+.mouthful_comment:focus {
+    outline: none;
+}
+
+.mouthful_comment_reply {
+    margin: 1em 0;
+    padding-left: 24px;
+    text-align: left;
+    border-left: 2px solid #8e8e8d;
+}
+
+.mouthful_comment_reply:focus {
+    outline: none;
+}
+
+.mouthful_date {
+    margin-left: 5px;
+    color: #7f8c8d;
+    font-size: 12px;
+    font-weight: normal;
+    margin-bottom: 5px;
+}
+
+.mouthful_author {
+    font-weight: 800;
+    font-size: 20px;
+    margin-bottom: 5px;
+}
+
+
+.mouthful_comment_body {
+    width: 96%;
+    margin: 20px 0;
+}
+
+.mouthful_form {
+    margin: 20px 0;
+    display: block;
+}
+
+.mouthful_form_invisible {
+    display: none;
+}
+
+.mouthful_author_input {
+    border-radius: 2px;
+    box-shadow: 0 0 2px #888;
+    padding: 10px 10px;
+    border-width: 1px;
+    font-size: 17px;
+    margin-bottom: 20px;
+}
+
+.mouthful_author_input:focus {
+    outline-width: 0;
+    border-color: #ce1458;
+    box-shadow: none;
+}
+
+.mouthful_comment_input {
+    border: 1px solid #f0f0f0;
+    border-radius: 2px;
+    box-shadow: 0 0 2px #888;
+    display: block;
+    margin-bottom: 20px;
+    font-size: 17px;
+    padding: 10px 10px;
+    width: 96%;
+}
+
+.mouthful_comment_input:focus {
+    outline-width: 0;
+    border-color: #ce1458;
+    box-shadow: none;
 }

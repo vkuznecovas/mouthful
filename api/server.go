@@ -36,6 +36,7 @@ func GetServer(db *abstraction.Database, config *model.Config) (*gin.Engine, err
 	// router.Use(cors.New(config))
 	r.Use(cors.Default())
 	router := New(db, config)
+	// TODO config the static dir
 	r.Use(static.Serve("/", static.LocalFile("./admin/build", true)))
 	r.GET("/status", router.Status)
 	v1 := r.Group("/v1")

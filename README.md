@@ -5,5 +5,12 @@
 
 ## TODO
 * dynamodb
-* config to affect admin panel as well
 * Remove the test config, replace with example
+* rate limiting
+* build and generate configs for both client/admin
+* consume config in client/admin
+* test cases with moderation off
+* Error message if comments cant be reached client side
+* Save the raw input of the comment in the database - maybe? what's the purpose? perhaps for editing the comment?
+* multilang support
+* save cookie for author name and prefil if it exists >>>>> test this on a service

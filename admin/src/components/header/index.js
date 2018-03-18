@@ -6,7 +6,7 @@ export default class Header extends Component {
 	render() {
 		return (
 			<header class={style.header}>
-				<h1>Moutful Admin Panel</h1>
+				<h1>Mouthful Admin Panel</h1>
 			</header>
 		);
 	}
