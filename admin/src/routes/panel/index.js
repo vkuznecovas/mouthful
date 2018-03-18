@@ -10,8 +10,6 @@ const handleStateChange = (http, context, key) => {
 		context.setState(stateChange)
 	} else if (http.readyState == 4 && http.status == 401) {
 		context.setState({ authorized: false, loaded: true })
-	} else {
-		// TODO
 	}
 }
 
