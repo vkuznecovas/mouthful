@@ -27,12 +27,15 @@ import (
 
 const debug = false
 
+var maxCommentLength int = 10000
+
 var config = configModel.Config{
 	Honeypot: false,
 	Moderation: configModel.Moderation{
-		Enabled:       true,
-		SessionSecret: "somesecret",
-		AdminPassword: "test",
+		Enabled:          true,
+		SessionSecret:    "somesecret",
+		AdminPassword:    "test",
+		MaxCommentLength: &maxCommentLength,
 	},
 }
 
@@ -1054,4 +1057,47 @@ func TestRestoreDeletedComment(t *testing.T) {
 
 		})
 
+}
+
+func TestCreateCommentBodyTooLong(t *testing.T) {
+	testDB := sqlite.CreateTestDatabase()
+	r := gofight.New()
+	email := "email"
+	server, err := api.GetServer(&testDB, &config)
+	assert.Nil(t, err)
+	body := model.CreateCommentBody{
+		Path:   "/2017/16",
+		Body:   strings.Repeat("#", maxCommentLength),
+		Author: "author",
+		Email:  &email,
+	}
+	bodyBytes, err := json.Marshal(body)
+	assert.Nil(t, err)
+	r.POST("/v1/comments").
+		SetBody(string(bodyBytes[:])).
+		SetDebug(debug).
+		Run(server, func(r gofight.HTTPResponse, rq gofight.HTTPRequest) {
+			var parsedBody model.CreateCommentBody
+			err = json.Unmarshal([]byte(r.Body.String()), &parsedBody)
+			assert.Nil(t, err)
+			assert.Equal(t, body.Path, parsedBody.Path)
+			assert.Equal(t, body.Author, parsedBody.Author)
+			assert.Equal(t, body.Email, parsedBody.Email)
+			assert.Equal(t, global.ParseAndSaniziteMarkdown(body.Body), parsedBody.Body)
+			assert.Equal(t, 200, r.Code)
+		})
+	body = model.CreateCommentBody{
+		Path:   "/2017/16",
+		Body:   strings.Repeat("#", maxCommentLength+1),
+		Author: "author",
+		Email:  &email,
+	}
+	bodyBytes, err = json.Marshal(body)
+	assert.Nil(t, err)
+	r.POST("/v1/comments").
+		SetBody(string(bodyBytes[:])).
+		SetDebug(debug).
+		Run(server, func(r gofight.HTTPResponse, rq gofight.HTTPRequest) {
+			assert.Equal(t, 400, r.Code)
+		})
 }

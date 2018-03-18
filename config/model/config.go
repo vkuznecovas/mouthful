@@ -17,6 +17,7 @@ type Moderation struct {
 	SessionName            *string
 	AdminPassword          string
 	SessionDurationSeconds int
+	MaxCommentLength       *int
 }
 
 // Config - root of our config

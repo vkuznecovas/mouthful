@@ -98,6 +98,13 @@ func (r *Router) CreateComment(c *gin.Context) {
 		c.AbortWithStatusJSON(400, global.ErrBadRequest.Error())
 		return
 	}
+	// length validation
+	if r.config.Moderation.MaxCommentLength != nil {
+		if len(createCommentBody.Body) > *r.config.Moderation.MaxCommentLength {
+			c.AbortWithStatusJSON(400, global.ErrBadRequest.Error())
+			return
+		}
+	}
 	createCommentBody.Body = global.ParseAndSaniziteMarkdown(createCommentBody.Body)
 	if r.config.Honeypot && createCommentBody.Email != nil {
 		c.AbortWithStatusJSON(200, createCommentBody)

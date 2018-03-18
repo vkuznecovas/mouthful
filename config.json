@@ -5,7 +5,8 @@
         "adminPassword": "somepassword",
         "sessionSecret": "somesecret",
         "sessionName": "some-name",
-        "sessionDurationSeconds": 21600
+        "sessionDurationSeconds": 21600,
+        "maxCommentLength": 10000
     },
     "database": {
         "dialect": "sqlite3",
