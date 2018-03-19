@@ -1,2 +1,4 @@
 vendor/
 test.db
+dist/
+config.front.json
