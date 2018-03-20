@@ -1,2 +1,6 @@
 vendor/
 test.db
+dist/
+config.front.json
+static/
+isso.db

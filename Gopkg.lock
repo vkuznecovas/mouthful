@@ -126,10 +126,22 @@
   version = "v1.6.0"
 
 [[projects]]
+  branch = "master"
+  name = "github.com/microcosm-cc/bluemonday"
+  packages = ["."]
+  revision = "542fd4642604d0d0c26112396ce5b1a9d01eee0b"
+
+[[projects]]
   name = "github.com/pmezard/go-difflib"
   packages = ["difflib"]
   revision = "792786c7400a136282c1664665ae0a8db921c6c2"
   version = "v1.0.0"
+
+[[projects]]
+  branch = "master"
+  name = "github.com/shurcooL/sanitized_anchor_name"
+  packages = ["."]
+  revision = "86672fcb3f950f35f2e675df2240550f2a50762f"
 
 [[projects]]
   name = "github.com/stretchr/testify"
@@ -142,6 +154,15 @@
   packages = ["codec"]
   revision = "9831f2c3ac1068a78f50999a30db84270f647af6"
   version = "v1.1"
+
+[[projects]]
+  branch = "master"
+  name = "golang.org/x/net"
+  packages = [
+    "html",
+    "html/atom"
+  ]
+  revision = "92b859f39abd2d91a854c9f9c4621b2f5054a92d"
 
 [[projects]]
   branch = "master"
@@ -168,6 +189,12 @@
   revision = "3f83fa5005286a7fe593b055f0d7771a7dce4655"
 
 [[projects]]
+  name = "gopkg.in/russross/blackfriday.v2"
+  packages = ["."]
+  revision = "cadec560ec52d93835bf2f15bd794700d3a2473b"
+  version = "v2.0.0"
+
+[[projects]]
   branch = "v2"
   name = "gopkg.in/yaml.v2"
   packages = ["."]
@@ -176,6 +203,6 @@
 [solve-meta]
   analyzer-name = "dep"
   analyzer-version = 1
-  inputs-digest = "c39da3d85efcc936008a2fff192b2f64fbeb0cef6f808b87e4dd72489cb9a00b"
+  inputs-digest = "ea45cd88125b068bb4b82e91acfbf75341b480af178c37ace39459d66a473c3b"
   solver-name = "gps-cdcl"
   solver-version = 1

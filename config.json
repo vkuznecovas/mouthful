@@ -11,5 +11,15 @@
     "database": {
         "dialect": "sqlite3",
         "database": "./test.db"
+    },
+    "api": {
+        "port": 8080,
+        "host": "http://localhost",
+        "debug": false,
+        "staticPath": "./static"
+    },
+    "client": {
+        "useDefaultStyle": true,
+        "pageSize": 5
     }
 }

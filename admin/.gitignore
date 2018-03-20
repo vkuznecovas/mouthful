@@ -4,3 +4,4 @@ node_modules
 *.lock
 
 package-lock.json
+config.json

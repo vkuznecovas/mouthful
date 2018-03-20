@@ -1,3 +1,4 @@
 node_modules
 .vscode
 build
+src/components/client/config.json

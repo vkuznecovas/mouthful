@@ -2,6 +2,7 @@ import { h, Component } from 'preact';
 import style from './style';
 import Thread from './thread';
 import Login from './login';
+import config from './config.js';
 
 const handleStateChange = (http, context, key) => {
 	if (http.readyState == 4 && http.status == 200) {
@@ -46,7 +47,7 @@ export default class Panel extends Component {
 		if (typeof window == "undefined") { return }
 
 		var http = new XMLHttpRequest();
-		var url = "http://localhost:7777/v1/admin/threads";
+		var url = config.url + "/v1/admin/threads";
 		http.open("GET", url, true);
 
 		http.onreadystatechange = function () {
@@ -59,7 +60,7 @@ export default class Panel extends Component {
 		if (typeof window == "undefined") { return }
 
 		var http = new XMLHttpRequest();
-		var url = "http://localhost:7777/v1/admin/comments/all";
+		var url = config.url + "/v1/admin/comments/all";
 		http.open("GET", url, true);
 
 		http.onreadystatechange = function () {
@@ -72,7 +73,7 @@ export default class Panel extends Component {
 	updateComment(commentId, body, author, confirmed) {
 		if (typeof window == "undefined") { return }
 		var http = new XMLHttpRequest();
-		var url = "http://localhost:7777/v1/admin/comments";
+		var url = config.url + "/v1/admin/comments";
 		http.open("PATCH", url, true);
 		var context = this;
 		http.onreadystatechange = function () {
@@ -109,7 +110,7 @@ export default class Panel extends Component {
 		}
 		// if we have no threads or comments
 		if (!(this.state.threads && this.state.comments && this.state.threads.length && this.state.comments.length)) {
-			return <div class={style.profile}>No comments yet!</div>
+			return <div class={style.mouthful_container}><div class={style.mouthful_login}>No comments yet!</div></div>
 		}
 		var threads = this.state.threads.map(t => {
 			var comments = this.state.comments

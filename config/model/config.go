@@ -25,4 +25,20 @@ type Config struct {
 	Database   Database
 	Honeypot   bool
 	Moderation Moderation
+	Client     Client
+	API        API
+}
+
+// API - api configuration part
+type API struct {
+	StaticPath *string
+	Port       *int
+	Host       string
+	Debug      bool
+}
+
+// Client - client configuration part
+type Client struct {
+	UseDefaultStyle bool
+	PageSize        int
 }
