@@ -1,4 +1,5 @@
 #!/bin/bash
+
 set +x
 rm -rf ./dist
 # make dirs to accomodate files
@@ -26,6 +27,7 @@ cd ..
 
 # build binary
 go build -o dist/mouthful main.go
+chmod +x dist/mouthful
 
 # copy over config
-mv ./config.json dist/config.json
+cp ./config.json dist/config.json

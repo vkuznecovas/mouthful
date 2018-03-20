@@ -4,7 +4,7 @@ const port = config && config.APIPort ? (":" + config.APIPort) : "";
 const baseUrl = host + port;
 const useDefaultStyle = config && config.UseDefaultStyle ? config.UseDefaultStyle : true;
 const moderation = config && config.Moderation ? config.Moderation : false;
-const pageSize = config && config.PageSize ? config.PageSize : 5;
+const pageSize = config && config.PageSize ? config.PageSize : 0;
 module.exports = {
     url: baseUrl,
     useDefaultStyle:useDefaultStyle,

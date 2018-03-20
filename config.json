@@ -1,0 +1,25 @@
+{
+    "honeypot": false,
+    "moderation": {
+        "enabled": true,
+        "adminPassword": "somepassword",
+        "sessionSecret": "somesecret",
+        "sessionName": "some-name",
+        "sessionDurationSeconds": 21600,
+        "maxCommentLength": 10000
+    },
+    "database": {
+        "dialect": "sqlite3",
+        "database": "./test.db"
+    },
+    "api": {
+        "port": 8080,
+        "host": "http://localhost",
+        "debug": false,
+        "staticPath": "./static"
+    },
+    "client": {
+        "useDefaultStyle": true,
+        "pageSize": 5
+    }
+}
