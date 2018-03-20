@@ -2,12 +2,15 @@ import { h, Component } from "preact";
 import style from "./style";
 import timeago from "./timeago"
 import cookies from "./cookies"
-const useStyle = true;
-const moderationEnabled = false;
+import config from "./config"
+
+const useStyle = config.useDefaultStyle;
+const moderationEnabled = config.moderation;
 const authorInputRefPrefix = "__mouthful_author_input_";
 const commentInputRefPrefix = "__mouthful_comment_input_";
 const commentRefPrefix = "__mouthful_comment_";
-const defaultComments = 5;
+const defaultComments = config.pageSize;
+
 function getStyle(c) {
   return useStyle ? style[c] : c
 }
@@ -156,7 +159,7 @@ export default class App extends Component {
     }
 
     var http = new XMLHttpRequest();
-    var url = "http://localhost:7777/v1/comments";
+    var url = config.url + "/v1/comments";
     http.open("POST", url, true);
     var context = this;
     http.onreadystatechange = function () {
@@ -233,7 +236,7 @@ export default class App extends Component {
     if (typeof window == "undefined") { return }
     var context = this;
     var http = new XMLHttpRequest();
-    var url = "http://localhost:7777/v1/comments?uri=" + encodeURIComponent(window.location.pathname);
+    var url = config.url + "/v1/comments?uri=" + encodeURIComponent(window.location.pathname);
     http.open("GET", url, true);
     http.onreadystatechange = function () {
       handleStateChange(http, context)

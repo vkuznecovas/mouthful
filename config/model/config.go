@@ -34,10 +34,11 @@ type API struct {
 	StaticPath *string
 	Port       *int
 	Host       string
+	Debug      bool
 }
 
 // Client - client configuration part
 type Client struct {
 	UseDefaultStyle bool
-	CustomCSSPath   *string
+	PageSize        int
 }

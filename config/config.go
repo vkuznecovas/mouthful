@@ -31,9 +31,7 @@ func TransformConfigToClientConfig(input *model.Config) (conf *model.ClientConfi
 	if input.Moderation.MaxCommentLength != nil {
 		conf.MaxCommentLength = input.Moderation.MaxCommentLength
 	}
-	if input.Client.CustomCSSPath != nil {
-		conf.CustomCSSPath = input.Client.CustomCSSPath
-	}
+
 	conf.UseDefaultStyle = input.Client.UseDefaultStyle
 	if input.API.Port != nil {
 		conf.APIPort = input.API.Port

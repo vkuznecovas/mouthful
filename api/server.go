@@ -9,6 +9,7 @@ import (
 	"github.com/gin-gonic/gin"
 	"github.com/vkuznecovas/mouthful/config/model"
 	"github.com/vkuznecovas/mouthful/db/abstraction"
+	"github.com/vkuznecovas/mouthful/global"
 )
 
 // CheckModerationVariables checks to see if the required moderation flags have been set in the config or not
@@ -29,15 +30,28 @@ func CheckModerationVariables(config *model.Config) error {
 
 // GetServer returns an instance of the mouthful server
 func GetServer(db *abstraction.Database, config *model.Config) (*gin.Engine, error) {
+	if config.API.Debug {
+		gin.SetMode(gin.DebugMode)
+	} else {
+		gin.SetMode(gin.ReleaseMode)
+	}
+
 	r := gin.Default()
+
 	// same as
 	// config := cors.DefaultConfig()
 	// config.AllowAllOrigins = true
 	// router.Use(cors.New(config))
+
 	r.Use(cors.Default())
 	router := New(db, config)
-	// TODO config the static dir
-	r.Use(static.Serve("/", static.LocalFile("./admin/build", true)))
+
+	fs := static.LocalFile(global.StaticPath, true)
+	if config.API.StaticPath != nil {
+		fs = static.LocalFile(*config.API.StaticPath, true)
+	}
+
+	r.Use(static.Serve("/", fs))
 	r.GET("/status", router.Status)
 	v1 := r.Group("/v1")
 	v1.GET("/comments", router.GetComments)
