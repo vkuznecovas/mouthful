@@ -612,6 +612,7 @@ func TestGetThreadsEmpty(t *testing.T) {
 		SetCookie(cookies).
 		Run(server, func(r gofight.HTTPResponse, rq gofight.HTTPRequest) {
 			assert.Equal(t, 200, r.Code)
+			assert.Equal(t, "[]", r.Body.String())
 			var threads []dbmodel.Thread
 			body, err := ioutil.ReadAll(r.Body)
 			assert.Nil(t, err)
@@ -632,6 +633,7 @@ func TestGetCommentsEmpty(t *testing.T) {
 		SetCookie(cookies).
 		Run(server, func(r gofight.HTTPResponse, rq gofight.HTTPRequest) {
 			assert.Equal(t, 200, r.Code)
+			assert.Equal(t, "[]", r.Body.String())
 			var comments []dbmodel.Comment
 			body, err := ioutil.ReadAll(r.Body)
 			assert.Nil(t, err)

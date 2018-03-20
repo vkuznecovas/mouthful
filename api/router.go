@@ -9,6 +9,7 @@ import (
 	"github.com/vkuznecovas/mouthful/api/model"
 	configModel "github.com/vkuznecovas/mouthful/config/model"
 	"github.com/vkuznecovas/mouthful/db/abstraction"
+	dbModel "github.com/vkuznecovas/mouthful/db/model"
 	"github.com/vkuznecovas/mouthful/global"
 )
 
@@ -70,6 +71,9 @@ func (r *Router) GetAllThreads(c *gin.Context) {
 		c.AbortWithStatusJSON(500, global.ErrInternalServerError.Error())
 		return
 	}
+	if threads == nil {
+		threads = make([]dbModel.Thread, 0)
+	}
 	c.JSON(200, threads)
 }
 
@@ -85,6 +89,9 @@ func (r *Router) GetAllComments(c *gin.Context) {
 		log.Println(err)
 		c.AbortWithStatusJSON(500, global.ErrInternalServerError.Error())
 		return
+	}
+	if comments == nil {
+		comments = make([]dbModel.Comment, 0)
 	}
 	c.JSON(200, comments)
 }

@@ -110,7 +110,7 @@ export default class Panel extends Component {
 		}
 		// if we have no threads or comments
 		if (!(this.state.threads && this.state.comments && this.state.threads.length && this.state.comments.length)) {
-			return <div class={style.profile}>No comments yet!</div>
+			return <div class={style.mouthful_container}><div class={style.mouthful_login}>No comments yet!</div></div>
 		}
 		var threads = this.state.threads.map(t => {
 			var comments = this.state.comments

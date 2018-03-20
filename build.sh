@@ -7,7 +7,7 @@ mkdir -p ./dist
 mkdir -p ./dist/static
 
 # create client config
-go run scripts/transformConfig.go ./config.json
+go run cmd/util/transformConfig.go ./config.json
 cp config.front.json client/src/components/client/config.json
 mv config.front.json admin/src/routes/panel/config.json
 
