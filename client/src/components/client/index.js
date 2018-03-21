@@ -53,7 +53,7 @@ const handleStateChange = (http, context) => {
   } else if (http.status == 404) {
     context.setState({ loaded: true, comments: [] })
   } else {
-    context.setState({ loaded: true })
+    context.setState({ loaded: true, error: true })
     console.log("error while fetching");
   }
 }
@@ -62,6 +62,7 @@ export default class App extends Component {
     super(props);
     this.state = {
       loaded: false,
+      error: false,
       comments: [],
       threadId: 0,
       showComments: defaultComments,
@@ -286,6 +287,9 @@ export default class App extends Component {
     </div>)
   }
   render(props) {
+    if (this.state.error == true) {
+      return <div class={getStyle("mouthful_wrapper")}><div class={getStyle("mouthful_error")}>The comments are temporarily unavailable</div></div>
+    }
     var commentsFiltered = this.state.comments.filter(x => x.ReplyTo == null);
     var commentDiv = <div class={getStyle("mouthful_no_comments")}>No comments yet!</div>
     var loadMoreComments = null;
