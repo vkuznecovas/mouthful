@@ -38,6 +38,14 @@ var config = configModel.Config{
 		AdminPassword:    "test",
 		MaxCommentLength: &maxCommentLength,
 	},
+	API: configModel.API{
+		Debug: false,
+		Cache: configModel.Cache{
+			Enabled:           false,
+			IntervalInSeconds: 1,
+			ExpiryInSeconds:   2,
+		},
+	},
 }
 
 func TestStatus(t *testing.T) {
@@ -1155,5 +1163,79 @@ func TestCreateCommentBodyTooLong(t *testing.T) {
 		SetDebug(debug).
 		Run(server, func(r gofight.HTTPResponse, rq gofight.HTTPRequest) {
 			assert.Equal(t, 400, r.Code)
+		})
+}
+
+func TestGetCommentsCache(t *testing.T) {
+	testDB := sqlite.CreateTestDatabase()
+	newConfig := config
+	newConfig.API.Cache.Enabled = true
+	server, err := api.GetServer(&testDB, &newConfig)
+	assert.Nil(t, err)
+	r := gofight.New()
+	commentBody := model.CreateCommentBody{
+		Path:   "/1027/test/",
+		Body:   "body",
+		Author: "author",
+	}
+	bodyBytes, err := json.Marshal(commentBody)
+	assert.Nil(t, err)
+	var commentId uuid.UUID
+	r.POST("/v1/comments").
+		SetBody(string(bodyBytes[:])).
+		SetDebug(debug).
+		Run(server, func(r gofight.HTTPResponse, rq gofight.HTTPRequest) {
+			var parsedBody model.CreateCommentResponse
+			err = json.Unmarshal([]byte(r.Body.String()), &parsedBody)
+			assert.Nil(t, err)
+			assert.Equal(t, commentBody.Path, parsedBody.Path)
+			assert.Equal(t, commentBody.Author, parsedBody.Author)
+			assert.Equal(t, global.ParseAndSaniziteMarkdown(commentBody.Body), parsedBody.Body)
+			assert.Equal(t, 200, r.Code)
+			uid, err := global.ParseUUIDFromString(parsedBody.Id)
+			assert.Nil(t, err)
+			commentId = *uid
+		})
+	cookies := GetSessionCookie(&testDB, r)
+	conf := true
+	bodyUpdate := model.UpdateCommentBody{
+		CommentId: commentId.String(),
+		Confirmed: &conf,
+	}
+	bodyBytes, err = json.Marshal(bodyUpdate)
+	r.PATCH("/v1/admin/comments").
+		SetBody(string(bodyBytes[:])).
+		SetDebug(debug).
+		SetCookie(cookies).
+		Run(server, func(r gofight.HTTPResponse, rq gofight.HTTPRequest) {
+			assert.Equal(t, "", r.Body.String())
+			assert.Equal(t, 204, r.Code)
+		})
+	r.GET("/v1/comments?uri="+url.QueryEscape(commentBody.Path)).
+		SetDebug(debug).
+		Run(server, func(r gofight.HTTPResponse, rq gofight.HTTPRequest) {
+			assert.Equal(t, 200, r.Code)
+			var comments []dbmodel.Comment
+			body, err := ioutil.ReadAll(r.Body)
+			assert.Nil(t, err)
+			err = json.Unmarshal(body, &comments)
+			assert.Nil(t, err)
+			assert.Len(t, comments, 1)
+			val := r.HeaderMap.Get("X-Cache")
+			assert.Equal(t, val, "MISS")
+		})
+	r.GET("/v1/comments?uri="+url.QueryEscape(commentBody.Path)).
+		SetDebug(debug).
+		Run(server, func(r gofight.HTTPResponse, rq gofight.HTTPRequest) {
+			assert.Equal(t, 200, r.Code)
+			var comments []dbmodel.Comment
+			body, err := ioutil.ReadAll(r.Body)
+			assert.Nil(t, err)
+			err = json.Unmarshal(body, &comments)
+			assert.Nil(t, err)
+			assert.Len(t, comments, 1)
+			assert.Equal(t, global.ParseAndSaniziteMarkdown(commentBody.Body), comments[0].Body)
+			val := r.HeaderMap.Get("X-Cache")
+			assert.Equal(t, val, "HIT")
 		})
 }

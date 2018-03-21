@@ -2,11 +2,13 @@ package api
 
 import (
 	"fmt"
+	"time"
 
 	"github.com/gin-contrib/cors"
 	"github.com/gin-contrib/sessions"
 	"github.com/gin-contrib/static"
 	"github.com/gin-gonic/gin"
+	cache "github.com/patrickmn/go-cache"
 	"github.com/vkuznecovas/mouthful/config/model"
 	"github.com/vkuznecovas/mouthful/db/abstraction"
 	"github.com/vkuznecovas/mouthful/global"
@@ -42,9 +44,14 @@ func GetServer(db *abstraction.Database, config *model.Config) (*gin.Engine, err
 	// config := cors.DefaultConfig()
 	// config.AllowAllOrigins = true
 	// router.Use(cors.New(config))
-
+	var cacheInstance *cache.Cache
+	if config.API.Cache.Enabled {
+		expiry := time.Duration(config.API.Cache.ExpiryInSeconds) * time.Second
+		interval := time.Duration(config.API.Cache.IntervalInSeconds) * time.Second
+		cacheInstance = cache.New(expiry, interval)
+	}
 	r.Use(cors.Default())
-	router := New(db, config)
+	router := New(db, config, cacheInstance)
 
 	fs := static.LocalFile(global.StaticPath, true)
 	if config.API.StaticPath != nil {
@@ -53,7 +60,9 @@ func GetServer(db *abstraction.Database, config *model.Config) (*gin.Engine, err
 
 	r.Use(static.Serve("/", fs))
 	r.GET("/status", router.Status)
+
 	v1 := r.Group("/v1")
+
 	v1.GET("/comments", router.GetComments)
 	v1.POST("/comments", router.CreateComment)
 

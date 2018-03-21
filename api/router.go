@@ -6,6 +6,7 @@ import (
 
 	"github.com/gin-contrib/sessions"
 	"github.com/gin-gonic/gin"
+	"github.com/patrickmn/go-cache"
 	"github.com/satori/go.uuid"
 	"github.com/vkuznecovas/mouthful/api/model"
 	configModel "github.com/vkuznecovas/mouthful/config/model"
@@ -18,11 +19,12 @@ import (
 type Router struct {
 	db     *abstraction.Database
 	config *configModel.Config
+	cache  *cache.Cache
 }
 
 // New returns a new instance of router
-func New(db *abstraction.Database, config *configModel.Config) *Router {
-	r := Router{db: db, config: config}
+func New(db *abstraction.Database, config *configModel.Config, cache *cache.Cache) *Router {
+	r := Router{db: db, config: config, cache: cache}
 	return &r
 }
 
@@ -40,6 +42,14 @@ func (r *Router) GetComments(c *gin.Context) {
 		c.AbortWithStatusJSON(400, global.ErrThreadNotFound.Error())
 		return
 	}
+	if r.cache != nil {
+		if cacheHit, found := r.cache.Get(path); found {
+			comments := cacheHit.(*[]dbModel.Comment)
+			c.Writer.Header().Set("X-Cache", "HIT")
+			c.JSON(200, *comments)
+			return
+		}
+	}
 	db := *r.db
 	comments, err := db.GetCommentsByThread(path)
 
@@ -53,6 +63,10 @@ func (r *Router) GetComments(c *gin.Context) {
 		return
 	}
 	if comments != nil {
+		if r.cache != nil {
+			r.cache.Set(path, &comments, cache.DefaultExpiration)
+			c.Writer.Header().Set("X-Cache", "MISS")
+		}
 		c.JSON(200, comments)
 		return
 	}
