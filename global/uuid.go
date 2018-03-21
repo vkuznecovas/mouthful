@@ -5,7 +5,7 @@ import (
 )
 
 func GetUUID() uuid.UUID {
-	return uuid.Must(uuid.NewV4())
+	return uuid.NewV4()
 }
 
 func ParseUUIDFromString(uid string) (*uuid.UUID, error) {

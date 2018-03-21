@@ -138,6 +138,12 @@
   version = "v1.0.0"
 
 [[projects]]
+  name = "github.com/satori/go.uuid"
+  packages = ["."]
+  revision = "f58768cc1a7a7e77a3bd49e98cdd21419399b6a3"
+  version = "v1.2.0"
+
+[[projects]]
   branch = "master"
   name = "github.com/shurcooL/sanitized_anchor_name"
   packages = ["."]
@@ -203,6 +209,6 @@
 [solve-meta]
   analyzer-name = "dep"
   analyzer-version = 1
-  inputs-digest = "ea45cd88125b068bb4b82e91acfbf75341b480af178c37ace39459d66a473c3b"
+  inputs-digest = "521bdc5b172f9ef6e30cc5a8ca9781edacce8e6dab807a7e43dc72249724f356"
   solver-name = "gps-cdcl"
   solver-version = 1
