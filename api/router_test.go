@@ -10,6 +10,7 @@ import (
 	"strings"
 	"testing"
 
+	"github.com/satori/go.uuid"
 	"github.com/vkuznecovas/mouthful/global"
 
 	"github.com/vkuznecovas/mouthful/db/abstraction"
@@ -192,8 +193,13 @@ func TestDeleteCommentNonExistant(t *testing.T) {
 	assert.Nil(t, err)
 	r := gofight.New()
 	cookies := GetSessionCookie(&testDB, r)
+	deleteCommentBody := model.DeleteCommentBody{
+		CommentId: global.GetUUID().String(),
+	}
+	v, err := json.Marshal(deleteCommentBody)
+	assert.Nil(t, err)
 	r.DELETE("/v1/admin/comments").
-		SetBody(string("{\"commentId\": 1}")).
+		SetBody(string(v)).
 		SetCookie(cookies).
 		SetDebug(debug).
 		Run(server, func(r gofight.HTTPResponse, rq gofight.HTTPRequest) {
@@ -213,22 +219,27 @@ func TestDeleteComment(t *testing.T) {
 		Author: "author",
 	}
 	bodyBytes, err := json.Marshal(body)
+	var commentId uuid.UUID
 	assert.Nil(t, err)
 	r.POST("/v1/comments").
 		SetBody(string(bodyBytes[:])).
 		SetDebug(debug).
 		Run(server, func(r gofight.HTTPResponse, rq gofight.HTTPRequest) {
-			var parsedBody model.CreateCommentBody
+			var parsedBody model.CreateCommentResponse
 			err = json.Unmarshal([]byte(r.Body.String()), &parsedBody)
 			assert.Nil(t, err)
 			assert.Equal(t, body.Path, parsedBody.Path)
 			assert.Equal(t, body.Author, parsedBody.Author)
 			assert.Equal(t, global.ParseAndSaniziteMarkdown(body.Body), parsedBody.Body)
 			assert.Equal(t, 200, r.Code)
+			uid, err := global.ParseUUIDFromString(parsedBody.Id)
+			assert.Nil(t, err)
+			commentId = *uid
 		})
 	conf := true
+
 	bodyUpdate := model.UpdateCommentBody{
-		CommentId: 1,
+		CommentId: commentId.String(),
 		Confirmed: &conf,
 	}
 	bodyBytes, err = json.Marshal(bodyUpdate)
@@ -255,8 +266,13 @@ func TestDeleteComment(t *testing.T) {
 			assert.Equal(t, global.ParseAndSaniziteMarkdown("body"), comments[0].Body)
 			assert.Equal(t, "author", comments[0].Author)
 		})
+	deleteCommentBody := model.DeleteCommentBody{
+		CommentId: commentId.String(),
+	}
+	v, err := json.Marshal(deleteCommentBody)
+	assert.Nil(t, err)
 	r.DELETE("/v1/admin/comments").
-		SetBody(string("{\"commentId\": 1}")).
+		SetBody(string(v)).
 		SetDebug(debug).
 		SetCookie(cookies).
 		Run(server, func(r gofight.HTTPResponse, rq gofight.HTTPRequest) {
@@ -297,21 +313,25 @@ func TestCreateComment(t *testing.T) {
 	}
 	bodyBytes, err := json.Marshal(body)
 	assert.Nil(t, err)
+	var commentId uuid.UUID
 	r.POST("/v1/comments").
 		SetBody(string(bodyBytes[:])).
 		SetDebug(debug).
 		Run(server, func(r gofight.HTTPResponse, rq gofight.HTTPRequest) {
-			var parsedBody model.CreateCommentBody
+			var parsedBody model.CreateCommentResponse
 			err = json.Unmarshal([]byte(r.Body.String()), &parsedBody)
 			assert.Nil(t, err)
 			assert.Equal(t, body.Path, parsedBody.Path)
 			assert.Equal(t, body.Author, parsedBody.Author)
 			assert.Equal(t, global.ParseAndSaniziteMarkdown(body.Body), parsedBody.Body)
 			assert.Equal(t, 200, r.Code)
+			uid, err := global.ParseUUIDFromString(parsedBody.Id)
+			assert.Nil(t, err)
+			commentId = *uid
 		})
 	conf := true
 	bodyUpdate := model.UpdateCommentBody{
-		CommentId: 1,
+		CommentId: commentId.String(),
 		Confirmed: &conf,
 	}
 	bodyBytes, err = json.Marshal(bodyUpdate)
@@ -351,27 +371,32 @@ func TestCreateCommentBadReplyTo(t *testing.T) {
 	}
 	bodyBytes, err := json.Marshal(body)
 	assert.Nil(t, err)
+	var commentId uuid.UUID
 	r.POST("/v1/comments").
 		SetBody(string(bodyBytes[:])).
 		SetDebug(debug).
 		Run(server, func(r gofight.HTTPResponse, rq gofight.HTTPRequest) {
-			var parsedBody model.CreateCommentBody
+			var parsedBody model.CreateCommentResponse
 			err = json.Unmarshal([]byte(r.Body.String()), &parsedBody)
 			assert.Nil(t, err)
 			assert.Equal(t, body.Path, parsedBody.Path)
 			assert.Equal(t, body.Author, parsedBody.Author)
 			assert.Equal(t, global.ParseAndSaniziteMarkdown(body.Body), parsedBody.Body)
 			assert.Equal(t, 200, r.Code)
+			uid, err := global.ParseUUIDFromString(parsedBody.Id)
+			assert.Nil(t, err)
+			commentId = *uid
 		})
 
 	conf := true
+
 	bodyUpdate := model.UpdateCommentBody{
-		CommentId: 1,
+		CommentId: commentId.String(),
 		Confirmed: &conf,
 	}
 	bodyBytes, err = json.Marshal(bodyUpdate)
 	assert.Nil(t, err)
-	replyTo := 1
+	replyTo := commentId.String()
 	body2 := model.CreateCommentBody{
 		Path:    "/1027/test/tttttttttt",
 		Body:    "body",
@@ -402,22 +427,26 @@ func TestCreateCommentReplyTo(t *testing.T) {
 	}
 	bodyBytes, err := json.Marshal(body)
 	assert.Nil(t, err)
+	var commentId uuid.UUID
 	r.POST("/v1/comments").
 		SetBody(string(bodyBytes[:])).
 		SetDebug(debug).
 		Run(server, func(r gofight.HTTPResponse, rq gofight.HTTPRequest) {
-			var parsedBody model.CreateCommentBody
+			var parsedBody model.CreateCommentResponse
 			err = json.Unmarshal([]byte(r.Body.String()), &parsedBody)
 			assert.Nil(t, err)
 			assert.Equal(t, body.Path, parsedBody.Path)
 			assert.Equal(t, body.Author, parsedBody.Author)
 			assert.Equal(t, global.ParseAndSaniziteMarkdown(body.Body), parsedBody.Body)
 			assert.Equal(t, 200, r.Code)
+			uid, err := global.ParseUUIDFromString(parsedBody.Id)
+			assert.Nil(t, err)
+			commentId = *uid
 		})
 
 	conf := true
 	bodyUpdate := model.UpdateCommentBody{
-		CommentId: 1,
+		CommentId: commentId.String(),
 		Confirmed: &conf,
 	}
 	bodyBytes, err = json.Marshal(bodyUpdate)
@@ -429,7 +458,7 @@ func TestCreateCommentReplyTo(t *testing.T) {
 			assert.Equal(t, "", r.Body.String())
 			assert.Equal(t, 204, r.Code)
 		})
-	replyTo := 1
+	replyTo := commentId.String()
 	body2 := model.CreateCommentBody{
 		Path:    "/1027/test/",
 		Body:    "body",
@@ -437,20 +466,24 @@ func TestCreateCommentReplyTo(t *testing.T) {
 		ReplyTo: &replyTo,
 	}
 	bodyBytes, err = json.Marshal(body2)
+	var commentId2 uuid.UUID
 	r.POST("/v1/comments").
 		SetBody(string(bodyBytes[:])).
 		SetDebug(debug).
 		Run(server, func(r gofight.HTTPResponse, rq gofight.HTTPRequest) {
-			var parsedBody model.CreateCommentBody
+			var parsedBody model.CreateCommentResponse
 			err = json.Unmarshal([]byte(r.Body.String()), &parsedBody)
 			assert.Nil(t, err)
 			assert.Equal(t, body2.Path, parsedBody.Path)
 			assert.Equal(t, body2.Author, parsedBody.Author)
 			assert.Equal(t, global.ParseAndSaniziteMarkdown(body2.Body), parsedBody.Body)
 			assert.Equal(t, 200, r.Code)
+			uid, err := global.ParseUUIDFromString(parsedBody.Id)
+			assert.Nil(t, err)
+			commentId2 = *uid
 		})
 	bodyUpdate = model.UpdateCommentBody{
-		CommentId: 2,
+		CommentId: commentId2.String(),
 		Confirmed: &conf,
 	}
 	bodyBytes, err = json.Marshal(bodyUpdate)
@@ -475,7 +508,7 @@ func TestCreateCommentReplyTo(t *testing.T) {
 			assert.Len(t, comments, 2)
 			assert.Equal(t, global.ParseAndSaniziteMarkdown("body"), comments[0].Body)
 			assert.Nil(t, comments[0].ReplyTo)
-			assert.Equal(t, 1, *comments[1].ReplyTo)
+			assert.True(t, uuid.Equal(commentId, *comments[1].ReplyTo))
 		})
 }
 
@@ -768,7 +801,7 @@ func TestUpdateCommentNonExistant(t *testing.T) {
 
 	conf := true
 	bodyUpdate := model.UpdateCommentBody{
-		CommentId: 1,
+		CommentId: global.GetUUID().String(),
 		Confirmed: &conf,
 	}
 	bodyBytes, err := json.Marshal(bodyUpdate)
@@ -796,21 +829,25 @@ func TestUpdateCommentInvalidBody(t *testing.T) {
 	}
 	bodyBytes, err := json.Marshal(body)
 	assert.Nil(t, err)
+	var commentId uuid.UUID
 	r.POST("/v1/comments").
 		SetBody(string(bodyBytes[:])).
 		SetDebug(debug).
 		Run(server, func(r gofight.HTTPResponse, rq gofight.HTTPRequest) {
-			var parsedBody model.CreateCommentBody
+			var parsedBody model.CreateCommentResponse
 			err = json.Unmarshal([]byte(r.Body.String()), &parsedBody)
 			assert.Nil(t, err)
 			assert.Equal(t, body.Path, parsedBody.Path)
 			assert.Equal(t, body.Author, parsedBody.Author)
 			assert.Equal(t, global.ParseAndSaniziteMarkdown(body.Body), parsedBody.Body)
 			assert.Equal(t, 200, r.Code)
+			uid, err := global.ParseUUIDFromString(parsedBody.Id)
+			assert.Nil(t, err)
+			commentId = *uid
 		})
 
 	bodyUpdate := model.UpdateCommentBody{
-		CommentId: 1,
+		CommentId: commentId.String(),
 	}
 	bodyBytes, err = json.Marshal(bodyUpdate)
 	assert.Nil(t, err)
@@ -835,17 +872,21 @@ func TestUpdateComment(t *testing.T) {
 	}
 	bodyBytes, err := json.Marshal(body)
 	assert.Nil(t, err)
+	var commentId uuid.UUID
 	r.POST("/v1/comments").
 		SetBody(string(bodyBytes[:])).
 		SetDebug(debug).
 		Run(server, func(r gofight.HTTPResponse, rq gofight.HTTPRequest) {
-			var parsedBody model.CreateCommentBody
+			var parsedBody model.CreateCommentResponse
 			err = json.Unmarshal([]byte(r.Body.String()), &parsedBody)
 			assert.Nil(t, err)
 			assert.Equal(t, body.Path, parsedBody.Path)
 			assert.Equal(t, body.Author, parsedBody.Author)
 			assert.Equal(t, global.ParseAndSaniziteMarkdown(body.Body), parsedBody.Body)
 			assert.Equal(t, 200, r.Code)
+			uid, err := global.ParseUUIDFromString(parsedBody.Id)
+			assert.Nil(t, err)
+			commentId = *uid
 		})
 
 	r.GET("/v1/comments?uri="+url.QueryEscape(body.Path)).
@@ -855,7 +896,7 @@ func TestUpdateComment(t *testing.T) {
 		})
 	conf := true
 	bodyUpdate := model.UpdateCommentBody{
-		CommentId: 1,
+		CommentId: commentId.String(),
 		Confirmed: &conf,
 	}
 	bodyBytes, err = json.Marshal(bodyUpdate)
@@ -884,7 +925,7 @@ func TestUpdateComment(t *testing.T) {
 	conf = true
 	b := "test"
 	bodyUpdate = model.UpdateCommentBody{
-		CommentId: 1,
+		CommentId: commentId.String(),
 		Body:      &b,
 	}
 	bodyBytes, err = json.Marshal(bodyUpdate)
@@ -913,7 +954,7 @@ func TestUpdateComment(t *testing.T) {
 	conf = true
 	a := "test"
 	bodyUpdate = model.UpdateCommentBody{
-		CommentId: 1,
+		CommentId: commentId.String(),
 		Author:    &a,
 	}
 	bodyBytes, err = json.Marshal(bodyUpdate)
@@ -963,8 +1004,13 @@ func TestRestoreDeletedCommentNonExistant(t *testing.T) {
 	assert.Nil(t, err)
 	r := gofight.New()
 	cookies := GetSessionCookie(&testDB, r)
+	deleteCommentBody := model.DeleteCommentBody{
+		CommentId: global.GetUUID().String(),
+	}
+	v, err := json.Marshal(deleteCommentBody)
+	assert.Nil(t, err)
 	r.DELETE("/v1/admin/comments/restore").
-		SetBody(string("{\"commentId\": 1}")).
+		SetBody(string(v)).
 		SetCookie(cookies).
 		SetDebug(debug).
 		Run(server, func(r gofight.HTTPResponse, rq gofight.HTTPRequest) {
@@ -985,21 +1031,25 @@ func TestRestoreDeletedComment(t *testing.T) {
 	}
 	bodyBytes, err := json.Marshal(body)
 	assert.Nil(t, err)
+	var commentId uuid.UUID
 	r.POST("/v1/comments").
 		SetBody(string(bodyBytes[:])).
 		SetDebug(debug).
 		Run(server, func(r gofight.HTTPResponse, rq gofight.HTTPRequest) {
-			var parsedBody model.CreateCommentBody
+			var parsedBody model.CreateCommentResponse
 			err = json.Unmarshal([]byte(r.Body.String()), &parsedBody)
 			assert.Nil(t, err)
 			assert.Equal(t, body.Path, parsedBody.Path)
 			assert.Equal(t, body.Author, parsedBody.Author)
 			assert.Equal(t, global.ParseAndSaniziteMarkdown(body.Body), parsedBody.Body)
 			assert.Equal(t, 200, r.Code)
+			uid, err := global.ParseUUIDFromString(parsedBody.Id)
+			assert.Nil(t, err)
+			commentId = *uid
 		})
 	conf := true
 	bodyUpdate := model.UpdateCommentBody{
-		CommentId: 1,
+		CommentId: commentId.String(),
 		Confirmed: &conf,
 	}
 	bodyBytes, err = json.Marshal(bodyUpdate)
@@ -1026,8 +1076,12 @@ func TestRestoreDeletedComment(t *testing.T) {
 			assert.Equal(t, global.ParseAndSaniziteMarkdown("body"), comments[0].Body)
 			assert.Equal(t, "author", comments[0].Author)
 		})
+	deleteCommentBody := model.DeleteCommentBody{
+		CommentId: commentId.String(),
+	}
+	v, err := json.Marshal(deleteCommentBody)
 	r.DELETE("/v1/admin/comments").
-		SetBody(string("{\"commentId\": 1}")).
+		SetBody(string(v)).
 		SetDebug(debug).
 		SetCookie(cookies).
 		Run(server, func(r gofight.HTTPResponse, rq gofight.HTTPRequest) {
@@ -1040,7 +1094,7 @@ func TestRestoreDeletedComment(t *testing.T) {
 			assert.Equal(t, "\"Thread not found\"", r.Body.String())
 		})
 	r.POST("/v1/admin/comments/restore").
-		SetBody(string("{\"commentId\": 1}")).
+		SetBody(string(v)).
 		SetDebug(debug).
 		SetCookie(cookies).
 		Run(server, func(r gofight.HTTPResponse, rq gofight.HTTPRequest) {

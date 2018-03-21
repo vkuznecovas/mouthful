@@ -1,19 +1,20 @@
 package abstraction
 
 import (
+	"github.com/satori/go.uuid"
 	"github.com/vkuznecovas/mouthful/db/model"
 )
 
 // Database is a database instance for your selected DB
 type Database interface {
 	InitializeDatabase() error
-	CreateThread(path string) error
-	CreateComment(body string, author string, path string, confirmed bool, replyTo *int) error
+	CreateThread(path string) (*uuid.UUID, error)
+	CreateComment(body string, author string, path string, confirmed bool, replyTo *uuid.UUID) (*uuid.UUID, error)
 	GetCommentsByThread(path string) ([]model.Comment, error)
-	UpdateComment(id int, body, author string, confirmed bool) error
-	DeleteComment(id int) error
-	RestoreDeletedComment(id int) error
-	GetComment(id int) (model.Comment, error)
+	UpdateComment(id uuid.UUID, body, author string, confirmed bool) error
+	DeleteComment(id uuid.UUID) error
+	RestoreDeletedComment(id uuid.UUID) error
+	GetComment(id uuid.UUID) (model.Comment, error)
 	GetAllThreads() ([]model.Thread, error)
 	GetAllComments() ([]model.Comment, error)
 	GetDatabaseDialect() string

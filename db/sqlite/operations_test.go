@@ -4,6 +4,7 @@ import (
 	"testing"
 	"time"
 
+	"github.com/satori/go.uuid"
 	"github.com/stretchr/testify/assert"
 
 	"github.com/jmoiron/sqlx"
@@ -31,28 +32,23 @@ func setupTestDb() *sqlite.Database {
 
 func TestCreateThread(t *testing.T) {
 	database := setupTestDb()
-	err := database.CreateThread("/test")
+	uid, err := database.CreateThread("/test")
 	assert.Nil(t, err)
-	rows, err := database.DB.Query("select * from thread limit 1")
+	assert.NotNil(t, uid)
+	thread, err := database.GetThread("/test")
 	assert.Nil(t, err)
-	assert.NotNil(t, rows)
-	for rows.Next() {
-		id := 0
-		path := ""
-		err = rows.Scan(&id, &path)
-		assert.Nil(t, err)
-		assert.Equal(t, 1, id)
-		assert.Equal(t, "/test", path)
-	}
+	assert.True(t, uuid.Equal(*uid, thread.Id))
+	assert.Equal(t, "/test", thread.Path)
 }
 
 func TestGetThread(t *testing.T) {
 	database := setupTestDb()
-	err := database.CreateThread("/test")
+	uid, err := database.CreateThread("/test")
 	assert.Nil(t, err)
+	assert.NotNil(t, uid)
 	thread, err := database.GetThread("/test")
 	assert.Nil(t, err)
-	assert.Equal(t, 1, thread.Id)
+	assert.True(t, uuid.Equal(*uid, thread.Id))
 	assert.Equal(t, "/test", thread.Path)
 }
 
@@ -66,71 +62,55 @@ func TestGetThreadNotFound(t *testing.T) {
 func TestCreateComment(t *testing.T) {
 	now := time.Now().UTC()
 	database := setupTestDb()
-	err := database.CreateComment("body", "author", "/test", true, nil)
+	uid, err := database.CreateComment("body", "author", "/test", true, nil)
 	assert.Nil(t, err)
-	rows, err := database.DB.Query("select * from comment limit 1")
+	assert.NotNil(t, uid)
+	comment, err := database.GetComment(*uid)
 	assert.Nil(t, err)
-	assert.NotNil(t, rows)
-	for rows.Next() {
-		id := 0
-		threadId := 0
-		body := ""
-		author := ""
-		confirmed := false
-		replyTo := new(*int)
-		createdAt := time.Now()
-		deletedAt := new(*time.Time)
-		err = rows.Scan(&id, &threadId, &body, &author, &confirmed, &createdAt, &deletedAt, &replyTo)
-		assert.Nil(t, err)
-		assert.Nil(t, deletedAt)
-		assert.Equal(t, 1, id)
-		assert.Equal(t, 1, threadId)
-		assert.Equal(t, "body", body)
-		assert.Equal(t, "author", author)
-		assert.Equal(t, true, confirmed)
-		assert.Equal(t, true, createdAt.UTC().After(now))
-		assert.Nil(t, replyTo)
-	}
+	assert.Nil(t, comment.DeletedAt)
+	assert.True(t, uuid.Equal(*uid, comment.Id))
+	assert.Equal(t, "body", comment.Body)
+	assert.Equal(t, "author", comment.Author)
+	assert.Equal(t, true, comment.Confirmed)
+	assert.Equal(t, true, comment.CreatedAt.UTC().After(now))
+	assert.Nil(t, comment.ReplyTo)
+
 }
 
 func TestCreateCommentNoReply(t *testing.T) {
 	database := setupTestDb()
-	replyTo := 1
-	err := database.CreateComment("body", "author", "/test", true, &replyTo)
+	replyTo := global.GetUUID()
+	_, err := database.CreateComment("body", "author", "/test", true, &replyTo)
 	assert.NotNil(t, err)
 	assert.Equal(t, global.ErrWrongReplyTo, err)
 }
 
 func TestCreateCommentWithReply(t *testing.T) {
 	database := setupTestDb()
-	err := database.CreateComment("body", "author", "/test", true, nil)
+	uid, err := database.CreateComment("body", "author", "/test", true, nil)
 	assert.Nil(t, err)
-	replyTo := 1
-	err = database.CreateComment("body", "author", "/test", true, &replyTo)
+	_, err = database.CreateComment("body", "author", "/test", true, uid)
 	assert.Nil(t, err)
 }
 
 func TestCreateCommentWrongReply(t *testing.T) {
 	database := setupTestDb()
-	err := database.CreateComment("body", "author", "/test", true, nil)
+	uid1, err := database.CreateComment("body", "author", "/test", true, nil)
 	assert.Nil(t, err)
-	replyTo := 1
-	err = database.CreateComment("body", "author", "/test", true, &replyTo)
+	uid2, err := database.CreateComment("body", "author", "/test", true, uid1)
 	assert.Nil(t, err)
-	replyTo = 2
-	err = database.CreateComment("body", "author", "/test", true, &replyTo)
+	_, err = database.CreateComment("body", "author", "/test", true, uid2)
 	assert.NotNil(t, err)
 	assert.Equal(t, global.ErrWrongReplyTo, err)
 }
 
 func TestCreateCommentWrongThread(t *testing.T) {
 	database := setupTestDb()
-	err := database.CreateComment("body", "author", "/test", true, nil)
+	uid, err := database.CreateComment("body", "author", "/test", true, nil)
 	assert.Nil(t, err)
-	replyTo := 1
-	err = database.CreateComment("body", "author", "/test", true, &replyTo)
+	_, err = database.CreateComment("body", "author", "/test", true, uid)
 	assert.Nil(t, err)
-	err = database.CreateComment("body", "author", "/testasdasdasd", true, &replyTo)
+	_, err = database.CreateComment("body", "author", "/testasdasdasd", true, uid)
 	assert.NotNil(t, err)
 	assert.Equal(t, global.ErrWrongReplyTo, err)
 }
@@ -144,7 +124,7 @@ func TestGetCommentsByThreadNoThread(t *testing.T) {
 
 func TestGetCommentsByThreadEmptyThread(t *testing.T) {
 	database := setupTestDb()
-	err := database.CreateThread("/test")
+	_, err := database.CreateThread("/test")
 	assert.Nil(t, err)
 	comments, err := database.GetCommentsByThread("/test")
 	assert.Nil(t, err)
@@ -153,13 +133,13 @@ func TestGetCommentsByThreadEmptyThread(t *testing.T) {
 
 func TestGetCommentsByThread(t *testing.T) {
 	database := setupTestDb()
-	err := database.CreateThread("/test")
+	_, err := database.CreateThread("/test")
 	assert.Nil(t, err)
-	err = database.CreateComment("body", "author", "/test", true, nil)
+	_, err = database.CreateComment("body", "author", "/test", true, nil)
 	assert.Nil(t, err)
-	err = database.CreateComment("body1", "author1", "/test", true, nil)
+	_, err = database.CreateComment("body1", "author1", "/test", true, nil)
 	assert.Nil(t, err)
-	err = database.CreateComment("body2", "author2", "/test", false, nil)
+	_, err = database.CreateComment("body2", "author2", "/test", false, nil)
 	assert.Nil(t, err)
 	comments, err := database.GetCommentsByThread("/test")
 	assert.Nil(t, err)
@@ -179,18 +159,18 @@ func TestGetCommentsByThread(t *testing.T) {
 
 func TestGetCommentNotFound(t *testing.T) {
 	database := setupTestDb()
-	_, err := database.GetComment(1)
+	_, err := database.GetComment(global.GetUUID())
 	assert.NotNil(t, err)
 	assert.Equal(t, global.ErrCommentNotFound, err)
 }
 
 func TestGetComment(t *testing.T) {
 	database := setupTestDb()
-	err := database.CreateComment("body", "author", "/test", true, nil)
+	uid, err := database.CreateComment("body", "author", "/test", true, nil)
 	assert.Nil(t, err)
-	comment, err := database.GetComment(1)
+	comment, err := database.GetComment(*uid)
 	assert.Nil(t, err)
-	assert.Equal(t, 1, comment.Id)
+	assert.True(t, uuid.Equal(*uid, comment.Id))
 	assert.Equal(t, "body", comment.Body)
 	assert.Equal(t, true, comment.Confirmed)
 	assert.Equal(t, "author", comment.Author)
@@ -199,20 +179,20 @@ func TestGetComment(t *testing.T) {
 
 func TestUpdateCommentNotFound(t *testing.T) {
 	database := setupTestDb()
-	err := database.UpdateComment(1, "t", "t", false)
+	err := database.UpdateComment(global.GetUUID(), "t", "t", false)
 	assert.NotNil(t, err)
 	assert.Equal(t, global.ErrCommentNotFound, err)
 }
 
 func TestUpdateComment(t *testing.T) {
 	database := setupTestDb()
-	err := database.CreateComment("body", "author", "/test", true, nil)
+	uid, err := database.CreateComment("body", "author", "/test", true, nil)
 	assert.Nil(t, err)
-	err = database.UpdateComment(1, "t", "t", false)
+	err = database.UpdateComment(*uid, "t", "t", false)
 	assert.Nil(t, err)
-	comment, err := database.GetComment(1)
+	comment, err := database.GetComment(*uid)
 	assert.Nil(t, err)
-	assert.Equal(t, 1, comment.Id)
+	assert.True(t, uuid.Equal(*uid, comment.Id))
 	assert.Equal(t, "t", comment.Body)
 	assert.Equal(t, false, comment.Confirmed)
 	assert.Equal(t, "t", comment.Author)
@@ -221,18 +201,18 @@ func TestUpdateComment(t *testing.T) {
 
 func TestDeleteCommentNotFound(t *testing.T) {
 	database := setupTestDb()
-	err := database.DeleteComment(1)
+	err := database.DeleteComment(global.GetUUID())
 	assert.NotNil(t, err)
 	assert.Equal(t, global.ErrCommentNotFound, err)
 }
 
 func TestDeleteComment(t *testing.T) {
 	database := setupTestDb()
-	err := database.CreateComment("body", "author", "/test", true, nil)
+	uid, err := database.CreateComment("body", "author", "/test", true, nil)
 	assert.Nil(t, err)
-	err = database.DeleteComment(1)
+	err = database.DeleteComment(*uid)
 	assert.Nil(t, err)
-	c, err := database.GetComment(1)
+	c, err := database.GetComment(*uid)
 	assert.Nil(t, err)
 	assert.NotNil(t, c.DeletedAt)
 }
@@ -246,9 +226,9 @@ func TestGetAllThreadsEmptyDatabase(t *testing.T) {
 
 func TestGetAllThreads(t *testing.T) {
 	database := setupTestDb()
-	err := database.CreateThread("/test")
+	_, err := database.CreateThread("/test")
 	assert.Nil(t, err)
-	err = database.CreateThread("/test1")
+	_, err = database.CreateThread("/test1")
 	assert.Nil(t, err)
 	threads, err := database.GetAllThreads()
 	assert.Nil(t, err)
@@ -269,9 +249,9 @@ func TestGetAllComments(t *testing.T) {
 	author := "author"
 	body := "body"
 	path := "/test"
-	err := database.CreateComment(body, author, path, false, nil)
+	_, err := database.CreateComment(body, author, path, false, nil)
 	assert.Nil(t, err)
-	err = database.CreateComment(body, author, path, true, nil)
+	_, err = database.CreateComment(body, author, path, true, nil)
 	assert.Nil(t, err)
 	comments, err := database.GetAllComments()
 	assert.Nil(t, err)
@@ -291,15 +271,15 @@ func TestSoftDelete(t *testing.T) {
 	author := "author"
 	body := "body"
 	path := "/test"
-	err := database.CreateComment(body, author, path, false, nil)
-	err = database.DeleteComment(1)
+	uid, err := database.CreateComment(body, author, path, false, nil)
+	err = database.DeleteComment(*uid)
 	assert.Nil(t, err)
-	c, err := database.GetComment(1)
+	c, err := database.GetComment(*uid)
 	assert.Nil(t, err)
 	assert.NotNil(t, c.DeletedAt)
-	err = database.RestoreDeletedComment(1)
+	err = database.RestoreDeletedComment(*uid)
 	assert.Nil(t, err)
-	c, err = database.GetComment(1)
+	c, err = database.GetComment(*uid)
 	assert.Nil(t, err)
 	assert.Nil(t, c.DeletedAt)
 }
@@ -309,11 +289,11 @@ func TestGetAllCommentsGetsSoftDeletedComments(t *testing.T) {
 	author := "author"
 	body := "body"
 	path := "/test"
-	err := database.CreateComment(body, author, path, false, nil)
+	uid, err := database.CreateComment(body, author, path, false, nil)
 	assert.Nil(t, err)
-	err = database.CreateComment(body, author, path, true, nil)
+	_, err = database.CreateComment(body, author, path, true, nil)
 	assert.Nil(t, err)
-	err = database.DeleteComment(1)
+	err = database.DeleteComment(*uid)
 	assert.Nil(t, err)
 	comments, err := database.GetAllComments()
 	assert.Nil(t, err)

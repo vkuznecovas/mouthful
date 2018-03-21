@@ -18,7 +18,6 @@ function getStyle(c) {
 function formatDate(d) {
   var dd = new Date(d)
   return timeago(dd)
-  return dd.toISOString().slice(0, 19).replace("T", " ")
 }
 
 
@@ -168,12 +167,6 @@ export default class App extends Component {
         if (http.status == 200) {
           // submit success, show the comment in the list below
           var cm = context.state.comments;
-          var maxId = 0;
-          for (var i = 0; i < cm.length; i++) {
-            if (cm[i].Id > maxId) {
-              maxId = cm[i].Id
-            }
-          }
           var toShow = context.state.showComments;
           if (context.state.forms[formIndex].replyTo != null) {
             var found = cm.map(x => x.Id).indexOf(context.state.forms[formIndex].replyTo)
@@ -190,7 +183,7 @@ export default class App extends Component {
           var parsedResponse = JSON.parse(http.responseText)
           cm.push({
             ThreadId: context.state.threadId,
-            Id: ++maxId,
+            Id: parsedResponse.id,
             Body: parsedResponse.body,
             Author: context.state.forms[formIndex].author,
             Confirmed: false,
@@ -214,7 +207,7 @@ export default class App extends Component {
             return Object.assign({}, x, {author: context.state.forms[formIndex].author})
           })
           context.setState({ comments: cm, forms, showComments: toShow })
-          setTimeout(() => context.focus(commentRefPrefix + maxId), 100)
+          setTimeout(() => context.focus(commentRefPrefix + parsedResponse.id), 100)
         }
       }
     }
