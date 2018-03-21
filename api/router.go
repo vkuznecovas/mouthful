@@ -6,6 +6,7 @@ import (
 
 	"github.com/gin-contrib/sessions"
 	"github.com/gin-gonic/gin"
+	"github.com/satori/go.uuid"
 	"github.com/vkuznecovas/mouthful/api/model"
 	configModel "github.com/vkuznecovas/mouthful/config/model"
 	"github.com/vkuznecovas/mouthful/db/abstraction"
@@ -105,6 +106,17 @@ func (r *Router) CreateComment(c *gin.Context) {
 		c.AbortWithStatusJSON(400, global.ErrBadRequest.Error())
 		return
 	}
+	// uuid validation
+	// TODO Testcases
+	var uid *uuid.UUID
+	if createCommentBody.ReplyTo != nil {
+		uid, err = global.ParseUUIDFromString(*createCommentBody.ReplyTo)
+		if err != nil {
+			c.AbortWithStatusJSON(400, global.ErrBadRequest.Error())
+			return
+		}
+	}
+
 	// length validation
 	if r.config.Moderation.MaxCommentLength != nil {
 		if len(createCommentBody.Body) > *r.config.Moderation.MaxCommentLength {
@@ -120,7 +132,7 @@ func (r *Router) CreateComment(c *gin.Context) {
 
 	db := *r.db
 	confirmed := !r.config.Moderation.Enabled
-	err = db.CreateComment(createCommentBody.Body, createCommentBody.Author, createCommentBody.Path, confirmed, createCommentBody.ReplyTo)
+	commentUID, err := db.CreateComment(createCommentBody.Body, createCommentBody.Author, createCommentBody.Path, confirmed, uid)
 	if err != nil {
 		if err == global.ErrWrongReplyTo {
 			c.AbortWithStatusJSON(400, global.ErrWrongReplyTo.Error())
@@ -130,7 +142,14 @@ func (r *Router) CreateComment(c *gin.Context) {
 		c.AbortWithStatusJSON(500, global.ErrInternalServerError.Error())
 		return
 	}
-	c.AbortWithStatusJSON(200, createCommentBody)
+	c.AbortWithStatusJSON(200, model.CreateCommentResponse{
+		Id:      commentUID.String(),
+		Path:    createCommentBody.Path,
+		Body:    createCommentBody.Body,
+		Author:  createCommentBody.Author,
+		Email:   createCommentBody.Email,
+		ReplyTo: createCommentBody.ReplyTo,
+	})
 }
 
 // UpdateComment updates the provided comment in body
@@ -146,13 +165,18 @@ func (r *Router) UpdateComment(c *gin.Context) {
 		c.AbortWithStatusJSON(400, global.ErrBadRequest.Error())
 		return
 	}
-
+	commentId, err := global.ParseUUIDFromString(updateCommentBody.CommentId)
+	if err != nil {
+		log.Println(err)
+		c.AbortWithStatusJSON(400, global.ErrBadRequest.Error())
+		return
+	}
 	if updateCommentBody.Body == nil && updateCommentBody.Author == nil && updateCommentBody.Confirmed == nil {
 		c.AbortWithStatusJSON(400, global.ErrBadRequest)
 		return
 	}
 	db := *r.db
-	comment, err := db.GetComment(updateCommentBody.CommentId)
+	comment, err := db.GetComment(*commentId)
 	if err != nil {
 		if err == global.ErrCommentNotFound {
 			c.AbortWithStatusJSON(404, global.ErrCommentNotFound.Error())
@@ -174,7 +198,7 @@ func (r *Router) UpdateComment(c *gin.Context) {
 	if updateCommentBody.Confirmed != nil {
 		confirmed = *updateCommentBody.Confirmed
 	}
-	err = db.UpdateComment(updateCommentBody.CommentId, body, author, confirmed)
+	err = db.UpdateComment(*commentId, body, author, confirmed)
 	if err != nil {
 		log.Println(err)
 		c.AbortWithStatusJSON(500, global.ErrInternalServerError.Error())
@@ -197,8 +221,14 @@ func (r *Router) DeleteComment(c *gin.Context) {
 		c.AbortWithStatusJSON(400, global.ErrBadRequest.Error())
 		return
 	}
+	commentId, err := global.ParseUUIDFromString(deleteCommentBody.CommentId)
+	if err != nil {
+		log.Println(err)
+		c.AbortWithStatusJSON(400, global.ErrBadRequest.Error())
+		return
+	}
 	db := *r.db
-	err = db.DeleteComment(deleteCommentBody.CommentId)
+	err = db.DeleteComment(*commentId)
 	if err != nil {
 		if err == global.ErrCommentNotFound {
 			c.AbortWithStatusJSON(404, global.ErrCommentNotFound.Error())
@@ -217,7 +247,6 @@ func (r *Router) RestoreDeletedComment(c *gin.Context) {
 		c.AbortWithStatusJSON(401, global.ErrUnauthorized.Error())
 		return
 	}
-	fmt.Println(c.Cookie("mouthful-session"))
 	var deleteCommentBody model.DeleteCommentBody
 	err := c.BindJSON(&deleteCommentBody)
 	if err != nil {
@@ -225,8 +254,14 @@ func (r *Router) RestoreDeletedComment(c *gin.Context) {
 		c.AbortWithStatusJSON(400, global.ErrBadRequest.Error())
 		return
 	}
+	commentId, err := global.ParseUUIDFromString(deleteCommentBody.CommentId)
+	if err != nil {
+		log.Println(err)
+		c.AbortWithStatusJSON(400, global.ErrBadRequest.Error())
+		return
+	}
 	db := *r.db
-	err = db.RestoreDeletedComment(deleteCommentBody.CommentId)
+	err = db.RestoreDeletedComment(*commentId)
 	if err != nil {
 		if err == global.ErrCommentNotFound {
 			c.AbortWithStatusJSON(404, global.ErrCommentNotFound.Error())
