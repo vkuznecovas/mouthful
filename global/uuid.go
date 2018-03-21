@@ -4,10 +4,12 @@ import (
 	"github.com/satori/go.uuid"
 )
 
+// GetUUID returns a new random UUID
 func GetUUID() uuid.UUID {
 	return uuid.NewV4()
 }
 
+// ParseUUIDFromString tries to parse a string as uuid, if fails returns an error. Otherwise a pointer to uuid.UUID
 func ParseUUIDFromString(uid string) (*uuid.UUID, error) {
 	u2, err := uuid.FromString(uid)
 	if err != nil {
