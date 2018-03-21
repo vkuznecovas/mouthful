@@ -16,7 +16,12 @@
         "port": 8080,
         "host": "http://localhost",
         "debug": false,
-        "staticPath": "./static"
+        "staticPath": "./static",
+        "cache": {
+            "enabled": true,
+            "intervalInSeconds": 10,
+            "expiryInSeconds": 300
+        }
     },
     "client": {
         "useDefaultStyle": true,

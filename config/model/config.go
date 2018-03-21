@@ -35,10 +35,18 @@ type API struct {
 	Port       *int
 	Host       string
 	Debug      bool
+	Cache      Cache
 }
 
 // Client - client configuration part
 type Client struct {
 	UseDefaultStyle bool
 	PageSize        int
+}
+
+// Cache - cache settings
+type Cache struct {
+	Enabled           bool
+	ExpiryInSeconds   int
+	IntervalInSeconds int
 }
