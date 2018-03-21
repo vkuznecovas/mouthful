@@ -1254,7 +1254,6 @@ func TestCreateCommentNoModeration(t *testing.T) {
 	}
 	bodyBytes, err := json.Marshal(body)
 	assert.Nil(t, err)
-	var commentId uuid.UUID
 	r.POST("/v1/comments").
 		SetBody(string(bodyBytes[:])).
 		SetDebug(debug).
@@ -1266,9 +1265,6 @@ func TestCreateCommentNoModeration(t *testing.T) {
 			assert.Equal(t, body.Author, parsedBody.Author)
 			assert.Equal(t, global.ParseAndSaniziteMarkdown(body.Body), parsedBody.Body)
 			assert.Equal(t, 200, r.Code)
-			uid, err := global.ParseUUIDFromString(parsedBody.Id)
-			assert.Nil(t, err)
-			commentId = *uid
 		})
 	r.GET("/v1/comments?uri="+url.QueryEscape(body.Path)).
 		SetDebug(debug).
