@@ -10,6 +10,7 @@ const authorInputRefPrefix = "__mouthful_author_input_";
 const commentInputRefPrefix = "__mouthful_comment_input_";
 const commentRefPrefix = "__mouthful_comment_";
 const defaultComments = config.pageSize;
+const maxChars = config.maxMessageLength;
 
 function getStyle(c) {
   return useStyle ? style[c] : c
@@ -89,7 +90,6 @@ export default class App extends Component {
   incrementReplyCount(commentId) {
     var copiedComments = this.state.comments;
     var found = copiedComments.map(x => x.Id).indexOf(commentId)
-    console.log(found);
     if (found >= 0) {
       copiedComments[found].RepliesToLoad += defaultComments
       this.setState({ comments: copiedComments })
@@ -131,6 +131,19 @@ export default class App extends Component {
   handleBodyChange(id, value) {
     var form = this.findFormIndex(id)
     if (form >= 0) {
+      if (maxChars > 0) {
+        var currentComment = this.state.forms[form].comment
+        if (currentComment.length > (maxChars + 99)) {
+          if (value.length > currentComment.length) {
+            // don't allow for extra characters, reset state to previous
+            var updatedForm = Object.assign({}, this.state.forms[form], { comment: currentComment });
+            var forms = this.state.forms;
+            forms[form] = updatedForm;
+            this.setState({ forms })
+            return
+          }
+        }
+      }
       var updatedForm = Object.assign({}, this.state.forms[form], { comment: value });
       var forms = this.state.forms;
       forms[form] = updatedForm;
@@ -157,6 +170,13 @@ export default class App extends Component {
       this.focus(commentInputRefPrefix + form.id)
       return
     }
+
+    if (maxChars > 0) {
+      if (form.comment.length > maxChars) {
+        this.focus(commentInputRefPrefix + form.id)
+        return
+      } 
+    } 
 
     var http = new XMLHttpRequest();
     var url = config.url + "/v1/comments";
@@ -242,22 +262,25 @@ export default class App extends Component {
     if (!form) {
       return null
     }
+    var diff = maxChars - form.comment.length;
     return (<div class={getStyle(form.visible ? "mouthful_form" : "mouthful_form_invisible")}>
       <input
         class={getStyle("mouthful_author_input")}
         type="text" name="author"
         placeholder="Name (required)"
-        value={this.state.forms[this.findFormIndex(id)].author}
+        value={form.author}
         ref={c => {
           this.refMap.set(authorInputRefPrefix + id, c)
         }}
         onChange={(e) => this.handleAuthorChange(id, e.target.value)}>
+             
       </input>
+      
       <input
         style={"display: none;"}
         type="text" name="email"
         placeholder="Email (required)"
-        value={this.state.forms[this.findFormIndex(id)].email}
+        value={form.email}
         onChange={(e) => this.handleEmailChange(id, e.target.value)}>
       </input>
       <textarea
@@ -268,15 +291,21 @@ export default class App extends Component {
         ref={c => {
           this.refMap.set(commentInputRefPrefix + id, c)
         }}
-        value={this.state.forms[this.findFormIndex(id)].comment}
+        value={form.comment}
+        onKeyUp={(e) => this.handleBodyChange(id, e.target.value)}
         onChange={(e) => this.handleBodyChange(id, e.target.value)}>
       </textarea>
+     <div>
       <input
         class={getStyle("mouthful_submit")}
         type="submit"
         value="Submit"
-        onClick={(e) => { this.handleNewCommentSubmit(id) }}>
+        onClick={(e) => {this.handleNewCommentSubmit(id)}}>
       </input>
+      {maxChars > 0 ? <span class={diff > 0 ? getStyle("mouthful_word_counter") : getStyle("mouthful_word_counter_error")}>
+                          {diff > 0 ? diff : diff * -1} {diff > 0 ? "characters left" : "characters too many"}
+                      </span> : null}
+      </div>
     </div>)
   }
   render(props) {

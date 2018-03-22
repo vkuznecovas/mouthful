@@ -5,9 +5,11 @@ const baseUrl = host + port;
 const useDefaultStyle = config && config.UseDefaultStyle ? config.UseDefaultStyle : true;
 const moderation = config && config.Moderation ? config.Moderation : false;
 const pageSize = config && config.PageSize ? config.PageSize : 0;
+const maxMessageLength = config && config.MaxCommentLength ? config.MaxCommentLength : 0;
 module.exports = {
     url: baseUrl,
     useDefaultStyle:useDefaultStyle,
     moderation:  moderation,
-    pageSize: pageSize
+    pageSize: pageSize,
+    maxMessageLength: maxMessageLength
 }
