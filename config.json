@@ -21,6 +21,10 @@
             "enabled": true,
             "intervalInSeconds": 10,
             "expiryInSeconds": 300
+        },
+        "rateLimiting": {
+            "enabled": true,
+            "postsHour": 100
         }
     },
     "client": {

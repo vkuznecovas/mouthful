@@ -45,6 +45,10 @@ var config = configModel.Config{
 			IntervalInSeconds: 1,
 			ExpiryInSeconds:   2,
 		},
+		RateLimiting: configModel.RateLimiting{
+			Enabled:   false,
+			PostsHour: 2,
+		},
 	},
 }
 
@@ -1407,5 +1411,72 @@ func TestDeleteCommentDeletesReplyToComments(t *testing.T) {
 			for _, v := range comments {
 				assert.NotNil(t, v.DeletedAt)
 			}
+		})
+}
+
+func TestRateLimitingCommentCreation(t *testing.T) {
+	testDB := sqlite.CreateTestDatabase()
+	newConfig := config
+	newConfig.API.RateLimiting.Enabled = true
+	server, err := api.GetServer(&testDB, &newConfig)
+	assert.Nil(t, err)
+	r := gofight.New()
+	body := model.CreateCommentBody{
+		Path:   "/1027/test/",
+		Body:   "body",
+		Author: "author",
+	}
+	bodyBytes, err := json.Marshal(body)
+	assert.Nil(t, err)
+	r.POST("/v1/comments").
+		SetBody(string(bodyBytes[:])).
+		SetDebug(debug).
+		Run(server, func(r gofight.HTTPResponse, rq gofight.HTTPRequest) {
+			assert.Equal(t, 200, r.Code)
+		})
+	r.POST("/v1/comments").
+		SetBody(string(bodyBytes[:])).
+		SetDebug(debug).
+		Run(server, func(r gofight.HTTPResponse, rq gofight.HTTPRequest) {
+			assert.Equal(t, 200, r.Code)
+		})
+	r.POST("/v1/comments").
+		SetBody(string(bodyBytes[:])).
+		SetDebug(debug).
+		Run(server, func(r gofight.HTTPResponse, rq gofight.HTTPRequest) {
+			assert.Equal(t, 429, r.Code)
+		})
+}
+
+func TestRateLimitingLoginCreation(t *testing.T) {
+	testDB := sqlite.CreateTestDatabase()
+	newConfig := config
+	newConfig.API.RateLimiting.Enabled = true
+	server, err := api.GetServer(&testDB, &newConfig)
+	assert.Nil(t, err)
+	r := gofight.New()
+	os.Setenv("ADMIN_PASSWORD", "test")
+	body := model.LoginBody{
+		Password: "t",
+	}
+	bodyBytes, err := json.Marshal(body)
+	assert.Nil(t, err)
+	r.POST("/v1/admin/login").
+		SetBody(string(bodyBytes[:])).
+		SetDebug(debug).
+		Run(server, func(r gofight.HTTPResponse, rq gofight.HTTPRequest) {
+			assert.Equal(t, 401, r.Code)
+		})
+	r.POST("/v1/admin/login").
+		SetBody(string(bodyBytes[:])).
+		SetDebug(debug).
+		Run(server, func(r gofight.HTTPResponse, rq gofight.HTTPRequest) {
+			assert.Equal(t, 401, r.Code)
+		})
+	r.POST("/v1/admin/login").
+		SetBody(string(bodyBytes[:])).
+		SetDebug(debug).
+		Run(server, func(r gofight.HTTPResponse, rq gofight.HTTPRequest) {
+			assert.Equal(t, 429, r.Code)
 		})
 }

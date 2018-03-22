@@ -31,17 +31,24 @@ type Config struct {
 
 // API - api configuration part
 type API struct {
-	StaticPath *string
-	Port       *int
-	Host       string
-	Debug      bool
-	Cache      Cache
+	StaticPath   *string
+	Port         *int
+	Host         string
+	Debug        bool
+	Cache        Cache
+	RateLimiting RateLimiting
 }
 
 // Client - client configuration part
 type Client struct {
 	UseDefaultStyle bool
 	PageSize        int
+}
+
+// RateLimiting - rate limiting configuration
+type RateLimiting struct {
+	Enabled   bool
+	PostsHour int
 }
 
 // Cache - cache settings
