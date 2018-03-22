@@ -1,7 +1,6 @@
 package api
 
 import (
-	"fmt"
 	"log"
 
 	"github.com/gin-contrib/sessions"
@@ -121,7 +120,6 @@ func (r *Router) CreateComment(c *gin.Context) {
 		return
 	}
 	// uuid validation
-	// TODO Testcases
 	var uid *uuid.UUID
 	if createCommentBody.ReplyTo != nil {
 		uid, err = global.ParseUUIDFromString(*createCommentBody.ReplyTo)
@@ -227,7 +225,6 @@ func (r *Router) DeleteComment(c *gin.Context) {
 		c.AbortWithStatusJSON(401, global.ErrUnauthorized.Error())
 		return
 	}
-	fmt.Println(c.Cookie("mouthful-session"))
 	var deleteCommentBody model.DeleteCommentBody
 	err := c.BindJSON(&deleteCommentBody)
 	if err != nil {

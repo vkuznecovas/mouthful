@@ -135,10 +135,9 @@ func (db *Database) UpdateComment(id uuid.UUID, body, author string, confirmed b
 	return nil
 }
 
-// DeleteComment soft-deletes the comment by id
+// DeleteComment soft-deletes the comment by id and all the replies to it
 func (db *Database) DeleteComment(id uuid.UUID) error {
-	// TODO - if we delete a comment with null REPLY TO - check if we need to update the references.
-	res, err := db.DB.Exec(db.DB.Rebind("update comment set deletedAt = CURRENT_TIMESTAMP where id=?"), id)
+	res, err := db.DB.Exec(db.DB.Rebind("update comment set deletedAt = CURRENT_TIMESTAMP where id=? or replyTo=?"), id, id)
 	if err != nil {
 		return err
 	}
