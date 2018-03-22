@@ -1280,3 +1280,47 @@ func TestCreateCommentNoModeration(t *testing.T) {
 			assert.Equal(t, "author", comments[0].Author)
 		})
 }
+
+func TestDeleteCommentBadUUID(t *testing.T) {
+	testDB := sqlite.CreateTestDatabase()
+	server, err := api.GetServer(&testDB, &config)
+	assert.Nil(t, err)
+	r := gofight.New()
+	cookies := GetSessionCookie(&testDB, r)
+	body := model.DeleteCommentBody{
+		CommentId: "535622c2-2da5-11e8-b4670ed5f89f718b",
+	}
+	bodyJson, err := json.Marshal(body)
+	assert.Nil(t, err)
+	r.DELETE("/v1/admin/comments").
+		SetBody(string(bodyJson)).
+		SetCookie(cookies).
+		SetDebug(debug).
+		Run(server, func(r gofight.HTTPResponse, rq gofight.HTTPRequest) {
+			fmt.Println(r.Code)
+			assert.Equal(t, 400, r.Code)
+		})
+}
+
+func TestUpdateCommentBadUUID(t *testing.T) {
+	testDB := sqlite.CreateTestDatabase()
+	server, err := api.GetServer(&testDB, &config)
+	assert.Nil(t, err)
+	r := gofight.New()
+	cookies := GetSessionCookie(&testDB, r)
+	newBody := "test"
+	body := model.UpdateCommentBody{
+		CommentId: "535622c2-2da5-11e8-b4670ed5f89f718b",
+		Body:      &newBody,
+	}
+	bodyJson, err := json.Marshal(body)
+	assert.Nil(t, err)
+	r.PATCH("/v1/admin/comments").
+		SetBody(string(bodyJson)).
+		SetCookie(cookies).
+		SetDebug(debug).
+		Run(server, func(r gofight.HTTPResponse, rq gofight.HTTPRequest) {
+			fmt.Println(r.Code)
+			assert.Equal(t, 400, r.Code)
+		})
+}
