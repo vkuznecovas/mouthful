@@ -309,3 +309,21 @@ func TestGetAllCommentsGetsSoftDeletedComments(t *testing.T) {
 	assert.Nil(t, comments[0].ReplyTo)
 	assert.Nil(t, comments[1].ReplyTo)
 }
+
+func TestDeleteCommentDeletesReplies(t *testing.T) {
+	database := setupTestDb()
+	author := "author"
+	body := "body"
+	path := "/test"
+	uid, err := database.CreateComment(body, author, path, false, nil)
+	assert.Nil(t, err)
+	_, err = database.CreateComment(body, author, path, true, uid)
+	assert.Nil(t, err)
+	err = database.DeleteComment(*uid)
+	assert.Nil(t, err)
+	comments, err := database.GetAllComments()
+	assert.Nil(t, err)
+	assert.Len(t, comments, 2)
+	assert.NotNil(t, comments[0].DeletedAt)
+	assert.NotNil(t, comments[1].DeletedAt)
+}
