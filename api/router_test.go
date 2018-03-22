@@ -1418,6 +1418,7 @@ func TestRateLimitingCommentCreation(t *testing.T) {
 	testDB := sqlite.CreateTestDatabase()
 	newConfig := config
 	newConfig.API.RateLimiting.Enabled = true
+	newConfig.API.RateLimiting.PostsHour = 10
 	server, err := api.GetServer(&testDB, &newConfig)
 	assert.Nil(t, err)
 	r := gofight.New()
@@ -1428,30 +1429,26 @@ func TestRateLimitingCommentCreation(t *testing.T) {
 	}
 	bodyBytes, err := json.Marshal(body)
 	assert.Nil(t, err)
-	r.POST("/v1/comments").
-		SetBody(string(bodyBytes[:])).
-		SetDebug(debug).
-		Run(server, func(r gofight.HTTPResponse, rq gofight.HTTPRequest) {
-			assert.Equal(t, 200, r.Code)
-		})
-	r.POST("/v1/comments").
-		SetBody(string(bodyBytes[:])).
-		SetDebug(debug).
-		Run(server, func(r gofight.HTTPResponse, rq gofight.HTTPRequest) {
-			assert.Equal(t, 200, r.Code)
-		})
-	r.POST("/v1/comments").
-		SetBody(string(bodyBytes[:])).
-		SetDebug(debug).
-		Run(server, func(r gofight.HTTPResponse, rq gofight.HTTPRequest) {
-			assert.Equal(t, 429, r.Code)
-		})
+	for i := 0; i <= newConfig.API.RateLimiting.PostsHour; i++ {
+		r.POST("/v1/comments").
+			SetBody(string(bodyBytes[:])).
+			SetDebug(debug).
+			Run(server, func(r gofight.HTTPResponse, rq gofight.HTTPRequest) {
+				if i == newConfig.API.RateLimiting.PostsHour {
+					assert.Equal(t, 429, r.Code)
+				} else {
+					assert.Equal(t, 200, r.Code)
+				}
+			})
+	}
+
 }
 
 func TestRateLimitingLoginCreation(t *testing.T) {
 	testDB := sqlite.CreateTestDatabase()
 	newConfig := config
 	newConfig.API.RateLimiting.Enabled = true
+	newConfig.API.RateLimiting.PostsHour = 100
 	server, err := api.GetServer(&testDB, &newConfig)
 	assert.Nil(t, err)
 	r := gofight.New()
@@ -1461,22 +1458,40 @@ func TestRateLimitingLoginCreation(t *testing.T) {
 	}
 	bodyBytes, err := json.Marshal(body)
 	assert.Nil(t, err)
-	r.POST("/v1/admin/login").
-		SetBody(string(bodyBytes[:])).
-		SetDebug(debug).
-		Run(server, func(r gofight.HTTPResponse, rq gofight.HTTPRequest) {
-			assert.Equal(t, 401, r.Code)
-		})
-	r.POST("/v1/admin/login").
-		SetBody(string(bodyBytes[:])).
-		SetDebug(debug).
-		Run(server, func(r gofight.HTTPResponse, rq gofight.HTTPRequest) {
-			assert.Equal(t, 401, r.Code)
-		})
-	r.POST("/v1/admin/login").
-		SetBody(string(bodyBytes[:])).
-		SetDebug(debug).
-		Run(server, func(r gofight.HTTPResponse, rq gofight.HTTPRequest) {
-			assert.Equal(t, 429, r.Code)
-		})
+	for i := 0; i <= newConfig.API.RateLimiting.PostsHour; i++ {
+		r.POST("/v1/admin/login").
+			SetBody(string(bodyBytes[:])).
+			SetDebug(debug).
+			Run(server, func(r gofight.HTTPResponse, rq gofight.HTTPRequest) {
+				if i == newConfig.API.RateLimiting.PostsHour {
+					assert.Equal(t, 429, r.Code)
+				} else {
+					assert.Equal(t, 401, r.Code)
+				}
+			})
+	}
+}
+
+func TestRateLimitingDisabled(t *testing.T) {
+	testDB := sqlite.CreateTestDatabase()
+	newConfig := config
+	newConfig.API.RateLimiting.Enabled = false
+	newConfig.API.RateLimiting.PostsHour = 1000
+	server, err := api.GetServer(&testDB, &newConfig)
+	assert.Nil(t, err)
+	r := gofight.New()
+	os.Setenv("ADMIN_PASSWORD", "test")
+	body := model.LoginBody{
+		Password: "t",
+	}
+	bodyBytes, err := json.Marshal(body)
+	assert.Nil(t, err)
+	for i := 0; i <= newConfig.API.RateLimiting.PostsHour; i++ {
+		r.POST("/v1/admin/login").
+			SetBody(string(bodyBytes[:])).
+			SetDebug(debug).
+			Run(server, func(r gofight.HTTPResponse, rq gofight.HTTPRequest) {
+				assert.Equal(t, 401, r.Code)
+			})
+	}
 }
