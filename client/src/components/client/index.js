@@ -131,6 +131,19 @@ export default class App extends Component {
   handleBodyChange(id, value) {
     var form = this.findFormIndex(id)
     if (form >= 0) {
+      if (maxChars > 0) {
+        var currentComment = this.state.forms[form].comment
+        if (currentComment.length > (maxChars + 99)) {
+          if (value.length > currentComment.length) {
+            // don't allow for extra characters, reset state to previous
+            var updatedForm = Object.assign({}, this.state.forms[form], { comment: currentComment });
+            var forms = this.state.forms;
+            forms[form] = updatedForm;
+            this.setState({ forms })
+            return
+          }
+        }
+      }
       var updatedForm = Object.assign({}, this.state.forms[form], { comment: value });
       var forms = this.state.forms;
       forms[form] = updatedForm;
@@ -157,6 +170,13 @@ export default class App extends Component {
       this.focus(commentInputRefPrefix + form.id)
       return
     }
+
+    if (maxChars > 0) {
+      if (form.comment.length > maxChars) {
+        this.focus(commentInputRefPrefix + form.id)
+        return
+      } 
+    } 
 
     var http = new XMLHttpRequest();
     var url = config.url + "/v1/comments";
@@ -280,20 +300,7 @@ export default class App extends Component {
         class={getStyle("mouthful_submit")}
         type="submit"
         value="Submit"
-        onClick={(e) => { 
-          if (maxChars > 0) {
-            console.log("maxchard", maxChars)
-            if (form.comment.length > maxChars) {
-              // Don't submit
-              console.log("DONT", form.comment.length)
-            } else {
-              console.log("DO", form.comment.length)
-              this.handleNewCommentSubmit(id) 
-            }
-          } else {
-            this.handleNewCommentSubmit(id) 
-          }
-        }}>
+        onClick={(e) => {this.handleNewCommentSubmit(id)}}>
       </input>
       {maxChars > 0 ? <span class={diff > 0 ? getStyle("mouthful_word_counter") : getStyle("mouthful_word_counter_error")}>
                           {diff > 0 ? diff : diff * -1} {diff > 0 ? "characters left" : "characters too many"}
