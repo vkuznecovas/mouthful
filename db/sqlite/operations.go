@@ -1,7 +1,6 @@
 package sqlite
 
 import (
-	"fmt"
 	"time"
 
 	// We absolutely need the sqlite driver here, this whole package depends on it
@@ -108,7 +107,6 @@ func (db *Database) GetCommentsByThread(path string) (comments []model.Comment, 
 
 // GetComment gets comment by id
 func (db *Database) GetComment(id uuid.UUID) (comment model.Comment, err error) {
-	fmt.Println(id)
 	err = db.DB.Get(&comment, db.DB.Rebind("select * from comment where id=?"), id)
 	if err != nil {
 		if err.Error() == "sql: no rows in result set" {
