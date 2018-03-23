@@ -2,12 +2,13 @@ package model
 
 // Database - a config object representing our database
 type Database struct {
-	Dialect  string
-	Database string
-	Username string
-	Password string
-	Host     string
-	Port     string
+	Dialect     string
+	Database    string
+	Username    string
+	Password    string
+	Host        string
+	Port        string
+	TablePrefix *string
 }
 
 // Moderation - moderation section of our config
