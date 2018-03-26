@@ -138,6 +138,12 @@
   version = "v2.1.0"
 
 [[projects]]
+  name = "github.com/pkg/errors"
+  packages = ["."]
+  revision = "645ef00459ed84a119197bfb8d8205042c6df63d"
+  version = "v0.8.0"
+
+[[projects]]
   name = "github.com/pmezard/go-difflib"
   packages = ["difflib"]
   revision = "792786c7400a136282c1664665ae0a8db921c6c2"
@@ -157,7 +163,10 @@
 
 [[projects]]
   name = "github.com/stretchr/testify"
-  packages = ["assert"]
+  packages = [
+    "assert",
+    "require"
+  ]
   revision = "12b6f73e6084dad08a7c6e575284b177ecafbc71"
   version = "v1.2.1"
 
@@ -166,6 +175,17 @@
   packages = ["codec"]
   revision = "9831f2c3ac1068a78f50999a30db84270f647af6"
   version = "v1.1"
+
+[[projects]]
+  name = "github.com/ulule/limiter"
+  packages = [
+    ".",
+    "drivers/middleware/gin",
+    "drivers/store/common",
+    "drivers/store/memory"
+  ]
+  revision = "f0ff82677fc4826ddae9ac45f2e11462fa245dad"
+  version = "v2.2.0"
 
 [[projects]]
   branch = "master"
@@ -215,6 +235,6 @@
 [solve-meta]
   analyzer-name = "dep"
   analyzer-version = 1
-  inputs-digest = "4ea1a870c1bac343922a7bbde5aa3024f2d82d98707b8a9375d53c167971a978"
+  inputs-digest = "b6bbb3308b6ed8308de72b8551e3673032733b519c40dd33b77e9e41f07b4510"
   solver-name = "gps-cdcl"
   solver-version = 1

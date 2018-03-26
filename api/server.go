@@ -9,6 +9,9 @@ import (
 	"github.com/gin-contrib/static"
 	"github.com/gin-gonic/gin"
 	cache "github.com/patrickmn/go-cache"
+	"github.com/ulule/limiter"
+	mgin "github.com/ulule/limiter/drivers/middleware/gin"
+	memoryLimiterStore "github.com/ulule/limiter/drivers/store/memory"
 	"github.com/vkuznecovas/mouthful/config/model"
 	"github.com/vkuznecovas/mouthful/db/abstraction"
 	"github.com/vkuznecovas/mouthful/global"
@@ -39,7 +42,7 @@ func GetServer(db *abstraction.Database, config *model.Config) (*gin.Engine, err
 	}
 
 	r := gin.Default()
-
+	r.ForwardedByClientIP = true
 	// same as
 	// config := cors.DefaultConfig()
 	// config.AllowAllOrigins = true
@@ -50,6 +53,17 @@ func GetServer(db *abstraction.Database, config *model.Config) (*gin.Engine, err
 		interval := time.Duration(config.API.Cache.IntervalInSeconds) * time.Second
 		cacheInstance = cache.New(expiry, interval)
 	}
+
+	var limitMiddleware *gin.HandlerFunc
+	if config.API.RateLimiting.Enabled {
+		limit, err := limiter.NewRateFromFormatted(fmt.Sprintf("%v-H", config.API.RateLimiting.PostsHour))
+		if err != nil {
+			return nil, err
+		}
+		newInstance := gin.HandlerFunc(mgin.NewMiddleware(limiter.New(memoryLimiterStore.NewStore(), limit)))
+		limitMiddleware = &newInstance
+	}
+
 	r.Use(cors.Default())
 	router := New(db, config, cacheInstance)
 
@@ -62,9 +76,13 @@ func GetServer(db *abstraction.Database, config *model.Config) (*gin.Engine, err
 	r.GET("/status", router.Status)
 
 	v1 := r.Group("/v1")
-
 	v1.GET("/comments", router.GetComments)
-	v1.POST("/comments", router.CreateComment)
+
+	if limitMiddleware != nil {
+		v1.POST("/comments", *limitMiddleware, router.CreateComment)
+	} else {
+		v1.POST("/comments", router.CreateComment)
+	}
 
 	if config.Moderation.Enabled {
 		err := CheckModerationVariables(config)
@@ -78,7 +96,13 @@ func GetServer(db *abstraction.Database, config *model.Config) (*gin.Engine, err
 		})
 		v1.PATCH("/admin/comments", sessions.Sessions("mouthful-session", store), router.UpdateComment)
 		v1.DELETE("/admin/comments", sessions.Sessions("mouthful-session", store), router.DeleteComment)
-		v1.POST("/admin/login", sessions.Sessions("mouthful-session", store), router.Login)
+
+		if limitMiddleware != nil {
+			v1.POST("/admin/login", *limitMiddleware, sessions.Sessions("mouthful-session", store), router.Login)
+		} else {
+			v1.POST("/admin/login", sessions.Sessions("mouthful-session", store), router.Login)
+		}
+
 		v1.POST("/admin/comments/restore", sessions.Sessions("mouthful-session", store), router.RestoreDeletedComment)
 		v1.GET("/admin/threads", sessions.Sessions("mouthful-session", store), router.GetAllThreads)
 		v1.GET("/admin/comments/all", sessions.Sessions("mouthful-session", store), router.GetAllComments)
