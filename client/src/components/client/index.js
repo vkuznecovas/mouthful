@@ -138,7 +138,6 @@ export default class App extends Component {
           if (!authorCookieValue) {
             cookies.set("mouthful_author", author, 365)
           }
-          console.log("author", author);
           context.setState({ comments: cm, showComments: toShow, author: author, forms })
           setTimeout(() => context.focus(config.commentRefPrefix + parsedResponse.id), 100)
         }
