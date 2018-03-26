@@ -96,7 +96,7 @@ func TestGetCommentsUnconfirmedComments(t *testing.T) {
 			var parsedBody model.CreateCommentBody
 			err = json.Unmarshal([]byte(r.Body.String()), &parsedBody)
 			assert.Nil(t, err)
-			assert.Equal(t, body.Path, parsedBody.Path)
+			assert.Equal(t, body.Path+"/", parsedBody.Path)
 			assert.Equal(t, body.Author, parsedBody.Author)
 			assert.Equal(t, global.ParseAndSaniziteMarkdown(body.Body), parsedBody.Body)
 			assert.Equal(t, 200, r.Code)
@@ -142,7 +142,7 @@ func TestCreateCommentSpamTrap(t *testing.T) {
 			var parsedBody model.CreateCommentBody
 			err = json.Unmarshal([]byte(r.Body.String()), &parsedBody)
 			assert.Nil(t, err)
-			assert.Equal(t, body.Path, parsedBody.Path)
+			assert.Equal(t, body.Path+"/", parsedBody.Path)
 			assert.Equal(t, body.Author, parsedBody.Author)
 			assert.Equal(t, body.Email, parsedBody.Email)
 			assert.Equal(t, global.ParseAndSaniziteMarkdown(body.Body), parsedBody.Body)
@@ -1148,7 +1148,7 @@ func TestCreateCommentBodyTooLong(t *testing.T) {
 			var parsedBody model.CreateCommentBody
 			err = json.Unmarshal([]byte(r.Body.String()), &parsedBody)
 			assert.Nil(t, err)
-			assert.Equal(t, body.Path, parsedBody.Path)
+			assert.Equal(t, body.Path+"/", parsedBody.Path)
 			assert.Equal(t, body.Author, parsedBody.Author)
 			assert.Equal(t, body.Email, parsedBody.Email)
 			assert.Equal(t, global.ParseAndSaniziteMarkdown(body.Body), parsedBody.Body)
@@ -1178,7 +1178,7 @@ func TestGetCommentsCache(t *testing.T) {
 	assert.Nil(t, err)
 	r := gofight.New()
 	commentBody := model.CreateCommentBody{
-		Path:   "/1027/test/",
+		Path:   "1027/test",
 		Body:   "body",
 		Author: "author",
 	}
@@ -1192,7 +1192,7 @@ func TestGetCommentsCache(t *testing.T) {
 			var parsedBody model.CreateCommentResponse
 			err = json.Unmarshal([]byte(r.Body.String()), &parsedBody)
 			assert.Nil(t, err)
-			assert.Equal(t, commentBody.Path, parsedBody.Path)
+			assert.Equal(t, "/"+commentBody.Path+"/", parsedBody.Path)
 			assert.Equal(t, commentBody.Author, parsedBody.Author)
 			assert.Equal(t, global.ParseAndSaniziteMarkdown(commentBody.Body), parsedBody.Body)
 			assert.Equal(t, 200, r.Code)
@@ -1215,7 +1215,7 @@ func TestGetCommentsCache(t *testing.T) {
 			assert.Equal(t, "", r.Body.String())
 			assert.Equal(t, 204, r.Code)
 		})
-	r.GET("/v1/comments?uri="+url.QueryEscape(commentBody.Path)).
+	r.GET("/v1/comments?uri="+url.QueryEscape("/"+commentBody.Path+"/")).
 		SetDebug(debug).
 		Run(server, func(r gofight.HTTPResponse, rq gofight.HTTPRequest) {
 			assert.Equal(t, 200, r.Code)
@@ -1494,4 +1494,46 @@ func TestRateLimitingDisabled(t *testing.T) {
 				assert.Equal(t, 401, r.Code)
 			})
 	}
+}
+
+func TestGetCommentsWithPathNormalization(t *testing.T) {
+	testDB := sqlite.CreateTestDatabase()
+	server, err := api.GetServer(&testDB, &config)
+	assert.Nil(t, err)
+	r := gofight.New()
+	commentBody := model.CreateCommentBody{
+		Path:   "1027/test",
+		Body:   "body",
+		Author: "author",
+	}
+	bodyBytes, err := json.Marshal(commentBody)
+	assert.Nil(t, err)
+	r.POST("/v1/comments").
+		SetBody(string(bodyBytes[:])).
+		SetDebug(debug).
+		Run(server, func(r gofight.HTTPResponse, rq gofight.HTTPRequest) {
+			var parsedBody model.CreateCommentBody
+			err = json.Unmarshal([]byte(r.Body.String()), &parsedBody)
+			assert.Nil(t, err)
+			assert.Equal(t, "/"+commentBody.Path+"/", parsedBody.Path)
+			assert.Equal(t, commentBody.Author, parsedBody.Author)
+			assert.Equal(t, global.ParseAndSaniziteMarkdown(commentBody.Body), parsedBody.Body)
+			assert.Equal(t, 200, r.Code)
+		})
+	cookies := GetSessionCookie(&testDB, r)
+	assert.Nil(t, err)
+	r.GET("/v1/admin/threads").
+		SetBody(string(bodyBytes[:])).
+		SetDebug(debug).
+		SetCookie(cookies).
+		Run(server, func(r gofight.HTTPResponse, rq gofight.HTTPRequest) {
+			assert.Equal(t, 200, r.Code)
+			var threads []dbmodel.Thread
+			body, err := ioutil.ReadAll(r.Body)
+			assert.Nil(t, err)
+			err = json.Unmarshal(body, &threads)
+			assert.Nil(t, err)
+			assert.Len(t, threads, 1)
+			assert.Equal(t, "/"+commentBody.Path+"/", threads[0].Path)
+		})
 }

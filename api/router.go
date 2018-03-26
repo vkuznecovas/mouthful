@@ -41,6 +41,7 @@ func (r *Router) GetComments(c *gin.Context) {
 		c.AbortWithStatusJSON(400, global.ErrThreadNotFound.Error())
 		return
 	}
+	path = NormalizePath(path)
 	if r.cache != nil {
 		if cacheHit, found := r.cache.Get(path); found {
 			comments := cacheHit.(*[]dbModel.Comment)
@@ -137,6 +138,7 @@ func (r *Router) CreateComment(c *gin.Context) {
 		}
 	}
 	createCommentBody.Body = global.ParseAndSaniziteMarkdown(createCommentBody.Body)
+	createCommentBody.Path = NormalizePath(createCommentBody.Path)
 	if r.config.Honeypot && createCommentBody.Email != nil {
 		c.AbortWithStatusJSON(200, createCommentBody)
 		return
