@@ -9,6 +9,7 @@ import (
 
 	"github.com/satori/go.uuid"
 
+	"github.com/vkuznecovas/mouthful/api"
 	"github.com/vkuznecovas/mouthful/global"
 
 	sqlite "github.com/vkuznecovas/mouthful/db/sqlite"
@@ -52,9 +53,10 @@ func main() {
 		if err != nil {
 			panic(err)
 		}
-		log.Println("Migrating thread " + *t.Uri)
+		uri := api.NormalizePath(*t.Uri)
+		log.Println("Migrating thread " + uri)
 		tuid := global.GetUUID()
-		_, err = mouthDB.Exec(mouthDB.Rebind("INSERT INTO Thread(Id,Path) VALUES(?, ?)"), tuid, *t.Uri)
+		_, err = mouthDB.Exec(mouthDB.Rebind("INSERT INTO Thread(Id,Path) VALUES(?, ?)"), tuid, uri)
 		if err != nil {
 			panic(err)
 		}
