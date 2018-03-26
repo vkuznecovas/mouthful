@@ -3,24 +3,14 @@ import style from "./style";
 import timeago from "./timeago"
 import cookies from "./cookies"
 import config from "./config"
-
+import Form from "./form"
+import FormWrapper from "./formWrapper"
+import Comment from "./comment"
 const useStyle = config.useDefaultStyle;
-const moderationEnabled = config.moderation;
-const authorInputRefPrefix = "__mouthful_author_input_";
-const commentInputRefPrefix = "__mouthful_comment_input_";
-const commentRefPrefix = "__mouthful_comment_";
-const defaultComments = config.pageSize;
-const maxChars = config.maxMessageLength;
 
 function getStyle(c) {
   return useStyle ? style[c] : c
 }
-
-function formatDate(d) {
-  var dd = new Date(d)
-  return timeago(dd)
-}
-
 
 const handleStateChange = (http, context) => {
   if (http.readyState != 4) {
@@ -31,20 +21,15 @@ const handleStateChange = (http, context) => {
 
     if (parsedResponse.length > 0) {
       var forms = context.state.forms;
-      var authorCookieValue = cookies.get("mouthful_author")
       var formsToAppend = parsedResponse.map(x => {
         return {
           id: x.Id,
-          visible: false,
-          author: authorCookieValue ? authorCookieValue : "",
-          comment: "",
-          email: null,
-          replyTo: x.ReplyTo ? x.ReplyTo : x.Id,
+          visible: false
         }
       })
       forms = forms.concat(formsToAppend)
       parsedResponse = parsedResponse.map(x => {
-        return Object.assign({}, x, { RepliesToLoad: defaultComments })
+        return Object.assign({}, x, { RepliesToLoad: config.pageSize })
       })
       context.setState({ loaded: true, comments: parsedResponse, threadId: parsedResponse[0].ThreadId, forms })
     } else {
@@ -65,33 +50,27 @@ export default class App extends Component {
       error: false,
       comments: [],
       threadId: 0,
-      showComments: defaultComments,
+      author: cookies.get("mouthful_author") ? cookies.get("mouthful_author") : "",
+      showComments: config.pageSize,
       forms: [{
         id: -1,
         visible: true,
-        author: "",
-        comment: "",
-        email: null,
-        replyTo: null
       }],
     }
     this.fetchComments = this.fetchComments.bind(this);
-    this.handleBodyChange = this.handleBodyChange.bind(this);
-    this.handleAuthorChange = this.handleAuthorChange.bind(this);
-    this.handleEmailChange = this.handleEmailChange.bind(this);
-    this.handleNewCommentSubmit = this.handleNewCommentSubmit.bind(this);
-    this.getForm = this.getForm.bind(this);
     this.flipFormVisiblity = this.flipFormVisiblity.bind(this);
     this.findFormIndex = this.findFormIndex.bind(this);
     this.refMap = new Map();
     this.focus = this.focus.bind(this);
     this.incrementReplyCount = this.incrementReplyCount.bind(this);
+    this.submitForm = this.submitForm.bind(this);
+    this.isFormVisible = this.isFormVisible.bind(this);
   }
   incrementReplyCount(commentId) {
     var copiedComments = this.state.comments;
     var found = copiedComments.map(x => x.Id).indexOf(commentId)
     if (found >= 0) {
-      copiedComments[found].RepliesToLoad += defaultComments
+      copiedComments[found].RepliesToLoad += config.pageSize
       this.setState({ comments: copiedComments })
     }
   }
@@ -104,80 +83,13 @@ export default class App extends Component {
   findFormIndex(id) {
     return this.state.forms.map(x => x.id).indexOf(id)
   }
-  flipFormVisiblity(index) {
+  flipFormVisiblity(id) {
     var forms = this.state.forms;
+    var index = this.findFormIndex(id)
     forms[index].visible = !forms[index].visible
     this.setState({ forms })
   }
-  handleAuthorChange(id, value) {
-    var form = this.findFormIndex(id)
-    if (form >= 0) {
-      var updatedForm = Object.assign({}, this.state.forms[form], { author: value });
-      var forms = this.state.forms;
-      forms[form] = updatedForm;
-      this.setState({ forms })
-    }
-
-  }
-  handleEmailChange(id, value) {
-    var form = this.findFormIndex(id)
-    if (form >= 0) {
-      var updatedForm = Object.assign({}, this.state.forms[form], { email: value });
-      var forms = this.state.forms;
-      forms[form] = updatedForm;
-      this.setState({ forms })
-    }
-  }
-  handleBodyChange(id, value) {
-    var form = this.findFormIndex(id)
-    if (form >= 0) {
-      if (maxChars > 0) {
-        var currentComment = this.state.forms[form].comment
-        if (currentComment.length > (maxChars + 99)) {
-          if (value.length > currentComment.length) {
-            // don't allow for extra characters, reset state to previous
-            var updatedForm = Object.assign({}, this.state.forms[form], { comment: currentComment });
-            var forms = this.state.forms;
-            forms[form] = updatedForm;
-            this.setState({ forms })
-            return
-          }
-        }
-      }
-      var updatedForm = Object.assign({}, this.state.forms[form], { comment: value });
-      var forms = this.state.forms;
-      forms[form] = updatedForm;
-      this.setState({ forms })
-    }
-  }
-  handleNewCommentSubmit(id) {
-    if (typeof window == "undefined") { return }
-    // validation
-    var formIndex = this.findFormIndex(id)
-    if (formIndex < 0) {
-      return
-    }
-    var form = this.state.forms[formIndex];
-    var authorCopy = form.author.replace(/\s/g,'');
-
-    if (authorCopy == "" || authorCopy.length < 3) {
-      this.focus(authorInputRefPrefix + form.id)
-      return
-    }
-
-    var commentCopy = form.comment.replace(/\s/g,'');
-    if (commentCopy == "" || commentCopy.length < 3) {
-      this.focus(commentInputRefPrefix + form.id)
-      return
-    }
-
-    if (maxChars > 0) {
-      if (form.comment.length > maxChars) {
-        this.focus(commentInputRefPrefix + form.id)
-        return
-      } 
-    } 
-
+  submitForm(id, comment, author, email, replyTo) {
     var http = new XMLHttpRequest();
     var url = config.url + "/v1/comments";
     http.open("POST", url, true);
@@ -188,58 +100,61 @@ export default class App extends Component {
           // submit success, show the comment in the list below
           var cm = context.state.comments;
           var toShow = context.state.showComments;
-          if (context.state.forms[formIndex].replyTo != null) {
-            var found = cm.map(x => x.Id).indexOf(context.state.forms[formIndex].replyTo)
+          if (replyTo != null) {
+            var found = cm.map(x => x.Id).indexOf(replyTo)
             if (found > -1){
-              var totalReplies = cm.filter(x => x.ReplyTo == context.state.forms[formIndex].replyTo).length + 1;
-              var leftOvers = (totalReplies % defaultComments) > 0 ? 1 : 0;
-              cm[found].RepliesToLoad =  totalReplies * defaultComments + leftOvers * defaultComments;
+              var totalReplies = cm.filter(x => x.ReplyTo == replyTo).length + 1;
+              var leftOvers = (totalReplies % config.pageSize) > 0 ? 1 : 0;
+              cm[found].RepliesToLoad =  totalReplies * config.pageSize + leftOvers * config.pageSize;
             }
           } else {
             var totalComments = cm.filter(x => x.ReplyTo == null).length + 1;
-            var leftOvers = (totalComments % defaultComments) > 0 ? 1 : 0;
-            toShow = totalComments * defaultComments + leftOvers * defaultComments;
+            var leftOvers = (totalComments % config.pageSize) > 0 ? 1 : 0;
+            toShow = totalComments * config.pageSize + leftOvers * config.pageSize;
           }
           var parsedResponse = JSON.parse(http.responseText)
           cm.push({
             ThreadId: context.state.threadId,
             Id: parsedResponse.id,
             Body: parsedResponse.body,
-            Author: context.state.forms[formIndex].author,
+            Author: author,
             Confirmed: false,
             CreatedAt: new Date(),
             DeletedAt: null,
-            ReplyTo: context.state.forms[formIndex].replyTo,
-            RepliesToLoad: defaultComments
+            ReplyTo: replyTo,
+            RepliesToLoad: config.pageSize
           })
-          var updatedForm = Object.assign(
-            {},
-            context.state.forms[formIndex],
-            { email: context.state.forms[formIndex].email, author:  context.state.forms[formIndex].author, comment: "", visible: id == -1 ? true : false }
-          );
+          var forms = context.state.forms
+          if (replyTo) {
+            var index = context.findFormIndex(replyTo)
+            forms[index].visible = false
+          }
+          forms = forms.concat([{
+            id: parsedResponse.id,
+            visible: false,
+          }])
+          
           var authorCookieValue = cookies.get("mouthful_author")
           if (!authorCookieValue) {
-            cookies.set("mouthful_author", context.state.forms[formIndex].author, 365)
+            cookies.set("mouthful_author", author, 365)
           }
-          var forms = context.state.forms;
-          forms[formIndex] = updatedForm;
-          forms = forms.map(x => {
-            return Object.assign({}, x, {author: context.state.forms[formIndex].author})
-          })
-          context.setState({ comments: cm, forms, showComments: toShow })
-          setTimeout(() => context.focus(commentRefPrefix + parsedResponse.id), 100)
+          console.log("author", author);
+          context.setState({ comments: cm, showComments: toShow, author: author, forms })
+          setTimeout(() => context.focus(config.commentRefPrefix + parsedResponse.id), 100)
         }
       }
     }
     http.send(JSON.stringify({
-      Body: context.state.forms[formIndex].comment,
-      Author: context.state.forms[formIndex].author,
+      Body: comment,
+      Author: author,
       Path: window.location.pathname,
-      ReplyTo: context.state.forms[formIndex].replyTo
+      ReplyTo: replyTo
     }))
   }
-
-
+  isFormVisible(id) {
+    filtered = this.state.forms.filter(x=>x.id == id)
+    return filtered[0].visible;
+  }
   componentDidMount() {
     if (!this.state.loaded) {
       this.fetchComments()
@@ -257,57 +172,6 @@ export default class App extends Component {
     }
     http.send()
   }
-  getForm(id) {
-    var form = this.state.forms[this.findFormIndex(id)]
-    if (!form) {
-      return null
-    }
-    var diff = maxChars - form.comment.length;
-    return (<div class={getStyle(form.visible ? "mouthful_form" : "mouthful_form_invisible")}>
-      <input
-        class={getStyle("mouthful_author_input")}
-        type="text" name="author"
-        placeholder="Name (required)"
-        value={form.author}
-        ref={c => {
-          this.refMap.set(authorInputRefPrefix + id, c)
-        }}
-        onChange={(e) => this.handleAuthorChange(id, e.target.value)}>
-             
-      </input>
-      
-      <input
-        style={"display: none;"}
-        type="text" name="email"
-        placeholder="Email (required)"
-        value={form.email}
-        onChange={(e) => this.handleEmailChange(id, e.target.value)}>
-      </input>
-      <textarea
-        class={getStyle("mouthful_comment_input")}
-        rows="3"
-        name="commentBody"
-        placeholder="Type comment here..."
-        ref={c => {
-          this.refMap.set(commentInputRefPrefix + id, c)
-        }}
-        value={form.comment}
-        onKeyUp={(e) => this.handleBodyChange(id, e.target.value)}
-        onChange={(e) => this.handleBodyChange(id, e.target.value)}>
-      </textarea>
-     <div>
-      <input
-        class={getStyle("mouthful_submit")}
-        type="submit"
-        value="Submit"
-        onClick={(e) => {this.handleNewCommentSubmit(id)}}>
-      </input>
-      {maxChars > 0 ? <span class={diff > 0 ? getStyle("mouthful_word_counter") : getStyle("mouthful_word_counter_error")}>
-                          {diff > 0 ? diff : diff * -1} {diff > 0 ? "characters left" : "characters too many"}
-                      </span> : null}
-      </div>
-    </div>)
-  }
   render(props) {
     if (this.state.error == true) {
       return <div class={getStyle("mouthful_wrapper")}><div class={getStyle("mouthful_error")}>The comments are temporarily unavailable</div></div>
@@ -320,7 +184,7 @@ export default class App extends Component {
         if (commentsFiltered.length > this.state.showComments) {
           loadMoreComments = <input
             class={getStyle("mouthful_reply_button")}
-            onClick={() => { this.setState({ showComments: this.state.showComments + defaultComments }) }}
+            onClick={() => { this.setState({ showComments: this.state.showComments + config.pageSize }) }}
             type="Submit"
             value="Show more comments" >
           </input>
@@ -345,48 +209,18 @@ export default class App extends Component {
         var replies = cmntsToFilter.map(x => {
           var formIndex = this.findFormIndex(x.Id);
           return <div class={getStyle("mouthful_comment_reply")} key={"___comment" + x.Id} tabindex="-1" ref={c => {
-            this.refMap.set(commentRefPrefix + x.Id, c)
+            this.refMap.set(config.commentRefPrefix + x.Id, c)
           }}>
-            <div class={getStyle("mouthful_author")}>{x.Author}
-              <span class={getStyle("mouthful_date")}>{formatDate(x.CreatedAt)}</span>
-              {formIndex < 0 && moderationEnabled ? <span class={getStyle("mouthful_moderation")}>In queue for moderation</span> : null}
-            </div>
-
-            <div class={getStyle("mouthful_comment_body")} dangerouslySetInnerHTML={{ __html: x.Body }} />
-            {
-              formIndex < 0
-                ? null
-                : <input
-                  class={getStyle("mouthful_reply_button")}
-                  onClick={() => this.flipFormVisiblity(formIndex)}
-                  type="submit"
-                  value={this.state.forms[formIndex].visible ? "Close" : "Reply"}>
-                </input>
-            }
-            {this.getForm(x.Id)}
+            <Comment comment={x}/>
+            <FormWrapper comment={x} flipFormVisibility={this.flipFormVisiblity} visible={this.state.forms[this.findFormIndex(x.Id)].visible}  author={this.state.author}  replyTo={x.Id} submitForm={this.submitForm}/>
           </div>
         });
         var formIndex = this.findFormIndex(comment.Id);
         return <div class={getStyle("mouthful_comment")} key={"___comment" + comment.Id} tabindex="-1" ref={c => {
-          this.refMap.set(commentRefPrefix + comment.Id, c)
+          this.refMap.set(config.commentRefPrefix + comment.Id, c)
         }}>
-          <div class={getStyle("mouthful_author")}>{comment.Author}
-            <span class={getStyle("mouthful_date")}>{formatDate(comment.CreatedAt)}</span>
-            {formIndex < 0 && moderationEnabled ? <span class={getStyle("mouthful_moderation")}>In queue for moderation</span> : null}
-          </div>
-
-          <div class={getStyle("mouthful_comment_body")} dangerouslySetInnerHTML={{ __html: comment.Body }} />
-          {
-            formIndex < 0
-              ? null
-              : <input
-                class={getStyle("mouthful_reply_button")}
-                onClick={() => this.flipFormVisiblity(formIndex)}
-                type="submit"
-                value={this.state.forms[formIndex].visible ? "Close" : "Reply"}>
-              </input>
-          }
-          {this.getForm(comment.Id)}
+          <Comment comment={comment}/>
+          <FormWrapper comment={comment} flipFormVisibility={this.flipFormVisiblity} visible={this.state.forms[this.findFormIndex(comment.Id)].visible}  author={this.state.author}  replyTo={comment.Id} submitForm={this.submitForm}/>
           <div class={getStyle("mouthful_comment_replies")}>
             {replies}
             {loadMoreReplies}
@@ -395,11 +229,9 @@ export default class App extends Component {
       })
     }
 
-    var form = this.getForm(-1)
-
     return (
       <div class={getStyle("mouthful_wrapper")}>
-        {form}
+        <Form id={-1} visible={this.state.forms[this.findFormIndex(-1)].visible} author={this.state.author} comment={""} replyTo={null} submitForm={this.submitForm} />
         {commentDiv}
         {loadMoreComments}
       </div>
