@@ -1,17 +1,19 @@
-package dynamodb_test
+package db_test
 
 import (
 	"testing"
 	"time"
 
+	"github.com/jmoiron/sqlx"
 	uuid "github.com/satori/go.uuid"
 	"github.com/stretchr/testify/assert"
 	"github.com/vkuznecovas/mouthful/db/abstraction"
 	"github.com/vkuznecovas/mouthful/db/dynamodb"
+	"github.com/vkuznecovas/mouthful/db/sqlite"
 	"github.com/vkuznecovas/mouthful/global"
 )
 
-func setupTestDb() abstraction.Database {
+func setupDynamoTestDb() abstraction.Database {
 	database := dynamodb.CreateTestDatabase()
 	wipeDB(database)
 	err := database.InitializeDatabase()
@@ -27,9 +29,79 @@ func wipeDB(db abstraction.Database) {
 	_ = driverCasted.DB.Table(driverCasted.TablePrefix + global.DefaultDynamoDbCommentTableName).DeleteTable().Run()
 }
 
-func TestCreateThread(t *testing.T) {
-	database := setupTestDb()
+func TestDynamoDb(t *testing.T) {
+	CreateThread(t, setupDynamoTestDb())
+	CreateThreadUniqueViolation(t, setupDynamoTestDb())
+	GetThread(t, setupDynamoTestDb())
+	GetThreadNotFound(t, setupDynamoTestDb())
+	CreateComment(t, setupDynamoTestDb())
+	CreateCommentNoReply(t, setupDynamoTestDb())
+	CreateCommentWithReply(t, setupDynamoTestDb())
+	CreateCommentWrongReply(t, setupDynamoTestDb())
+	CreateCommentWrongThread(t, setupDynamoTestDb())
+	GetCommentNotFound(t, setupDynamoTestDb())
+	GetComment(t, setupDynamoTestDb())
+	GetCommentsByThreadNoThread(t, setupDynamoTestDb())
+	GetCommentsByThread(t, setupDynamoTestDb())
+	UpdateCommentNotFound(t, setupDynamoTestDb())
+	UpdateComment(t, setupDynamoTestDb())
+	DeleteCommentNotFound(t, setupDynamoTestDb())
+	DeleteComment(t, setupDynamoTestDb())
+	GetAllThreadsEmptyDatabase(t, setupDynamoTestDb())
+	GetAllThreads(t, setupDynamoTestDb())
+	GetAllCommentsEmptyDatabase(t, setupDynamoTestDb())
+	GetAllComments(t, setupDynamoTestDb())
+	SoftDelete(t, setupDynamoTestDb())
+	GetAllCommentsGetsSoftDeletedComments(t, setupDynamoTestDb())
+	DeleteCommentDeletesReplies(t, setupDynamoTestDb())
+}
 
+func setupSqliteTestDb() abstraction.Database {
+	database := sqlite.Database{}
+	db, err := sqlx.Open("sqlite3", ":memory:")
+	if err != nil {
+		panic(err)
+	}
+	err = db.Ping()
+	if err != nil {
+		panic(err)
+	}
+	database.DB = db
+	err = database.InitializeDatabase()
+	if err != nil {
+		panic(err)
+	}
+	return &database
+}
+
+func TestSqliteDb(t *testing.T) {
+	CreateThread(t, setupSqliteTestDb())
+	CreateThreadUniqueViolation(t, setupSqliteTestDb())
+	GetThread(t, setupSqliteTestDb())
+	GetThreadNotFound(t, setupSqliteTestDb())
+	CreateComment(t, setupSqliteTestDb())
+	CreateCommentNoReply(t, setupSqliteTestDb())
+	CreateCommentWithReply(t, setupSqliteTestDb())
+	CreateCommentWrongReply(t, setupSqliteTestDb())
+	CreateCommentWrongThread(t, setupSqliteTestDb())
+	GetCommentNotFound(t, setupSqliteTestDb())
+	GetComment(t, setupSqliteTestDb())
+	GetCommentsByThreadNoThread(t, setupSqliteTestDb())
+	GetCommentsByThread(t, setupSqliteTestDb())
+	UpdateCommentNotFound(t, setupSqliteTestDb())
+	UpdateComment(t, setupSqliteTestDb())
+	DeleteCommentNotFound(t, setupSqliteTestDb())
+	DeleteComment(t, setupSqliteTestDb())
+	GetAllThreadsEmptyDatabase(t, setupSqliteTestDb())
+	GetAllThreads(t, setupSqliteTestDb())
+	GetAllCommentsEmptyDatabase(t, setupSqliteTestDb())
+	GetAllComments(t, setupSqliteTestDb())
+	SoftDelete(t, setupSqliteTestDb())
+	GetAllCommentsGetsSoftDeletedComments(t, setupSqliteTestDb())
+	DeleteCommentDeletesReplies(t, setupSqliteTestDb())
+}
+
+func CreateThread(t *testing.T, database abstraction.Database) {
 	uid, err := database.CreateThread("/test")
 	assert.Nil(t, err)
 	assert.NotNil(t, uid)
@@ -39,8 +111,7 @@ func TestCreateThread(t *testing.T) {
 	assert.Equal(t, "/test", thread.Path)
 }
 
-func TestCreateThreadUniqueViolation(t *testing.T) {
-	database := setupTestDb()
+func CreateThreadUniqueViolation(t *testing.T, database abstraction.Database) {
 	uid, err := database.CreateThread("/test")
 	assert.Nil(t, err)
 	assert.NotNil(t, uid)
@@ -49,8 +120,7 @@ func TestCreateThreadUniqueViolation(t *testing.T) {
 	assert.True(t, uuid.Equal(*uid, *uidNew))
 }
 
-func TestGetThread(t *testing.T) {
-	database := setupTestDb()
+func GetThread(t *testing.T, database abstraction.Database) {
 	uid, err := database.CreateThread("/test")
 	assert.Nil(t, err)
 	assert.NotNil(t, uid)
@@ -60,16 +130,14 @@ func TestGetThread(t *testing.T) {
 	assert.Equal(t, "/test", thread.Path)
 }
 
-func TestGetThreadNotFound(t *testing.T) {
-	database := setupTestDb()
+func GetThreadNotFound(t *testing.T, database abstraction.Database) {
 	_, err := database.GetThread("/test")
 	assert.NotNil(t, err)
 	assert.Equal(t, global.ErrThreadNotFound, err)
 }
 
-func TestCreateComment(t *testing.T) {
+func CreateComment(t *testing.T, database abstraction.Database) {
 	now := time.Now().UTC()
-	database := setupTestDb()
 	uid, err := database.CreateComment("body", "author", "/test", true, nil)
 	assert.Nil(t, err)
 	assert.NotNil(t, uid)
@@ -85,24 +153,21 @@ func TestCreateComment(t *testing.T) {
 
 }
 
-func TestCreateCommentNoReply(t *testing.T) {
-	database := setupTestDb()
+func CreateCommentNoReply(t *testing.T, database abstraction.Database) {
 	replyTo := global.GetUUID()
 	_, err := database.CreateComment("body", "author", "/test", true, &replyTo)
 	assert.NotNil(t, err)
 	assert.Equal(t, global.ErrWrongReplyTo, err)
 }
 
-func TestCreateCommentWithReply(t *testing.T) {
-	database := setupTestDb()
+func CreateCommentWithReply(t *testing.T, database abstraction.Database) {
 	uid, err := database.CreateComment("body", "author", "/test", true, nil)
 	assert.Nil(t, err)
 	_, err = database.CreateComment("body", "author", "/test", true, uid)
 	assert.Nil(t, err)
 }
 
-func TestCreateCommentWrongReply(t *testing.T) {
-	database := setupTestDb()
+func CreateCommentWrongReply(t *testing.T, database abstraction.Database) {
 	uid1, err := database.CreateComment("body", "author", "/test", true, nil)
 	assert.Nil(t, err)
 	uid2, err := database.CreateComment("body", "author", "/test", true, uid1)
@@ -112,8 +177,7 @@ func TestCreateCommentWrongReply(t *testing.T) {
 	assert.Equal(t, global.ErrWrongReplyTo, err)
 }
 
-func TestCreateCommentWrongThread(t *testing.T) {
-	database := setupTestDb()
+func CreateCommentWrongThread(t *testing.T, database abstraction.Database) {
 	uid, err := database.CreateComment("body", "author", "/test", true, nil)
 	assert.Nil(t, err)
 	_, err = database.CreateComment("body", "author", "/test", true, uid)
@@ -123,15 +187,13 @@ func TestCreateCommentWrongThread(t *testing.T) {
 	assert.Equal(t, global.ErrWrongReplyTo, err)
 }
 
-func TestGetCommentNotFound(t *testing.T) {
-	database := setupTestDb()
+func GetCommentNotFound(t *testing.T, database abstraction.Database) {
 	_, err := database.GetComment(global.GetUUID())
 	assert.NotNil(t, err)
 	assert.Equal(t, global.ErrCommentNotFound, err)
 }
 
-func TestGetComment(t *testing.T) {
-	database := setupTestDb()
+func GetComment(t *testing.T, database abstraction.Database) {
 	uid, err := database.CreateComment("body", "author", "/test", true, nil)
 	assert.Nil(t, err)
 	comment, err := database.GetComment(*uid)
@@ -143,15 +205,13 @@ func TestGetComment(t *testing.T) {
 	assert.Nil(t, comment.ReplyTo)
 }
 
-func TestGetCommentsByThreadNoThread(t *testing.T) {
-	database := setupTestDb()
+func GetCommentsByThreadNoThread(t *testing.T, database abstraction.Database) {
 	_, err := database.GetCommentsByThread("/test")
 	assert.NotNil(t, err)
 	assert.Equal(t, global.ErrThreadNotFound, err)
 }
 
-func TestGetCommentsByThreadEmptyThread(t *testing.T) {
-	database := setupTestDb()
+func GetCommentsByThreadEmptyThread(t *testing.T, database abstraction.Database) {
 	_, err := database.CreateThread("/test")
 	assert.Nil(t, err)
 	comments, err := database.GetCommentsByThread("/test")
@@ -159,8 +219,7 @@ func TestGetCommentsByThreadEmptyThread(t *testing.T) {
 	assert.Len(t, comments, 0)
 }
 
-func TestGetCommentsByThread(t *testing.T) {
-	database := setupTestDb()
+func GetCommentsByThread(t *testing.T, database abstraction.Database) {
 	_, err := database.CreateThread("/test")
 	assert.Nil(t, err)
 	_, err = database.CreateComment("body", "author", "/test", true, nil)
@@ -186,15 +245,13 @@ func TestGetCommentsByThread(t *testing.T) {
 	assert.Equal(t, true, comments[0].Confirmed)
 	assert.Equal(t, true, comments[1].Confirmed)
 }
-func TestUpdateCommentNotFound(t *testing.T) {
-	database := setupTestDb()
+func UpdateCommentNotFound(t *testing.T, database abstraction.Database) {
 	err := database.UpdateComment(global.GetUUID(), "t", "t", false)
 	assert.NotNil(t, err)
 	assert.Equal(t, global.ErrCommentNotFound, err)
 }
 
-func TestUpdateComment(t *testing.T) {
-	database := setupTestDb()
+func UpdateComment(t *testing.T, database abstraction.Database) {
 	uid, err := database.CreateComment("body", "author", "/test", true, nil)
 	assert.Nil(t, err)
 	err = database.UpdateComment(*uid, "t", "t", false)
@@ -208,15 +265,13 @@ func TestUpdateComment(t *testing.T) {
 	assert.Nil(t, comment.ReplyTo)
 }
 
-func TestDeleteCommentNotFound(t *testing.T) {
-	database := setupTestDb()
+func DeleteCommentNotFound(t *testing.T, database abstraction.Database) {
 	err := database.DeleteComment(global.GetUUID())
 	assert.NotNil(t, err)
 	assert.Equal(t, global.ErrCommentNotFound, err)
 }
 
-func TestDeleteComment(t *testing.T) {
-	database := setupTestDb()
+func DeleteComment(t *testing.T, database abstraction.Database) {
 	uid, err := database.CreateComment("body", "author", "/test", true, nil)
 	assert.Nil(t, err)
 	err = database.DeleteComment(*uid)
@@ -226,15 +281,13 @@ func TestDeleteComment(t *testing.T) {
 	assert.NotNil(t, c.DeletedAt)
 }
 
-func TestGetAllThreadsEmptyDatabase(t *testing.T) {
-	database := setupTestDb()
+func GetAllThreadsEmptyDatabase(t *testing.T, database abstraction.Database) {
 	threads, err := database.GetAllThreads()
 	assert.Nil(t, err)
 	assert.Len(t, threads, 0)
 }
 
-func TestGetAllThreads(t *testing.T) {
-	database := setupTestDb()
+func GetAllThreads(t *testing.T, database abstraction.Database) {
 	_, err := database.CreateThread("/test")
 	assert.Nil(t, err)
 	_, err = database.CreateThread("/test1")
@@ -246,15 +299,13 @@ func TestGetAllThreads(t *testing.T) {
 	assert.Equal(t, "/test1", threads[1].Path)
 }
 
-func TestGetAllCommentsEmptyDatabase(t *testing.T) {
-	database := setupTestDb()
+func GetAllCommentsEmptyDatabase(t *testing.T, database abstraction.Database) {
 	comments, err := database.GetAllComments()
 	assert.Nil(t, err)
 	assert.Len(t, comments, 0)
 }
 
-func TestGetAllComments(t *testing.T) {
-	database := setupTestDb()
+func GetAllComments(t *testing.T, database abstraction.Database) {
 	author := "author"
 	body := "body"
 	path := "/test"
@@ -275,8 +326,7 @@ func TestGetAllComments(t *testing.T) {
 	assert.Nil(t, comments[1].ReplyTo)
 }
 
-func TestSoftDelete(t *testing.T) {
-	database := setupTestDb()
+func SoftDelete(t *testing.T, database abstraction.Database) {
 	author := "author"
 	body := "body"
 	path := "/test"
@@ -296,8 +346,7 @@ func TestSoftDelete(t *testing.T) {
 	assert.Nil(t, c.DeletedAt)
 }
 
-func TestGetAllCommentsGetsSoftDeletedComments(t *testing.T) {
-	database := setupTestDb()
+func GetAllCommentsGetsSoftDeletedComments(t *testing.T, database abstraction.Database) {
 	author := "author"
 	body := "body"
 	path := "/test"
@@ -322,8 +371,7 @@ func TestGetAllCommentsGetsSoftDeletedComments(t *testing.T) {
 	assert.Nil(t, comments[1].ReplyTo)
 }
 
-func TestDeleteCommentDeletesReplies(t *testing.T) {
-	database := setupTestDb()
+func DeleteCommentDeletesReplies(t *testing.T, database abstraction.Database) {
 	author := "author"
 	body := "body"
 	path := "/test"

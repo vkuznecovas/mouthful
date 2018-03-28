@@ -13,6 +13,8 @@ type Database struct {
 	DynamoDBCommentReadUnits  *int
 	DynamoDBThreadWriteUnits  *int
 	DynamoDBCommentWriteUnits *int
+	AwsAccessKeyID            *string
+	AwsSecretAccessKey        *string
 }
 
 // Moderation - moderation section of our config
