@@ -10,7 +10,7 @@ import (
 	"github.com/vkuznecovas/mouthful/global"
 )
 
-var sqliteQueries = []string{
+var SqliteQueries = []string{
 	`CREATE TABLE IF NOT EXISTS Thread(
 		Id BLOB PRIMARY KEY,
 		CreatedAt TIMESTAMP DEFAULT CURRENT_TIMESTAMP not null,
@@ -31,7 +31,7 @@ var sqliteQueries = []string{
 
 // InitializeDatabase runs the queries for an initial database seed
 func (db *Database) InitializeDatabase() error {
-	for _, v := range sqliteQueries {
+	for _, v := range SqliteQueries {
 		db.DB.MustExec(v)
 	}
 	return nil
