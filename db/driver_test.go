@@ -13,6 +13,32 @@ import (
 	"github.com/vkuznecovas/mouthful/global"
 )
 
+var testFunctions = [...]interface{}{CreateThread,
+	CreateThreadUniqueViolation,
+	GetThread,
+	GetThreadNotFound,
+	CreateComment,
+	CreateCommentNoReply,
+	CreateCommentWithReply,
+	CreateCommentWrongReply,
+	CreateCommentWrongThread,
+	GetCommentNotFound,
+	GetComment,
+	GetCommentsByThreadNoThread,
+	GetCommentsByThread,
+	UpdateCommentNotFound,
+	UpdateComment,
+	DeleteCommentNotFound,
+	DeleteComment,
+	GetAllThreadsEmptyDatabase,
+	GetAllThreads,
+	GetAllCommentsEmptyDatabase,
+	GetAllComments,
+	SoftDelete,
+	GetAllCommentsGetsSoftDeletedComments,
+	DeleteCommentDeletesReplies,
+}
+
 func setupDynamoTestDb() abstraction.Database {
 	database := dynamodb.CreateTestDatabase()
 	wipeDB(database)
@@ -27,33 +53,6 @@ func wipeDB(db abstraction.Database) {
 	driverCasted := driver.(*dynamodb.Database)
 	_ = driverCasted.DB.Table(driverCasted.TablePrefix + global.DefaultDynamoDbThreadTableName).DeleteTable().Run()
 	_ = driverCasted.DB.Table(driverCasted.TablePrefix + global.DefaultDynamoDbCommentTableName).DeleteTable().Run()
-}
-
-func TestDynamoDb(t *testing.T) {
-	CreateThread(t, setupDynamoTestDb())
-	CreateThreadUniqueViolation(t, setupDynamoTestDb())
-	GetThread(t, setupDynamoTestDb())
-	GetThreadNotFound(t, setupDynamoTestDb())
-	CreateComment(t, setupDynamoTestDb())
-	CreateCommentNoReply(t, setupDynamoTestDb())
-	CreateCommentWithReply(t, setupDynamoTestDb())
-	CreateCommentWrongReply(t, setupDynamoTestDb())
-	CreateCommentWrongThread(t, setupDynamoTestDb())
-	GetCommentNotFound(t, setupDynamoTestDb())
-	GetComment(t, setupDynamoTestDb())
-	GetCommentsByThreadNoThread(t, setupDynamoTestDb())
-	GetCommentsByThread(t, setupDynamoTestDb())
-	UpdateCommentNotFound(t, setupDynamoTestDb())
-	UpdateComment(t, setupDynamoTestDb())
-	DeleteCommentNotFound(t, setupDynamoTestDb())
-	DeleteComment(t, setupDynamoTestDb())
-	GetAllThreadsEmptyDatabase(t, setupDynamoTestDb())
-	GetAllThreads(t, setupDynamoTestDb())
-	GetAllCommentsEmptyDatabase(t, setupDynamoTestDb())
-	GetAllComments(t, setupDynamoTestDb())
-	SoftDelete(t, setupDynamoTestDb())
-	GetAllCommentsGetsSoftDeletedComments(t, setupDynamoTestDb())
-	DeleteCommentDeletesReplies(t, setupDynamoTestDb())
 }
 
 func setupSqliteTestDb() abstraction.Database {
@@ -74,31 +73,16 @@ func setupSqliteTestDb() abstraction.Database {
 	return &database
 }
 
+func TestDynamoDb(t *testing.T) {
+	for _, v := range testFunctions {
+		v.(func(*testing.T, abstraction.Database))(t, setupDynamoTestDb())
+	}
+}
+
 func TestSqliteDb(t *testing.T) {
-	CreateThread(t, setupSqliteTestDb())
-	CreateThreadUniqueViolation(t, setupSqliteTestDb())
-	GetThread(t, setupSqliteTestDb())
-	GetThreadNotFound(t, setupSqliteTestDb())
-	CreateComment(t, setupSqliteTestDb())
-	CreateCommentNoReply(t, setupSqliteTestDb())
-	CreateCommentWithReply(t, setupSqliteTestDb())
-	CreateCommentWrongReply(t, setupSqliteTestDb())
-	CreateCommentWrongThread(t, setupSqliteTestDb())
-	GetCommentNotFound(t, setupSqliteTestDb())
-	GetComment(t, setupSqliteTestDb())
-	GetCommentsByThreadNoThread(t, setupSqliteTestDb())
-	GetCommentsByThread(t, setupSqliteTestDb())
-	UpdateCommentNotFound(t, setupSqliteTestDb())
-	UpdateComment(t, setupSqliteTestDb())
-	DeleteCommentNotFound(t, setupSqliteTestDb())
-	DeleteComment(t, setupSqliteTestDb())
-	GetAllThreadsEmptyDatabase(t, setupSqliteTestDb())
-	GetAllThreads(t, setupSqliteTestDb())
-	GetAllCommentsEmptyDatabase(t, setupSqliteTestDb())
-	GetAllComments(t, setupSqliteTestDb())
-	SoftDelete(t, setupSqliteTestDb())
-	GetAllCommentsGetsSoftDeletedComments(t, setupSqliteTestDb())
-	DeleteCommentDeletesReplies(t, setupSqliteTestDb())
+	for _, v := range testFunctions {
+		v.(func(*testing.T, abstraction.Database))(t, setupSqliteTestDb())
+	}
 }
 
 func CreateThread(t *testing.T, database abstraction.Database) {
