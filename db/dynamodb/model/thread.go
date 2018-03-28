@@ -25,3 +25,18 @@ func (t *Thread) ToThread() model.Thread {
 		CreatedAt: t.CreatedAt,
 	}
 }
+
+// ThreadSlice represents a collection of threads
+type ThreadSlice []Thread
+
+func (ts ThreadSlice) Len() int {
+	return len(ts)
+}
+
+func (ts ThreadSlice) Less(i, j int) bool {
+	return ts[i].CreatedAt.Before(ts[j].CreatedAt)
+}
+
+func (ts ThreadSlice) Swap(i, j int) {
+	ts[i], ts[j] = ts[j], ts[i]
+}

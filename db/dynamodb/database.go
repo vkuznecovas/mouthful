@@ -6,7 +6,6 @@ import (
 	"github.com/guregu/dynamo"
 	"github.com/vkuznecovas/mouthful/config/model"
 	"github.com/vkuznecovas/mouthful/db/abstraction"
-	"github.com/vkuznecovas/mouthful/global"
 )
 
 // TODO: tests
@@ -28,30 +27,19 @@ func CreateDatabase(databaseConfig model.Database) (abstraction.Database, error)
 		DB:          db,
 		TablePrefix: prefix,
 	}, nil
-	// // put item
-	// w := widget{UserID: 613, Time: time.Now(), Msg: "hello"}
-	// err := table.Put(w).Run()
-
-	// // get the same item
-	// var result widget
-	// err = table.Get("UserID", w.UserID).
-	// 	Range("Time", dynamo.Equal, w.Time).
-	// 	Filter("'Count' = ? AND $ = ?", w.Count, "Message", w.Msg). // placeholders in expressions
-	// 	One(&result)
-
-	// // get all items
-	// var results []widget
-	// err = table.Scan().All(&results)
 }
 
-func (db *Database) WipeDatabase() error {
-	err := db.DB.Table(db.TablePrefix + global.DefaultDynamoDbThreadTableName).DeleteTable().Run()
-	if err != nil {
-		return err
+// CreateTestDatabase creates a database instance for testing locally
+func CreateTestDatabase() abstraction.Database {
+	db := dynamo.New(session.New(), &aws.Config{Region: aws.String("eu-west-1"), Endpoint: aws.String("http://localhost:8000")})
+	prefix := "test"
+	database := &Database{
+		DB:          db,
+		TablePrefix: prefix,
 	}
-	err = db.DB.Table(db.TablePrefix + global.DefaultDynamoDbCommentTableName).DeleteTable().Run()
+	err := database.InitializeDatabase()
 	if err != nil {
-		return err
+		panic(err)
 	}
-	return nil
+	return database
 }

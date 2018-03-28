@@ -2,6 +2,7 @@ package dynamodb
 
 import (
 	"log"
+	"sort"
 	"strings"
 	"time"
 
@@ -18,7 +19,7 @@ func (db *Database) InitializeDatabase() error {
 	tables := [...]string{global.DefaultDynamoDbThreadTableName, global.DefaultDynamoDbCommentTableName}
 	tableModelMap := map[string]interface{}{
 		global.DefaultDynamoDbThreadTableName:  dynamoModel.Thread{},
-		global.DefaultDynamoDbCommentTableName: model.Comment{},
+		global.DefaultDynamoDbCommentTableName: dynamoModel.Comment{},
 	}
 
 	for i := range tables {
@@ -136,55 +137,156 @@ func (db *Database) CreateComment(body string, author string, path string, confi
 		}
 	}
 	uid := global.GetUUID()
-	err = db.DB.Table(db.TablePrefix + global.DefaultDynamoDbCommentTableName).Put(model.Comment{
+	var toReplyTo *string
+	if replyTo != nil {
+		trt := replyTo.String()
+		toReplyTo = &trt
+	}
+	err = db.DB.Table(db.TablePrefix + global.DefaultDynamoDbCommentTableName).Put(dynamoModel.Comment{
 		Id:        uid,
 		ThreadId:  thread.Id,
 		Body:      body,
 		Author:    author,
 		Confirmed: confirmed,
 		CreatedAt: time.Now().UTC(),
-		ReplyTo:   replyTo,
+		ReplyTo:   toReplyTo,
 	}).Run()
 	return &uid, err
 }
 
 // GetCommentsByThread gets all the comments by thread path
 func (db *Database) GetCommentsByThread(path string) (comments []model.Comment, err error) {
+	thread, err := db.GetThread(path)
+	if err != nil {
+		return comments, err
+	}
+	var result dynamoModel.CommentSlice
 
+	err = db.DB.Table(db.TablePrefix+global.DefaultDynamoDbCommentTableName).Scan().Filter("'ThreadId' = ?", thread.Id).All(&result)
+	if err != nil {
+		if err == dynamo.ErrNotFound {
+			return comments, nil
+		}
+		return comments, err
+	}
+	sort.Sort(result)
+
+	comments = make([]model.Comment, 0)
+	for i := range result {
+		comment, err := result[i].ToComment()
+		if err != nil {
+			return comments, err
+		}
+		if !comment.Confirmed {
+			continue
+		}
+		if comment.DeletedAt != nil {
+			continue
+		}
+		comments = append(comments, comment)
+	}
+	// Filter("'Count' = ? AND $ = ?", w.Count, "Message", w.Msg)
 	return comments, nil
 }
 
 // GetComment gets comment by id
 func (db *Database) GetComment(id uuid.UUID) (comment model.Comment, err error) {
+	var result *dynamoModel.Comment
 
-	return comment, nil
+	err = db.DB.Table(db.TablePrefix+global.DefaultDynamoDbCommentTableName).Get("ID", id).One(&result)
+	if err != nil {
+		if err == dynamo.ErrNotFound {
+			return comment, global.ErrCommentNotFound
+		}
+		return comment, err
+	}
+	res, err := result.ToComment()
+	return res, err
 }
 
 // UpdateComment updatesComment comment by id
 func (db *Database) UpdateComment(id uuid.UUID, body, author string, confirmed bool) error {
-
-	return nil
+	_, err := db.GetComment(id)
+	if err != nil {
+		return err
+	}
+	statement := db.DB.Table(db.TablePrefix+global.DefaultDynamoDbCommentTableName).Update("ID", id)
+	statement.Set("Body", body)
+	statement.Set("Author", author)
+	statement.Set("Confirmed", confirmed)
+	err = statement.Run()
+	return err
 }
 
 // DeleteComment soft-deletes the comment by id and all the replies to it
 func (db *Database) DeleteComment(id uuid.UUID) error {
+	comment, err := db.GetComment(id)
+	if err != nil {
+		return err
+	}
 
-	return nil
+	deletedAt := time.Now().UnixNano()
+	err = db.DB.Table(db.TablePrefix+global.DefaultDynamoDbCommentTableName).Update("ID", id).Set("DeletedAt", deletedAt).Run()
+	if err != nil {
+		return err
+	}
+	var result dynamoModel.CommentSlice
+	err = db.DB.Table(db.TablePrefix+global.DefaultDynamoDbCommentTableName).Scan().Filter("'ThreadId' = ?", comment.ThreadId).All(&result)
+	if err != nil {
+		return err
+	}
+	for i := range result {
+		if result[i].ReplyTo != nil {
+			cid, err := global.ParseUUIDFromString(*result[i].ReplyTo)
+			if err != nil {
+				return err
+			}
+			if uuid.Equal(*cid, comment.Id) {
+				err = db.DB.Table(db.TablePrefix+global.DefaultDynamoDbCommentTableName).Update("ID", result[i].Id).Set("DeletedAt", deletedAt).Run()
+				if err != nil {
+					return err
+				}
+			}
+		}
+	}
+	return err
 }
 
 // RestoreDeletedComment restores the soft-deleted comment
 func (db *Database) RestoreDeletedComment(id uuid.UUID) error {
-
-	return nil
+	_, err := db.GetComment(id)
+	if err != nil {
+		return err
+	}
+	err = db.DB.Table(db.TablePrefix+global.DefaultDynamoDbCommentTableName).Update("ID", id).Remove("DeletedAt").Run()
+	return err
 }
 
 // GetAllThreads gets all the threads found in the database
 func (db *Database) GetAllThreads() (threads []model.Thread, err error) {
+	var result dynamoModel.ThreadSlice
+	db.DB.Table(db.TablePrefix + global.DefaultDynamoDbThreadTableName).Scan().All(&result)
+	sort.Sort(result)
+	threads = make([]model.Thread, len(result))
+	for i := range result {
+		threads[i] = result[i].ToThread()
+	}
 	return threads, err
 }
 
 // GetAllComments gets all the comments found in the database
 func (db *Database) GetAllComments() (comments []model.Comment, err error) {
+	var result dynamoModel.CommentSlice
+	db.DB.Table(db.TablePrefix + global.DefaultDynamoDbCommentTableName).Scan().All(&result)
+	sort.Sort(result)
+	comments = make([]model.Comment, len(result))
+	for i := range result {
+		comment, err := result[i].ToComment()
+		if err != nil {
+			return comments, err
+		}
+		comments[i] = comment
+	}
 	return comments, err
 }
 
