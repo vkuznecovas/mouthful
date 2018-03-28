@@ -21,11 +21,12 @@ func (db *Database) InitializeDatabase() error {
 		global.DefaultDynamoDbThreadTableName:  dynamoModel.Thread{},
 		global.DefaultDynamoDbCommentTableName: dynamoModel.Comment{},
 	}
-	tableReadCapMap := map[string]interface{}{}
+	// tableReadCapMap := map[string]interface{}{}
 	prefix := ""
 	if db.Config.TablePrefix != nil {
 		prefix = *db.Config.TablePrefix
 	}
+	db.TablePrefix = prefix
 	for i := range tables {
 
 		tables[i] = prefix + tables[i]

@@ -12,8 +12,9 @@ import (
 
 // Database is a database instance for sqlite
 type Database struct {
-	DB     *dynamo.DB
-	Config model.Database
+	DB          *dynamo.DB
+	Config      model.Database
+	TablePrefix string
 }
 
 // CreateDatabase creates a database instance from the given config
@@ -24,8 +25,9 @@ func CreateDatabase(databaseConfig model.Database) (abstraction.Database, error)
 		prefix = *databaseConfig.TablePrefix
 	}
 	return &Database{
-		DB:     db,
-		Config: databaseConfig,
+		DB:          db,
+		Config:      databaseConfig,
+		TablePrefix: prefix,
 	}, nil
 }
 
