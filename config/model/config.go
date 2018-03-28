@@ -2,13 +2,17 @@ package model
 
 // Database - a config object representing our database
 type Database struct {
-	Dialect     string
-	Database    string
-	Username    string
-	Password    string
-	Host        string
-	Port        string
-	TablePrefix *string
+	Dialect                   string
+	Database                  string
+	Username                  string
+	Password                  string
+	Host                      string
+	Port                      string
+	TablePrefix               *string
+	DynamoDBThreadReadUnits   *int
+	DynamoDBCommentReadUnits  *int
+	DynamoDBThreadWriteUnits  *int
+	DynamoDBCommentWriteUnits *int
 }
 
 // Moderation - moderation section of our config

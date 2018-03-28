@@ -21,9 +21,14 @@ func (db *Database) InitializeDatabase() error {
 		global.DefaultDynamoDbThreadTableName:  dynamoModel.Thread{},
 		global.DefaultDynamoDbCommentTableName: dynamoModel.Comment{},
 	}
-
+	tableReadCapMap := map[string]interface{}{}
+	prefix := ""
+	if db.Config.TablePrefix != nil {
+		prefix = *db.Config.TablePrefix
+	}
 	for i := range tables {
-		tables[i] = db.TablePrefix + tables[i]
+
+		tables[i] = prefix + tables[i]
 	}
 
 	dynamoTables, err := db.DB.ListTables().All()
@@ -39,7 +44,7 @@ func (db *Database) InitializeDatabase() error {
 		}
 		if !found {
 			log.Printf("Creating table %v\n", t)
-			noPrefix := strings.Replace(t, db.TablePrefix, "", 1)
+			noPrefix := strings.Replace(t, prefix, "", 1)
 			err := db.DB.CreateTable(t, tableModelMap[noPrefix]).Provision(4, 2).Run()
 			if err != nil {
 				return err
@@ -54,15 +59,22 @@ func (db *Database) InitializeDatabase() error {
 		if err != nil {
 			return err
 		}
-		matches := 0
+
+		running := 0
 		for _, v := range dt {
 			for _, t := range tables {
 				if t == v {
-					matches++
+					desc, err := db.DB.Table(v).Describe().Run()
+					if err != nil {
+						return err
+					}
+					if desc.Status == dynamo.ActiveStatus {
+						running++
+					}
 				}
 			}
 		}
-		if matches == len(tables) {
+		if running == len(tables) {
 			log.Printf("Tables created, continuing...\n")
 			break
 		} else {
@@ -84,7 +96,6 @@ func (db *Database) CreateThread(path string) (*uuid.UUID, error) {
 				Id:        uid,
 				Path:      path,
 				CreatedAt: time.Now(),
-				Comments:  make([]uuid.UUID, 0),
 			}).Run()
 			return &uid, err
 		}

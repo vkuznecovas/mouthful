@@ -27,10 +27,6 @@ func wipeDB(db abstraction.Database) {
 	_ = driverCasted.DB.Table(driverCasted.TablePrefix + global.DefaultDynamoDbCommentTableName).DeleteTable().Run()
 }
 
-func TestDynamoDb(t *testing.T) {
-	_ = setupTestDb()
-}
-
 func TestCreateThread(t *testing.T) {
 	database := setupTestDb()
 

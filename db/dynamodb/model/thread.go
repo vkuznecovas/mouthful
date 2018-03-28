@@ -11,10 +11,9 @@ import (
 // Thread represents a commenting thread for dynamodb.
 // This is needed since we store threads a bit differently than in a relational database
 type Thread struct {
-	Id        uuid.UUID   `db:"Id" dynamo:"ID"`
-	Path      string      `db:"Path" dynamo:"Path,hash"`
-	CreatedAt time.Time   `db:"CreatedAt" dynamo:"CreatedAt"`
-	Comments  []uuid.UUID `dynamo:"Comments"`
+	Id        uuid.UUID `dynamo:"ID"`
+	Path      string    `dynamo:"Path,hash"`
+	CreatedAt time.Time `dynamo:"CreatedAt"`
 }
 
 // ToThread converts dynamodb thread to mouthful thread
