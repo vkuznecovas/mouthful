@@ -5,3 +5,4 @@ config.front.json
 static/
 isso.db
 debug.test
+.vscode/

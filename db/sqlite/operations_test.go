@@ -41,6 +41,16 @@ func TestCreateThread(t *testing.T) {
 	assert.Equal(t, "/test", thread.Path)
 }
 
+func TestCreateThreadUniqueViolation(t *testing.T) {
+	database := setupTestDb()
+	uid, err := database.CreateThread("/test")
+	assert.Nil(t, err)
+	assert.NotNil(t, uid)
+	uidNew, err := database.CreateThread("/test")
+	assert.Nil(t, err)
+	assert.True(t, uuid.Equal(*uid, *uidNew))
+}
+
 func TestGetThread(t *testing.T) {
 	database := setupTestDb()
 	uid, err := database.CreateThread("/test")

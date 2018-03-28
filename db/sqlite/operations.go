@@ -39,9 +39,16 @@ func (db *Database) InitializeDatabase() error {
 
 // CreateThread takes the thread path and creates it in the database
 func (db *Database) CreateThread(path string) (*uuid.UUID, error) {
-	uid := global.GetUUID()
-	_, err := db.DB.Exec(db.DB.Rebind("INSERT INTO Thread(Id,Path) VALUES(?, ?)"), uid, path)
-	return &uid, err
+	thread, err := db.GetThread(path)
+	if err != nil {
+		if err == global.ErrThreadNotFound {
+			uid := global.GetUUID()
+			_, err := db.DB.Exec(db.DB.Rebind("INSERT INTO Thread(Id,Path) VALUES(?, ?)"), uid, path)
+			return &uid, err
+		}
+		return nil, err
+	}
+	return &thread.Id, nil
 }
 
 // GetThread takes the thread path and fetches it from the database
@@ -180,4 +187,8 @@ func (db *Database) GetAllComments() (comments []model.Comment, err error) {
 // GetDatabaseDialect returns the current database dialect
 func (db *Database) GetDatabaseDialect() string {
 	return "sqlite3"
+}
+
+func (db *Database) GetUnderlyingStruct() interface{} {
+	return db
 }

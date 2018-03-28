@@ -6,6 +6,7 @@ import (
 	"github.com/guregu/dynamo"
 	"github.com/vkuznecovas/mouthful/config/model"
 	"github.com/vkuznecovas/mouthful/db/abstraction"
+	"github.com/vkuznecovas/mouthful/global"
 )
 
 // TODO: tests
@@ -18,7 +19,7 @@ type Database struct {
 
 // CreateDatabase creates a database instance from the given config
 func CreateDatabase(databaseConfig model.Database) (abstraction.Database, error) {
-	db := dynamo.New(session.New(), &aws.Config{Region: aws.String("eu-west-1"), Endpoint: aws.String("http://localhost:8080")})
+	db := dynamo.New(session.New(), &aws.Config{Region: aws.String("eu-west-1"), Endpoint: aws.String("http://localhost:8000")})
 	prefix := ""
 	if databaseConfig.TablePrefix != nil {
 		prefix = *databaseConfig.TablePrefix
@@ -41,4 +42,16 @@ func CreateDatabase(databaseConfig model.Database) (abstraction.Database, error)
 	// // get all items
 	// var results []widget
 	// err = table.Scan().All(&results)
+}
+
+func (db *Database) WipeDatabase() error {
+	err := db.DB.Table(db.TablePrefix + global.DefaultDynamoDbThreadTableName).DeleteTable().Run()
+	if err != nil {
+		return err
+	}
+	err = db.DB.Table(db.TablePrefix + global.DefaultDynamoDbCommentTableName).DeleteTable().Run()
+	if err != nil {
+		return err
+	}
+	return nil
 }
