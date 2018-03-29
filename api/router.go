@@ -1,6 +1,7 @@
 package api
 
 import (
+	"fmt"
 	"log"
 
 	"github.com/gin-contrib/sessions"
@@ -62,12 +63,17 @@ func (r *Router) GetComments(c *gin.Context) {
 		c.AbortWithStatusJSON(500, global.ErrInternalServerError.Error())
 		return
 	}
+	fmt.Println(comments)
 	if comments != nil {
 		if r.cache != nil {
 			r.cache.Set(path, &comments, cache.DefaultExpiration)
 			c.Writer.Header().Set("X-Cache", "MISS")
 		}
-		c.JSON(200, comments)
+		if len(comments) > 0 {
+			c.JSON(200, comments)
+		} else {
+			c.JSON(404, global.ErrThreadNotFound.Error())
+		}
 		return
 	}
 	c.AbortWithStatusJSON(404, global.ErrThreadNotFound.Error())

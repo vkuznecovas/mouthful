@@ -2,12 +2,20 @@ package model
 
 // Database - a config object representing our database
 type Database struct {
-	Dialect  string
-	Database string
-	Username string
-	Password string
-	Host     string
-	Port     string
+	Dialect                   string
+	Database                  *string
+	Username                  *string
+	Password                  *string
+	Host                      *string
+	Port                      *string
+	TablePrefix               *string
+	DynamoDBThreadReadUnits   *int64
+	DynamoDBCommentReadUnits  *int64
+	DynamoDBThreadWriteUnits  *int64
+	DynamoDBCommentWriteUnits *int64
+	AwsAccessKeyID            *string
+	AwsSecretAccessKey        *string
+	AwsRegion                 *string
 }
 
 // Moderation - moderation section of our config

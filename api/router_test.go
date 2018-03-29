@@ -10,10 +10,12 @@ import (
 	"strings"
 	"testing"
 
+	"github.com/jmoiron/sqlx"
 	"github.com/satori/go.uuid"
 	"github.com/vkuznecovas/mouthful/global"
 
 	"github.com/vkuznecovas/mouthful/db/abstraction"
+	"github.com/vkuznecovas/mouthful/db/dynamodb"
 
 	"github.com/appleboy/gofight"
 	"github.com/stretchr/testify/assert"
@@ -52,8 +54,110 @@ var config = configModel.Config{
 	},
 }
 
-func TestStatus(t *testing.T) {
-	testDB := sqlite.CreateTestDatabase()
+var testFunctions = [...]interface{}{
+	Status,
+	GetCommentsNoComments,
+	GetCommentsUnconfirmedComments,
+	GetCommentsBadQuery,
+	CreateCommentSpamTrap,
+	CreateCommentBadRequst,
+	DeleteCommentBadRequst,
+	DeleteCommentNonExistant,
+	DeleteComment,
+	UpdateCommentBadRequst,
+	CreateComment,
+	CreateCommentBadReplyTo,
+	CreateCommentReplyTo,
+	LoginBadPassword,
+	LoginGoodPassword,
+	LoginInvalidRequest,
+	GetAllCommentsUnauthorized,
+	UpdateCommentUnauthorized,
+	DeleteCommentUnauthorized,
+	GetThreadsUnauthorized,
+	GetThreadsEmpty,
+	GetCommentsEmpty,
+	GetThreads,
+	GetComments,
+	GetCommentsUnconfirmed,
+	UpdateCommentNonExistant,
+	UpdateCommentInvalidBody,
+	UpdateComment,
+	RestoreDeletedCommentBadRequst,
+	RestoreDeletedCommentNonExistant,
+	RestoreDeletedComment,
+	CreateCommentBodyTooLong,
+	GetCommentsCache,
+	CreateCommentNoModeration,
+	DeleteCommentBadUUID,
+	UpdateCommentBadUUID,
+	DeleteCommentDeletesReplyToComments,
+	RateLimitingLoginCreation,
+	RateLimitingDisabled,
+	RateLimitingCommentCreation,
+	GetCommentsWithPathNormalization,
+}
+
+func GetSessionCookie(db *abstraction.Database, r *gofight.RequestConfig) gofight.H {
+	cookiePrefix := "mouthful-session"
+	cookieValue := ""
+	os.Setenv("ADMIN_PASSWORD", "test")
+	server, _ := api.GetServer(db, &config)
+	r.POST("/v1/admin/login").
+		SetBody(`{"password": "test"}`).
+		SetDebug(debug).
+		Run(server, func(r gofight.HTTPResponse, rq gofight.HTTPRequest) {
+			cookieValue = strings.Split(strings.TrimLeft(r.HeaderMap["Set-Cookie"][0], cookiePrefix+"="), " ")[0]
+		})
+	return gofight.H{cookiePrefix: cookieValue}
+}
+
+func setupDynamoTestDb() abstraction.Database {
+	database := dynamodb.CreateTestDatabase()
+	err := database.InitializeDatabase()
+	if err != nil {
+		panic(err)
+	}
+	return database
+}
+
+func setupSqliteTestDb() abstraction.Database {
+	database := sqlite.Database{}
+	db, err := sqlx.Open("sqlite3", ":memory:")
+	if err != nil {
+		panic(err)
+	}
+	err = db.Ping()
+	if err != nil {
+		panic(err)
+	}
+	database.DB = db
+	err = database.InitializeDatabase()
+	if err != nil {
+		panic(err)
+	}
+	return &database
+}
+
+func TestRouterWithSqlite(t *testing.T) {
+	for _, f := range testFunctions {
+		f.(func(*testing.T, abstraction.Database))(t, setupSqliteTestDb())
+	}
+}
+
+func TestRouterWithDynamoDb(t *testing.T) {
+	db := setupDynamoTestDb()
+	driver := db.GetUnderlyingStruct()
+	driverCasted := driver.(*dynamodb.Database)
+	// Just in case this is not an in memory instance
+	defer driverCasted.DeleteTables()
+	for _, f := range testFunctions {
+		f.(func(*testing.T, abstraction.Database))(t, db)
+		driverCasted.WipeOutData()
+	}
+}
+
+func Status(t *testing.T, testDB abstraction.Database) {
 	r := gofight.New()
 	server, err := api.GetServer(&testDB, &config)
 	assert.Nil(t, err)
@@ -65,8 +169,7 @@ func TestStatus(t *testing.T) {
 		})
 }
 
-func TestGetCommentsNoComments(t *testing.T) {
-	testDB := sqlite.CreateTestDatabase()
+func GetCommentsNoComments(t *testing.T, testDB abstraction.Database) {
 	r := gofight.New()
 	server, err := api.GetServer(&testDB, &config)
 	assert.Nil(t, err)
@@ -77,8 +180,7 @@ func TestGetCommentsNoComments(t *testing.T) {
 		})
 }
 
-func TestGetCommentsUnconfirmedComments(t *testing.T) {
-	testDB := sqlite.CreateTestDatabase()
+func GetCommentsUnconfirmedComments(t *testing.T, testDB abstraction.Database) {
 	r := gofight.New()
 	server, err := api.GetServer(&testDB, &config)
 	assert.Nil(t, err)
@@ -108,8 +210,7 @@ func TestGetCommentsUnconfirmedComments(t *testing.T) {
 		})
 }
 
-func TestGetCommentsBadQuery(t *testing.T) {
-	testDB := sqlite.CreateTestDatabase()
+func GetCommentsBadQuery(t *testing.T, testDB abstraction.Database) {
 	r := gofight.New()
 	server, err := api.GetServer(&testDB, &config)
 	assert.Nil(t, err)
@@ -120,8 +221,7 @@ func TestGetCommentsBadQuery(t *testing.T) {
 		})
 }
 
-func TestCreateCommentSpamTrap(t *testing.T) {
-	testDB := sqlite.CreateTestDatabase()
+func CreateCommentSpamTrap(t *testing.T, testDB abstraction.Database) {
 	r := gofight.New()
 	email := "email"
 
@@ -156,8 +256,7 @@ func TestCreateCommentSpamTrap(t *testing.T) {
 		})
 }
 
-func TestCreateCommentBadRequst(t *testing.T) {
-	testDB := sqlite.CreateTestDatabase()
+func CreateCommentBadRequst(t *testing.T, testDB abstraction.Database) {
 	r := gofight.New()
 	server, err := api.GetServer(&testDB, &config)
 	assert.Nil(t, err)
@@ -169,22 +268,7 @@ func TestCreateCommentBadRequst(t *testing.T) {
 		})
 }
 
-func GetSessionCookie(db *abstraction.Database, r *gofight.RequestConfig) gofight.H {
-	cookiePrefix := "mouthful-session"
-	cookieValue := ""
-	os.Setenv("ADMIN_PASSWORD", "test")
-	server, _ := api.GetServer(db, &config)
-	r.POST("/v1/admin/login").
-		SetBody(`{"password": "test"}`).
-		SetDebug(debug).
-		Run(server, func(r gofight.HTTPResponse, rq gofight.HTTPRequest) {
-			cookieValue = strings.Split(strings.TrimLeft(r.HeaderMap["Set-Cookie"][0], cookiePrefix+"="), " ")[0]
-		})
-	return gofight.H{cookiePrefix: cookieValue}
-}
-
-func TestDeleteCommentBadRequst(t *testing.T) {
-	testDB := sqlite.CreateTestDatabase()
+func DeleteCommentBadRequst(t *testing.T, testDB abstraction.Database) {
 	server, err := api.GetServer(&testDB, &config)
 	assert.Nil(t, err)
 	r := gofight.New()
@@ -199,8 +283,7 @@ func TestDeleteCommentBadRequst(t *testing.T) {
 		})
 }
 
-func TestDeleteCommentNonExistant(t *testing.T) {
-	testDB := sqlite.CreateTestDatabase()
+func DeleteCommentNonExistant(t *testing.T, testDB abstraction.Database) {
 	server, err := api.GetServer(&testDB, &config)
 	assert.Nil(t, err)
 	r := gofight.New()
@@ -219,8 +302,7 @@ func TestDeleteCommentNonExistant(t *testing.T) {
 		})
 }
 
-func TestDeleteComment(t *testing.T) {
-	testDB := sqlite.CreateTestDatabase()
+func DeleteComment(t *testing.T, testDB abstraction.Database) {
 	r := gofight.New()
 	server, err := api.GetServer(&testDB, &config)
 	assert.Nil(t, err)
@@ -297,8 +379,7 @@ func TestDeleteComment(t *testing.T) {
 		})
 }
 
-func TestUpdateCommentBadRequst(t *testing.T) {
-	testDB := sqlite.CreateTestDatabase()
+func UpdateCommentBadRequst(t *testing.T, testDB abstraction.Database) {
 	server, err := api.GetServer(&testDB, &config)
 	assert.Nil(t, err)
 	r := gofight.New()
@@ -312,8 +393,7 @@ func TestUpdateCommentBadRequst(t *testing.T) {
 		})
 }
 
-func TestCreateComment(t *testing.T) {
-	testDB := sqlite.CreateTestDatabase()
+func CreateComment(t *testing.T, testDB abstraction.Database) {
 	server, err := api.GetServer(&testDB, &config)
 	assert.Nil(t, err)
 	r := gofight.New()
@@ -371,8 +451,7 @@ func TestCreateComment(t *testing.T) {
 		})
 }
 
-func TestCreateCommentBadReplyTo(t *testing.T) {
-	testDB := sqlite.CreateTestDatabase()
+func CreateCommentBadReplyTo(t *testing.T, testDB abstraction.Database) {
 	server, err := api.GetServer(&testDB, &config)
 	assert.Nil(t, err)
 	r := gofight.New()
@@ -426,8 +505,7 @@ func TestCreateCommentBadReplyTo(t *testing.T) {
 		})
 }
 
-func TestCreateCommentReplyTo(t *testing.T) {
-	testDB := sqlite.CreateTestDatabase()
+func CreateCommentReplyTo(t *testing.T, testDB abstraction.Database) {
 	server, err := api.GetServer(&testDB, &config)
 	assert.Nil(t, err)
 	r := gofight.New()
@@ -524,9 +602,8 @@ func TestCreateCommentReplyTo(t *testing.T) {
 		})
 }
 
-func TestLoginBadPassword(t *testing.T) {
+func LoginBadPassword(t *testing.T, testDB abstraction.Database) {
 	os.Setenv("ADMIN_PASSWORD", "test")
-	testDB := sqlite.CreateTestDatabase()
 	r := gofight.New()
 	body := model.LoginBody{
 		Password: "t",
@@ -543,9 +620,8 @@ func TestLoginBadPassword(t *testing.T) {
 		})
 }
 
-func TestLoginGoodPassword(t *testing.T) {
+func LoginGoodPassword(t *testing.T, testDB abstraction.Database) {
 	os.Setenv("ADMIN_PASSWORD", "test")
-	testDB := sqlite.CreateTestDatabase()
 	r := gofight.New()
 	body := model.LoginBody{
 		Password: "test",
@@ -565,9 +641,8 @@ func TestLoginGoodPassword(t *testing.T) {
 		})
 }
 
-func TestLoginInvalidRequest(t *testing.T) {
+func LoginInvalidRequest(t *testing.T, testDB abstraction.Database) {
 	os.Setenv("ADMIN_PASSWORD", "test")
-	testDB := sqlite.CreateTestDatabase()
 	r := gofight.New()
 	body := "asdasdasdasdasdasdasd"
 	bodyBytes, err := json.Marshal(body)
@@ -582,8 +657,7 @@ func TestLoginInvalidRequest(t *testing.T) {
 		})
 }
 
-func TestGetAllCommentsUnauthorized(t *testing.T) {
-	testDB := sqlite.CreateTestDatabase()
+func GetAllCommentsUnauthorized(t *testing.T, testDB abstraction.Database) {
 	r := gofight.New()
 	body := "Doesnt matter, really"
 	bodyBytes, err := json.Marshal(body)
@@ -598,8 +672,7 @@ func TestGetAllCommentsUnauthorized(t *testing.T) {
 		})
 }
 
-func TestUpdateCommentUnauthorized(t *testing.T) {
-	testDB := sqlite.CreateTestDatabase()
+func UpdateCommentUnauthorized(t *testing.T, testDB abstraction.Database) {
 	r := gofight.New()
 	body := "Doesnt matter, really"
 	bodyBytes, err := json.Marshal(body)
@@ -614,8 +687,7 @@ func TestUpdateCommentUnauthorized(t *testing.T) {
 		})
 }
 
-func TestDeleteCommentUnauthorized(t *testing.T) {
-	testDB := sqlite.CreateTestDatabase()
+func DeleteCommentUnauthorized(t *testing.T, testDB abstraction.Database) {
 	r := gofight.New()
 	body := "Doesnt matter, really"
 	bodyBytes, err := json.Marshal(body)
@@ -630,8 +702,7 @@ func TestDeleteCommentUnauthorized(t *testing.T) {
 		})
 }
 
-func TestGetThreadsUnauthorized(t *testing.T) {
-	testDB := sqlite.CreateTestDatabase()
+func GetThreadsUnauthorized(t *testing.T, testDB abstraction.Database) {
 	r := gofight.New()
 	body := "Doesnt matter, really"
 	bodyBytes, err := json.Marshal(body)
@@ -646,8 +717,7 @@ func TestGetThreadsUnauthorized(t *testing.T) {
 		})
 }
 
-func TestGetThreadsEmpty(t *testing.T) {
-	testDB := sqlite.CreateTestDatabase()
+func GetThreadsEmpty(t *testing.T, testDB abstraction.Database) {
 	server, err := api.GetServer(&testDB, &config)
 	assert.Nil(t, err)
 	r := gofight.New()
@@ -667,8 +737,7 @@ func TestGetThreadsEmpty(t *testing.T) {
 		})
 }
 
-func TestGetCommentsEmpty(t *testing.T) {
-	testDB := sqlite.CreateTestDatabase()
+func GetCommentsEmpty(t *testing.T, testDB abstraction.Database) {
 	server, err := api.GetServer(&testDB, &config)
 	assert.Nil(t, err)
 	r := gofight.New()
@@ -688,8 +757,7 @@ func TestGetCommentsEmpty(t *testing.T) {
 		})
 }
 
-func TestGetThreads(t *testing.T) {
-	testDB := sqlite.CreateTestDatabase()
+func GetThreads(t *testing.T, testDB abstraction.Database) {
 	server, err := api.GetServer(&testDB, &config)
 	assert.Nil(t, err)
 	r := gofight.New()
@@ -730,8 +798,7 @@ func TestGetThreads(t *testing.T) {
 		})
 }
 
-func TestGetComments(t *testing.T) {
-	testDB := sqlite.CreateTestDatabase()
+func GetComments(t *testing.T, testDB abstraction.Database) {
 	server, err := api.GetServer(&testDB, &config)
 	assert.Nil(t, err)
 	r := gofight.New()
@@ -773,8 +840,7 @@ func TestGetComments(t *testing.T) {
 		})
 }
 
-func TestGetCommentsUnconfirmed(t *testing.T) {
-	testDB := sqlite.CreateTestDatabase()
+func GetCommentsUnconfirmed(t *testing.T, testDB abstraction.Database) {
 	r := gofight.New()
 	body := model.CreateCommentBody{
 		Path:   "/1027/test/",
@@ -804,8 +870,7 @@ func TestGetCommentsUnconfirmed(t *testing.T) {
 		})
 }
 
-func TestUpdateCommentNonExistant(t *testing.T) {
-	testDB := sqlite.CreateTestDatabase()
+func UpdateCommentNonExistant(t *testing.T, testDB abstraction.Database) {
 	server, err := api.GetServer(&testDB, &config)
 	assert.Nil(t, err)
 	r := gofight.New()
@@ -827,8 +892,7 @@ func TestUpdateCommentNonExistant(t *testing.T) {
 		})
 }
 
-func TestUpdateCommentInvalidBody(t *testing.T) {
-	testDB := sqlite.CreateTestDatabase()
+func UpdateCommentInvalidBody(t *testing.T, testDB abstraction.Database) {
 	server, err := api.GetServer(&testDB, &config)
 	assert.Nil(t, err)
 	r := gofight.New()
@@ -871,8 +935,7 @@ func TestUpdateCommentInvalidBody(t *testing.T) {
 			assert.Equal(t, 400, r.Code)
 		})
 }
-func TestUpdateComment(t *testing.T) {
-	testDB := sqlite.CreateTestDatabase()
+func UpdateComment(t *testing.T, testDB abstraction.Database) {
 	server, err := api.GetServer(&testDB, &config)
 	assert.Nil(t, err)
 	r := gofight.New()
@@ -994,8 +1057,7 @@ func TestUpdateComment(t *testing.T) {
 		})
 }
 
-func TestRestoreDeletedCommentBadRequst(t *testing.T) {
-	testDB := sqlite.CreateTestDatabase()
+func RestoreDeletedCommentBadRequst(t *testing.T, testDB abstraction.Database) {
 	server, err := api.GetServer(&testDB, &config)
 	assert.Nil(t, err)
 	r := gofight.New()
@@ -1010,8 +1072,7 @@ func TestRestoreDeletedCommentBadRequst(t *testing.T) {
 		})
 }
 
-func TestRestoreDeletedCommentNonExistant(t *testing.T) {
-	testDB := sqlite.CreateTestDatabase()
+func RestoreDeletedCommentNonExistant(t *testing.T, testDB abstraction.Database) {
 	server, err := api.GetServer(&testDB, &config)
 	assert.Nil(t, err)
 	r := gofight.New()
@@ -1030,8 +1091,7 @@ func TestRestoreDeletedCommentNonExistant(t *testing.T) {
 		})
 }
 
-func TestRestoreDeletedComment(t *testing.T) {
-	testDB := sqlite.CreateTestDatabase()
+func RestoreDeletedComment(t *testing.T, testDB abstraction.Database) {
 	r := gofight.New()
 	server, err := api.GetServer(&testDB, &config)
 	assert.Nil(t, err)
@@ -1127,8 +1187,7 @@ func TestRestoreDeletedComment(t *testing.T) {
 
 }
 
-func TestCreateCommentBodyTooLong(t *testing.T) {
-	testDB := sqlite.CreateTestDatabase()
+func CreateCommentBodyTooLong(t *testing.T, testDB abstraction.Database) {
 	r := gofight.New()
 	email := "email"
 	server, err := api.GetServer(&testDB, &config)
@@ -1170,8 +1229,7 @@ func TestCreateCommentBodyTooLong(t *testing.T) {
 		})
 }
 
-func TestGetCommentsCache(t *testing.T) {
-	testDB := sqlite.CreateTestDatabase()
+func GetCommentsCache(t *testing.T, testDB abstraction.Database) {
 	newConfig := config
 	newConfig.API.Cache.Enabled = true
 	server, err := api.GetServer(&testDB, &newConfig)
@@ -1244,8 +1302,7 @@ func TestGetCommentsCache(t *testing.T) {
 		})
 }
 
-func TestCreateCommentNoModeration(t *testing.T) {
-	testDB := sqlite.CreateTestDatabase()
+func CreateCommentNoModeration(t *testing.T, testDB abstraction.Database) {
 	newConfig := config
 	newConfig.Moderation.Enabled = false
 	server, err := api.GetServer(&testDB, &newConfig)
@@ -1285,8 +1342,7 @@ func TestCreateCommentNoModeration(t *testing.T) {
 		})
 }
 
-func TestDeleteCommentBadUUID(t *testing.T) {
-	testDB := sqlite.CreateTestDatabase()
+func DeleteCommentBadUUID(t *testing.T, testDB abstraction.Database) {
 	server, err := api.GetServer(&testDB, &config)
 	assert.Nil(t, err)
 	r := gofight.New()
@@ -1306,8 +1362,7 @@ func TestDeleteCommentBadUUID(t *testing.T) {
 		})
 }
 
-func TestUpdateCommentBadUUID(t *testing.T) {
-	testDB := sqlite.CreateTestDatabase()
+func UpdateCommentBadUUID(t *testing.T, testDB abstraction.Database) {
 	server, err := api.GetServer(&testDB, &config)
 	assert.Nil(t, err)
 	r := gofight.New()
@@ -1329,8 +1384,7 @@ func TestUpdateCommentBadUUID(t *testing.T) {
 		})
 }
 
-func TestDeleteCommentDeletesReplyToComments(t *testing.T) {
-	testDB := sqlite.CreateTestDatabase()
+func DeleteCommentDeletesReplyToComments(t *testing.T, testDB abstraction.Database) {
 	r := gofight.New()
 	server, err := api.GetServer(&testDB, &config)
 	assert.Nil(t, err)
@@ -1414,8 +1468,7 @@ func TestDeleteCommentDeletesReplyToComments(t *testing.T) {
 		})
 }
 
-func TestRateLimitingCommentCreation(t *testing.T) {
-	testDB := sqlite.CreateTestDatabase()
+func RateLimitingCommentCreation(t *testing.T, testDB abstraction.Database) {
 	newConfig := config
 	newConfig.API.RateLimiting.Enabled = true
 	newConfig.API.RateLimiting.PostsHour = 10
@@ -1444,8 +1497,7 @@ func TestRateLimitingCommentCreation(t *testing.T) {
 
 }
 
-func TestRateLimitingLoginCreation(t *testing.T) {
-	testDB := sqlite.CreateTestDatabase()
+func RateLimitingLoginCreation(t *testing.T, testDB abstraction.Database) {
 	newConfig := config
 	newConfig.API.RateLimiting.Enabled = true
 	newConfig.API.RateLimiting.PostsHour = 100
@@ -1472,8 +1524,7 @@ func TestRateLimitingLoginCreation(t *testing.T) {
 	}
 }
 
-func TestRateLimitingDisabled(t *testing.T) {
-	testDB := sqlite.CreateTestDatabase()
+func RateLimitingDisabled(t *testing.T, testDB abstraction.Database) {
 	newConfig := config
 	newConfig.API.RateLimiting.Enabled = false
 	newConfig.API.RateLimiting.PostsHour = 1000
@@ -1496,8 +1547,7 @@ func TestRateLimitingDisabled(t *testing.T) {
 	}
 }
 
-func TestGetCommentsWithPathNormalization(t *testing.T) {
-	testDB := sqlite.CreateTestDatabase()
+func GetCommentsWithPathNormalization(t *testing.T, testDB abstraction.Database) {
 	server, err := api.GetServer(&testDB, &config)
 	assert.Nil(t, err)
 	r := gofight.New()

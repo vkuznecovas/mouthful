@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"strings"
 
+	"github.com/vkuznecovas/mouthful/db/dynamodb"
 	"github.com/vkuznecovas/mouthful/db/sqlite"
 
 	"github.com/vkuznecovas/mouthful/config/model"
@@ -15,6 +16,9 @@ func GetDBInstance(databaseConfig model.Database) (db abstraction.Database, err 
 	switch strings.ToLower(databaseConfig.Dialect) {
 	case "sqlite3":
 		db, err = sqlite.CreateDatabase(databaseConfig)
+		return db, err
+	case "dynamodb":
+		db, err = dynamodb.CreateDatabase(databaseConfig)
 		return db, err
 	default:
 		err = fmt.Errorf("unsupported dialect %v", databaseConfig.Dialect)

@@ -1,6 +1,11 @@
 language: go
+env:
+  - AWS_ACCESS_KEY_ID=somekey AWS_SECRET_ACCESS_KEY=somekey
 before_install:
   - go get -u github.com/golang/dep/cmd/dep
+  - wget http://dynamodb-local.s3-website-us-west-2.amazonaws.com/dynamodb_local_latest.tar.gz -O /tmp/dynamodb_local_latest.tar.gz
+  - tar -xzf /tmp/dynamodb_local_latest.tar.gz -C /tmp
+  - java -Djava.library.path=/tmp/DynamoDBLocal_lib -jar /tmp/DynamoDBLocal.jar -inMemory &
 install:
   - dep ensure
 script: 
@@ -8,5 +13,9 @@ script:
   - go build main.go
   - go build cmd/util/transformConfig.go
   - go build cmd/migration/isso/main.go
+  - go build cmd/migration/dynamodb/main.go
 notifications:
   email: false
+addons:
+  hosts:
+    - dynamodb-local
