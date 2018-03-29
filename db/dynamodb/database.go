@@ -2,6 +2,7 @@ package dynamodb
 
 import (
 	"errors"
+	"os"
 
 	"github.com/aws/aws-sdk-go/aws"
 	"github.com/aws/aws-sdk-go/aws/session"
@@ -41,6 +42,27 @@ func ValidateConfig(config model.Database) error {
 	}
 	if config.AwsRegion == nil {
 		err += "Please specify the AWS region your dynamoDb lives in\n"
+	}
+	if config.AwsAccessKeyID == nil {
+		if os.Getenv("AWS_ACCESS_KEY_ID") == "" {
+			err += "Please specify the AWS_ACCESS_KEY_ID either by setting AWS_ACCESS_KEY_ID environment variable or setting AwsAccessKeyID in config\n"
+		} else {
+			value := os.Getenv("AWS_ACCESS_KEY_ID")
+			config.AwsAccessKeyID = &value
+		}
+	} else {
+		if os.Getenv("AWS_ACCESS_KEY_ID") == "" {
+			os.Setenv("AWS_ACCESS_KEY_ID", *config.AwsAccessKeyID)
+		}
+	}
+	if config.AwsSecretAccessKey == nil {
+		if os.Getenv("AWS_SECRET_ACCESS_KEY") == "" {
+			err += "Please specify the AWS_SECRET_ACCESS_KEY either by setting AWS_SECRET_ACCESS_KEY environment variable or setting AwsSecretAccessKey in config\n"
+		}
+	} else {
+		if os.Getenv("AWS_SECRET_ACCESS_KEY") == "" {
+			os.Setenv("AWS_SECRET_ACCESS_KEY", *config.AwsSecretAccessKey)
+		}
 	}
 	if err != "" {
 		return errors.New(err)
