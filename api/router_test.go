@@ -149,12 +149,12 @@ func TestRouterWithDynamoDb(t *testing.T) {
 	db := setupDynamoTestDb()
 	driver := db.GetUnderlyingStruct()
 	driverCasted := driver.(*dynamodb.Database)
+	// Just in case this is not an in memory instance
+	defer driverCasted.DeleteTables()
 	for _, f := range testFunctions {
 		f.(func(*testing.T, abstraction.Database))(t, db)
 		driverCasted.WipeOutData()
 	}
-	// Just in case this is not an in memory instance
-	driverCasted.DeleteTables()
 }
 
 func Status(t *testing.T, testDB abstraction.Database) {
