@@ -11,9 +11,10 @@ import (
 )
 
 func TestGetDBInstanceSqlite3(t *testing.T) {
+	memory := ":memory:"
 	database := model.Database{
 		Dialect:  "sqlite3",
-		Database: ":memory:",
+		Database: &memory,
 	}
 	sqliteInstance, err := db.GetDBInstance(database)
 	assert.Nil(t, err)
@@ -23,9 +24,10 @@ func TestGetDBInstanceSqlite3(t *testing.T) {
 
 func TestGetDBInstanceNotFound(t *testing.T) {
 	d := "something"
+	memory := ":memory:"
 	database := model.Database{
 		Dialect:  d,
-		Database: ":memory:",
+		Database: &memory,
 	}
 	_, err := db.GetDBInstance(database)
 	assert.NotNil(t, err)
