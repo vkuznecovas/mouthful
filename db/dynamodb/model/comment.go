@@ -13,7 +13,7 @@ import (
 // Comment represents a comment in a thread
 type Comment struct {
 	Id        uuid.UUID `dynamo:"ID,hash"`
-	ThreadId  uuid.UUID `dynamo:"ThreadId"`
+	ThreadId  uuid.UUID `dynamo:"ThreadId" index:"ThreadId_index,hash"`
 	Body      string    `dynamo:"Body"`
 	Author    string    `dynamo:"Author"`
 	Confirmed bool      `dynamo:"Confirmed"`

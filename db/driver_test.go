@@ -70,12 +70,14 @@ func TestDynamoDb(t *testing.T) {
 	db := setupDynamoTestDb()
 	driver := db.GetUnderlyingStruct()
 	driverCasted := driver.(*dynamodb.Database)
-	for _, f := range testFunctions {
-		f.(func(*testing.T, abstraction.Database))(t, db)
-		driverCasted.WipeOutData()
-	}
+	defer driverCasted.DeleteTables()
+	// for _, f := range testFunctions {
+	// 	f.(func(*testing.T, abstraction.Database))(t, db)
+	// 	driverCasted.WipeOutData()
+	// }
+	GetCommentsByThread(t, db)
 	// Just in case this is not an in memory instance
-	driverCasted.DeleteTables()
+
 }
 
 func TestSqliteDb(t *testing.T) {
