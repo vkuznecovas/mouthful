@@ -16,6 +16,7 @@ import (
 
 	"github.com/vkuznecovas/mouthful/db/abstraction"
 	"github.com/vkuznecovas/mouthful/db/dynamodb"
+	dynamoModel "github.com/vkuznecovas/mouthful/db/dynamodb/model"
 
 	"github.com/appleboy/gofight"
 	"github.com/stretchr/testify/assert"
@@ -31,6 +32,29 @@ import (
 const debug = false
 
 var maxCommentLength int = 10000
+
+var config = configModel.Config{
+	Honeypot: false,
+	Moderation: configModel.Moderation{
+		Enabled:          true,
+		SessionSecret:    "somesecret",
+		AdminPassword:    "test",
+		MaxCommentLength: &maxCommentLength,
+	},
+	API: configModel.API{
+		Debug: false,
+		Cache: configModel.Cache{
+			Enabled:           false,
+			IntervalInSeconds: 1,
+			ExpiryInSeconds:   2,
+		},
+		RateLimiting: configModel.RateLimiting{
+			Enabled:   false,
+			PostsHour: 2,
+		},
+	},
+}
+
 var testFunctions = [...]interface{}{
 	Status,
 	GetCommentsNoComments,
@@ -75,28 +99,6 @@ var testFunctions = [...]interface{}{
 	GetCommentsWithPathNormalization,
 }
 
-var config = configModel.Config{
-	Honeypot: false,
-	Moderation: configModel.Moderation{
-		Enabled:          true,
-		SessionSecret:    "somesecret",
-		AdminPassword:    "test",
-		MaxCommentLength: &maxCommentLength,
-	},
-	API: configModel.API{
-		Debug: false,
-		Cache: configModel.Cache{
-			Enabled:           false,
-			IntervalInSeconds: 1,
-			ExpiryInSeconds:   2,
-		},
-		RateLimiting: configModel.RateLimiting{
-			Enabled:   false,
-			PostsHour: 2,
-		},
-	},
-}
-
 func GetSessionCookie(db *abstraction.Database, r *gofight.RequestConfig) gofight.H {
 	cookiePrefix := "mouthful-session"
 	cookieValue := ""
@@ -113,7 +115,6 @@ func GetSessionCookie(db *abstraction.Database, r *gofight.RequestConfig) gofigh
 
 func setupDynamoTestDb() abstraction.Database {
 	database := dynamodb.CreateTestDatabase()
-	wipeDB(database)
 	err := database.InitializeDatabase()
 	if err != nil {
 		panic(err)
@@ -121,11 +122,29 @@ func setupDynamoTestDb() abstraction.Database {
 	return database
 }
 
-func wipeDB(db abstraction.Database) {
-	driver := db.GetUnderlyingStruct()
-	driverCasted := driver.(*dynamodb.Database)
-	_ = driverCasted.DB.Table(driverCasted.TablePrefix + global.DefaultDynamoDbThreadTableName).DeleteTable().Run()
-	_ = driverCasted.DB.Table(driverCasted.TablePrefix + global.DefaultDynamoDbCommentTableName).DeleteTable().Run()
+func wipeDB(db *dynamodb.Database) {
+	var threads []dynamoModel.Thread
+	var comments []dynamoModel.Comment
+	err := db.DB.Table(db.TablePrefix + global.DefaultDynamoDbThreadTableName).Scan().All(&threads)
+	if err != nil {
+		panic(err)
+	}
+	for _, v := range threads {
+		err := db.DB.Table(db.TablePrefix+global.DefaultDynamoDbThreadTableName).Delete("Path", v.Path).Run()
+		if err != nil {
+			panic(err)
+		}
+	}
+	err = db.DB.Table(db.TablePrefix + global.DefaultDynamoDbCommentTableName).Scan().All(&comments)
+	if err != nil {
+		panic(err)
+	}
+	for _, v := range comments {
+		err := db.DB.Table(db.TablePrefix+global.DefaultDynamoDbCommentTableName).Delete("ID", v.Id).Run()
+		if err != nil {
+			panic(err)
+		}
+	}
 }
 
 func setupSqliteTestDb() abstraction.Database {
@@ -147,14 +166,18 @@ func setupSqliteTestDb() abstraction.Database {
 }
 
 func TestRouterWithSqlite(t *testing.T) {
-	for _, v := range testFunctions {
-		v.(func(*testing.T, abstraction.Database))(t, setupSqliteTestDb())
+	for _, f := range testFunctions {
+		f.(func(*testing.T, abstraction.Database))(t, setupSqliteTestDb())
 	}
 }
 
 func TestRouterWithDynamoDb(t *testing.T) {
-	for _, v := range testFunctions {
-		v.(func(*testing.T, abstraction.Database))(t, setupDynamoTestDb())
+	db := setupDynamoTestDb()
+	driver := db.GetUnderlyingStruct()
+	driverCasted := driver.(*dynamodb.Database)
+	for _, f := range testFunctions {
+		f.(func(*testing.T, abstraction.Database))(t, db)
+		wipeDB(driverCasted)
 	}
 }
 

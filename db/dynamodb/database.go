@@ -6,6 +6,7 @@ import (
 	"github.com/guregu/dynamo"
 	"github.com/vkuznecovas/mouthful/config/model"
 	"github.com/vkuznecovas/mouthful/db/abstraction"
+	"github.com/vkuznecovas/mouthful/global"
 )
 
 // TODO: tests
@@ -31,10 +32,11 @@ func CreateDatabase(databaseConfig model.Database) (abstraction.Database, error)
 	}, nil
 }
 
-// CreateTestDatabase creates a database instance for testing locally
+// CreateTestDatabase creates a database instance for testing locally.
+// It creates tables with UUID prefix, so should be safe to use even if tests are run in parallel.
 func CreateTestDatabase() abstraction.Database {
 	db := dynamo.New(session.New(), &aws.Config{Region: aws.String("eu-west-1"), Endpoint: aws.String("http://localhost:8000")})
-	prefix := "test"
+	prefix := global.GetUUID().String()
 	database := &Database{
 		DB: db,
 		Config: model.Database{

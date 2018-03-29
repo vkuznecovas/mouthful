@@ -9,6 +9,7 @@ import (
 	"github.com/stretchr/testify/assert"
 	"github.com/vkuznecovas/mouthful/db/abstraction"
 	"github.com/vkuznecovas/mouthful/db/dynamodb"
+	dynamoModel "github.com/vkuznecovas/mouthful/db/dynamodb/model"
 	"github.com/vkuznecovas/mouthful/db/sqlite"
 	"github.com/vkuznecovas/mouthful/global"
 )
@@ -41,18 +42,11 @@ var testFunctions = [...]interface{}{CreateThread,
 
 func setupDynamoTestDb() abstraction.Database {
 	database := dynamodb.CreateTestDatabase()
-	wipeDB(database)
 	err := database.InitializeDatabase()
 	if err != nil {
 		panic(err)
 	}
 	return database
-}
-func wipeDB(db abstraction.Database) {
-	driver := db.GetUnderlyingStruct()
-	driverCasted := driver.(*dynamodb.Database)
-	_ = driverCasted.DB.Table(driverCasted.TablePrefix + global.DefaultDynamoDbThreadTableName).DeleteTable().Run()
-	_ = driverCasted.DB.Table(driverCasted.TablePrefix + global.DefaultDynamoDbCommentTableName).DeleteTable().Run()
 }
 
 func setupSqliteTestDb() abstraction.Database {
@@ -73,15 +67,43 @@ func setupSqliteTestDb() abstraction.Database {
 	return &database
 }
 
+func wipeDB(db *dynamodb.Database) {
+	var threads []dynamoModel.Thread
+	var comments []dynamoModel.Comment
+	err := db.DB.Table(db.TablePrefix + global.DefaultDynamoDbThreadTableName).Scan().All(&threads)
+	if err != nil {
+		panic(err)
+	}
+	for _, v := range threads {
+		err := db.DB.Table(db.TablePrefix+global.DefaultDynamoDbThreadTableName).Delete("Path", v.Path).Run()
+		if err != nil {
+			panic(err)
+		}
+	}
+	err = db.DB.Table(db.TablePrefix + global.DefaultDynamoDbCommentTableName).Scan().All(&comments)
+	if err != nil {
+		panic(err)
+	}
+	for _, v := range comments {
+		err := db.DB.Table(db.TablePrefix+global.DefaultDynamoDbCommentTableName).Delete("ID", v.Id).Run()
+		if err != nil {
+			panic(err)
+		}
+	}
+}
 func TestDynamoDb(t *testing.T) {
-	for _, v := range testFunctions {
-		v.(func(*testing.T, abstraction.Database))(t, setupDynamoTestDb())
+	db := setupDynamoTestDb()
+	driver := db.GetUnderlyingStruct()
+	driverCasted := driver.(*dynamodb.Database)
+	for _, f := range testFunctions {
+		f.(func(*testing.T, abstraction.Database))(t, db)
+		wipeDB(driverCasted)
 	}
 }
 
 func TestSqliteDb(t *testing.T) {
-	for _, v := range testFunctions {
-		v.(func(*testing.T, abstraction.Database))(t, setupSqliteTestDb())
+	for _, f := range testFunctions {
+		f.(func(*testing.T, abstraction.Database))(t, setupSqliteTestDb())
 	}
 }
 
@@ -315,6 +337,7 @@ func SoftDelete(t *testing.T, database abstraction.Database) {
 	body := "body"
 	path := "/test"
 	uid, err := database.CreateComment(body, author, path, false, nil)
+	assert.Nil(t, err)
 	c, err := database.GetComment(*uid)
 	assert.Nil(t, err)
 	assert.Nil(t, c.DeletedAt)
