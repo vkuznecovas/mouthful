@@ -1,6 +1,8 @@
 package dynamodb
 
 import (
+	"errors"
+
 	"github.com/aws/aws-sdk-go/aws"
 	"github.com/aws/aws-sdk-go/aws/session"
 	"github.com/guregu/dynamo"
@@ -20,9 +22,39 @@ type Database struct {
 	IsTest      bool
 }
 
+// TODO: write recommended units here
+// ValidateConfig validates the config for sqlite
+func ValidateConfig(config model.Database) error {
+	err := ""
+	// os.Getenv()
+	if config.DynamoDBCommentReadUnits == nil {
+		err += "Please specify the read units for dynamoDb Comment table by adjusting the config value DynamoDBCommentReadUnits\n"
+	}
+	if config.DynamoDBThreadReadUnits == nil {
+		err += "Please specify the read units for dynamoDb Thread table by adjusting the config value DynamoDBThreadReadUnits\n"
+	}
+	if config.DynamoDBThreadWriteUnits == nil {
+		err += "Please specify the write units for dynamoDb Thread table by adjusting the config value DynamoDBThreadWriteUnits\n"
+	}
+	if config.DynamoDBCommentWriteUnits == nil {
+		err += "Please specify the write units for dynamoDb Comment table by adjusting the config value DynamoDBCommentWriteUnits\n"
+	}
+	if config.AwsRegion == nil {
+		err += "Please specify the AWS region your dynamoDb lives in\n"
+	}
+	if err != "" {
+		return errors.New(err)
+	}
+	return nil
+}
+
 // CreateDatabase creates a database instance from the given config
 func CreateDatabase(databaseConfig model.Database) (abstraction.Database, error) {
-	db := dynamo.New(session.New(), &aws.Config{Region: aws.String("eu-west-1"), Endpoint: aws.String("http://localhost:8000")})
+	err := ValidateConfig(databaseConfig)
+	if err != nil {
+		return nil, err
+	}
+	db := dynamo.New(session.New(), &aws.Config{Region: aws.String(*databaseConfig.AwsRegion)})
 	prefix := ""
 	if databaseConfig.TablePrefix != nil {
 		prefix = *databaseConfig.TablePrefix
@@ -39,10 +71,15 @@ func CreateDatabase(databaseConfig model.Database) (abstraction.Database, error)
 func CreateTestDatabase() abstraction.Database {
 	db := dynamo.New(session.New(), &aws.Config{Region: aws.String("eu-west-1"), Endpoint: aws.String("http://localhost:8000")})
 	prefix := global.GetUUID().String() + "_"
+	units := int64(1)
 	database := &Database{
 		DB: db,
 		Config: model.Database{
-			TablePrefix: &prefix,
+			TablePrefix:               &prefix,
+			DynamoDBCommentReadUnits:  &units,
+			DynamoDBCommentWriteUnits: &units,
+			DynamoDBThreadReadUnits:   &units,
+			DynamoDBThreadWriteUnits:  &units,
 		},
 		IsTest: true,
 	}

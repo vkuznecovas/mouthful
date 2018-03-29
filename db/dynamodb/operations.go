@@ -21,7 +21,10 @@ func (db *Database) InitializeDatabase() error {
 		global.DefaultDynamoDbThreadTableName:  dynamoModel.Thread{},
 		global.DefaultDynamoDbCommentTableName: dynamoModel.Comment{},
 	}
-	// tableReadCapMap := map[string]interface{}{}
+	tableUnitsMap := map[string][2]int64{
+		global.DefaultDynamoDbThreadTableName:  [...]int64{*db.Config.DynamoDBThreadReadUnits, *db.Config.DynamoDBThreadWriteUnits},
+		global.DefaultDynamoDbCommentTableName: [...]int64{*db.Config.DynamoDBCommentReadUnits, *db.Config.DynamoDBCommentWriteUnits},
+	}
 	prefix := ""
 	if db.Config.TablePrefix != nil {
 		prefix = *db.Config.TablePrefix
@@ -46,7 +49,9 @@ func (db *Database) InitializeDatabase() error {
 		if !found {
 			log.Printf("Creating table %v\n", t)
 			noPrefix := strings.Replace(t, prefix, "", 1)
-			err := db.DB.CreateTable(t, tableModelMap[noPrefix]).Provision(4, 2).Run()
+			readUnits := tableUnitsMap[noPrefix][0]
+			writeUnits := tableUnitsMap[noPrefix][1]
+			err := db.DB.CreateTable(t, tableModelMap[noPrefix]).Provision(readUnits, writeUnits).Run()
 			if err != nil {
 				return err
 			}
