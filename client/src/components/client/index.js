@@ -11,7 +11,9 @@ const useStyle = config.useDefaultStyle;
 function getStyle(c) {
   return useStyle ? style[c] : c
 }
-
+function sortComments(a, b) {
+  return new Date(a.CreatedAt) - new Date(b.CreatedAt)
+}
 const handleStateChange = (http, context) => {
   if (http.readyState != 4) {
     return
@@ -175,7 +177,7 @@ export default class App extends Component {
     if (this.state.error == true) {
       return <div class={getStyle("mouthful_wrapper")}><div class={getStyle("mouthful_error")}>The comments are temporarily unavailable</div></div>
     }
-    var commentsFiltered = this.state.comments.filter(x => x.ReplyTo == null);
+    var commentsFiltered = this.state.comments.filter(x => x.ReplyTo == null).sort(sortComments);
     var commentDiv = <div class={getStyle("mouthful_no_comments")}>No comments yet!</div>
     var loadMoreComments = null;
     if (commentsFiltered.length != 0) {
@@ -191,7 +193,7 @@ export default class App extends Component {
         commentsFiltered = commentsFiltered.slice(0, this.state.showComments);
       }
       commentDiv = commentsFiltered.map(comment => {
-        var cmntsToFilter = this.state.comments.filter(x => x.ReplyTo === comment.Id);
+        var cmntsToFilter = this.state.comments.filter(x => x.ReplyTo === comment.Id).sort(sortComments);
         var loadMoreReplies = null;
         if (comment.RepliesToLoad && comment.RepliesToLoad > 0) {
           if (cmntsToFilter.length > comment.RepliesToLoad) {
