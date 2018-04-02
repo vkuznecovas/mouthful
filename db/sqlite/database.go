@@ -2,6 +2,9 @@ package sqlite
 
 import (
 	"errors"
+	"log"
+	"os"
+	"time"
 
 	"github.com/jmoiron/sqlx"
 	"github.com/vkuznecovas/mouthful/config/model"
@@ -40,6 +43,10 @@ func CreateDatabase(databaseConfig model.Database) (abstraction.Database, error)
 			return nil, err
 		}
 		db = d
+		// this is used for the demo page
+		if os.Getenv("MOUTHFUL_PERIODIC_DELETE") == "enabled" {
+			periodicWipe(d)
+		}
 	} else {
 		d, err := sqlx.Connect("sqlite3", *databaseConfig.Database)
 		if err != nil {
@@ -71,4 +78,22 @@ func CreateTestDatabase() abstraction.Database {
 		panic(err)
 	}
 	return &DB
+}
+
+func periodicWipe(db *sqlx.DB) {
+	ticker := time.NewTicker(24 * time.Hour)
+	quit := make(chan struct{})
+	log.Println("MOUTHFUL WILL DELETE ALL DATA ONCE EVERY 24 HOURS")
+	go func() {
+		for {
+			select {
+			case <-ticker.C:
+				log.Println("wiping data")
+				db.Exec("truncate table comment")
+			case <-quit:
+				ticker.Stop()
+				return
+			}
+		}
+	}()
 }
