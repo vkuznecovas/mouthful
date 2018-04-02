@@ -294,7 +294,6 @@ func (r *Router) RestoreDeletedComment(c *gin.Context) {
 }
 
 func (r *Router) isAdmin(c *gin.Context) bool {
-	// return true // TODO remove once tested
 	session := sessions.Default(c)
 	isAdmin := session.Get("isAdmin")
 	isAdminParsed, ok := isAdmin.(bool)

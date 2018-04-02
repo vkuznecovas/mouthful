@@ -59,7 +59,6 @@ func (db *Database) InitializeDatabase() error {
 	}
 
 	log.Printf("Tables created, waiting for them to be ready. Timeout - 1 minute\n")
-	// TODO check if this actually works in aws, it might not.
 	for i := 0; i < 60; i++ {
 		dt, err := db.DB.ListTables().All()
 		if err != nil {
