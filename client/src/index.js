@@ -8,6 +8,6 @@ import Widget from "./components/client";
 let _habitat = habitat(Widget);
 
 _habitat.render({
-  selector: '[data-widget-host="habitat"]',
+  selector: '#mouthful-comments',
   clean: true
 });
