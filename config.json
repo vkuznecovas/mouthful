@@ -4,7 +4,6 @@
         "enabled": true,
         "adminPassword": "somepassword",
         "sessionSecret": "somesecret",
-        "sessionName": "some-name",
         "sessionDurationSeconds": 21600,
         "maxCommentLength": 10000
     },
@@ -14,9 +13,7 @@
     },
     "api": {
         "port": 8080,
-        "host": "http://localhost",
         "debug": false,
-        "staticPath": "./static",
         "cache": {
             "enabled": true,
             "intervalInSeconds": 10,
