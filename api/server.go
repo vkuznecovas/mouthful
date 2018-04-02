@@ -67,15 +67,21 @@ func GetServer(db *abstraction.Database, config *model.Config) (*gin.Engine, err
 	r.Use(cors.Default())
 	router := New(db, config, cacheInstance)
 
-	fs := static.LocalFile(global.StaticPath, true)
-	if config.API.StaticPath != nil {
-		fs = static.LocalFile(*config.API.StaticPath, true)
+	if config.Moderation.Enabled {
+		fs := static.LocalFile(global.StaticPath, true)
+		r.Use(static.Serve("/", fs))
+	} else {
+		// We only serve client.js then
+		customFs := UnmoderatedFs{
+			FileSystem: gin.Dir(global.StaticPath, true),
+		}
+		r.Use(static.Serve("/", customFs))
 	}
 
-	r.Use(static.Serve("/", fs))
 	r.GET("/status", router.Status)
 
 	v1 := r.Group("/v1")
+	v1.GET("/client/config", router.GetClientConfig)
 	v1.GET("/comments", router.GetComments)
 
 	if limitMiddleware != nil {
@@ -91,6 +97,7 @@ func GetServer(db *abstraction.Database, config *model.Config) (*gin.Engine, err
 		}
 		store := sessions.NewCookieStore([]byte(config.Moderation.SessionSecret))
 		store.Options(sessions.Options{
+			// TODO - figure this out
 			MaxAge: 0, //int(time.Second * time.Duration(config.Moderation.SessionDurationSeconds)), //30min
 			Path:   "/",
 		})

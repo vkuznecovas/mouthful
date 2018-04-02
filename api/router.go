@@ -9,6 +9,7 @@ import (
 	"github.com/patrickmn/go-cache"
 	"github.com/satori/go.uuid"
 	"github.com/vkuznecovas/mouthful/api/model"
+	cfg "github.com/vkuznecovas/mouthful/config"
 	configModel "github.com/vkuznecovas/mouthful/config/model"
 	"github.com/vkuznecovas/mouthful/db/abstraction"
 	dbModel "github.com/vkuznecovas/mouthful/db/model"
@@ -17,14 +18,16 @@ import (
 
 // Router handles all the different routes as well as stores our  config and db objects
 type Router struct {
-	db     *abstraction.Database
-	config *configModel.Config
-	cache  *cache.Cache
+	db           *abstraction.Database
+	config       *configModel.Config
+	cache        *cache.Cache
+	clientConfig *configModel.ClientConfig
 }
 
 // New returns a new instance of router
 func New(db *abstraction.Database, config *configModel.Config, cache *cache.Cache) *Router {
-	r := Router{db: db, config: config, cache: cache}
+	clientConfig := cfg.TransformConfigToClientConfig(config)
+	r := Router{db: db, config: config, cache: cache, clientConfig: clientConfig}
 	return &r
 }
 
@@ -33,6 +36,11 @@ func (r *Router) Status(c *gin.Context) {
 	c.JSON(200, gin.H{
 		"message": "OK",
 	})
+}
+
+// GetClientConfig returns the client config portion
+func (r *Router) GetClientConfig(c *gin.Context) {
+	c.JSON(200, *r.clientConfig)
 }
 
 // GetComments returns the comments from thread that is passed as query parameter uri

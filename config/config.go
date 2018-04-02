@@ -16,10 +16,6 @@ func ParseConfig(contents []byte) (*model.Config, error) {
 	if err != nil {
 		return nil, err
 	}
-	if config.API.StaticPath == nil {
-		path := global.StaticPath
-		config.API.StaticPath = &path
-	}
 	return &config, nil
 }
 
@@ -30,15 +26,12 @@ func TransformConfigToClientConfig(input *model.Config) (conf *model.ClientConfi
 	conf.Moderation = input.Moderation.Enabled
 	if input.Moderation.MaxCommentLength != nil {
 		conf.MaxCommentLength = input.Moderation.MaxCommentLength
+	} else {
+		length := global.DefaultCommentLengthLimit
+		conf.MaxCommentLength = &length
 	}
+	conf.PageSize = input.Client.PageSize
 
 	conf.UseDefaultStyle = input.Client.UseDefaultStyle
-	if input.API.Port != nil {
-		conf.APIPort = input.API.Port
-	} else {
-		port := global.DefaultPort
-		conf.APIPort = &port
-	}
-	conf.APIHost = input.API.Host
 	return conf
 }

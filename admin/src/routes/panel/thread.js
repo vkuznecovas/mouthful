@@ -1,6 +1,5 @@
 import { h, Component } from 'preact';
 import style from './style';
-import config from './config';
 
 
 function formatDate(d) {
@@ -35,7 +34,7 @@ export default class Thread extends Component {
 	deleteComment(commentId) {
 		if (typeof window == "undefined") { return }
 		var http = new XMLHttpRequest();
-		var url = config.url + "/v1/admin/comments";
+		var url = window.location.origin + "/v1/admin/comments";
 		http.open("DELETE", url, true);
 		var context = this;
 		http.onreadystatechange = function () {
@@ -54,7 +53,7 @@ export default class Thread extends Component {
 	undoDelete(commentId) {
 		if (typeof window == "undefined") { return }
 		var http = new XMLHttpRequest();
-		var url = config.url + "/v1/admin/comments/restore";
+		var url = window.location.origin + "/v1/admin/comments/restore";
 		http.open("POST", url, true);
 		var context = this;
 		http.onreadystatechange = function () {

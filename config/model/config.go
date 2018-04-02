@@ -2,66 +2,64 @@ package model
 
 // Database - a config object representing our database
 type Database struct {
-	Dialect                   string
-	Database                  *string
-	Username                  *string
-	Password                  *string
-	Host                      *string
-	Port                      *string
-	TablePrefix               *string
-	DynamoDBThreadReadUnits   *int64
-	DynamoDBCommentReadUnits  *int64
-	DynamoDBThreadWriteUnits  *int64
-	DynamoDBCommentWriteUnits *int64
-	AwsAccessKeyID            *string
-	AwsSecretAccessKey        *string
-	AwsRegion                 *string
+	Dialect                   string  `json:"dialect"`
+	Database                  *string `json:"database,omitempty"`
+	Username                  *string `json:"username,omitempty"`
+	Password                  *string `json:"password,omitempty"`
+	Host                      *string `json:"host,omitempty"`
+	Port                      *string `json:"port,omitempty"`
+	TablePrefix               *string `json:"tablePrefix,omitempty"`
+	DynamoDBThreadReadUnits   *int64  `json:"dynamoDBThreadReadUnits,omitempty"`
+	DynamoDBCommentReadUnits  *int64  `json:"dynamoDBCommentReadUnits,omitempty"`
+	DynamoDBThreadWriteUnits  *int64  `json:"dynamoDBThreadWriteUnits,omitempty"`
+	DynamoDBCommentWriteUnits *int64  `json:"dynamoDBCommentWriteUnits,omitempty"`
+	AwsAccessKeyID            *string `json:"awsAccessKeyID,omitempty"`
+	AwsSecretAccessKey        *string `json:"awsSecretAccessKey,omitempty"`
+	AwsRegion                 *string `json:"awsRegion,omitempty"`
 }
 
 // Moderation - moderation section of our config
 type Moderation struct {
-	Enabled                bool
-	SessionSecret          string
-	SessionName            *string
-	AdminPassword          string
-	SessionDurationSeconds int
-	MaxCommentLength       *int
+	Enabled                bool    `json:"enabled"`
+	SessionSecret          string  `json:"sessionSecret"`
+	SessionName            *string `json:"sessionName,omitempty"`
+	AdminPassword          string  `json:"adminPassword"`
+	SessionDurationSeconds int     `json:"sessionDurationSeconds"`
+	MaxCommentLength       *int    `json:"maxCommentLength,omitempty"`
 }
 
 // Config - root of our config
 type Config struct {
-	Database   Database
-	Honeypot   bool
-	Moderation Moderation
-	Client     Client
-	API        API
+	Database   Database   `json:"database"`
+	Honeypot   bool       `json:"honeypot"`
+	Moderation Moderation `json:"moderation"`
+	Client     Client     `json:"client"`
+	API        API        `json:"api"`
 }
 
 // API - api configuration part
 type API struct {
-	StaticPath   *string
-	Port         *int
-	Host         string
-	Debug        bool
-	Cache        Cache
-	RateLimiting RateLimiting
+	Port         *int         `json:"port,omitempty"`
+	Debug        bool         `json:"debug"`
+	Cache        Cache        `json:"cache"`
+	RateLimiting RateLimiting `json:"rateLimiting"`
 }
 
 // Client - client configuration part
 type Client struct {
-	UseDefaultStyle bool
-	PageSize        int
+	UseDefaultStyle bool `json:"useDefaultStyle"`
+	PageSize        int  `json:"pageSize"`
 }
 
 // RateLimiting - rate limiting configuration
 type RateLimiting struct {
-	Enabled   bool
-	PostsHour int
+	Enabled   bool `json:"enabled"`
+	PostsHour int  `json:"postsHour"`
 }
 
 // Cache - cache settings
 type Cache struct {
-	Enabled           bool
-	ExpiryInSeconds   int
-	IntervalInSeconds int
+	Enabled           bool `json:"enabled"`
+	ExpiryInSeconds   int  `json:"expiryInSeconds"`
+	IntervalInSeconds int  `json:"entervalInSeconds"`
 }
