@@ -20,6 +20,9 @@ npm run build
 mv ./build/* ../dist/static/
 cd ..
 
+# install deps
+dep ensure
+
 # build binary
 go build -o dist/mouthful main.go
 chmod +x dist/mouthful
