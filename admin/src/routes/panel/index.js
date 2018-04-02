@@ -2,7 +2,6 @@ import { h, Component } from 'preact';
 import style from './style';
 import Thread from './thread';
 import Login from './login';
-import config from './config.js';
 
 const handleStateChange = (http, context, key) => {
 	if (http.readyState == 4 && http.status == 200) {
@@ -47,7 +46,7 @@ export default class Panel extends Component {
 		if (typeof window == "undefined") { return }
 
 		var http = new XMLHttpRequest();
-		var url = config.url + "/v1/admin/threads";
+		var url = window.location.origin + "/v1/admin/threads";
 		http.open("GET", url, true);
 
 		http.onreadystatechange = function () {
@@ -60,7 +59,7 @@ export default class Panel extends Component {
 		if (typeof window == "undefined") { return }
 
 		var http = new XMLHttpRequest();
-		var url = config.url + "/v1/admin/comments/all";
+		var url = window.location.origin + "/v1/admin/comments/all";
 		http.open("GET", url, true);
 
 		http.onreadystatechange = function () {
@@ -73,7 +72,7 @@ export default class Panel extends Component {
 	updateComment(commentId, body, author, confirmed) {
 		if (typeof window == "undefined") { return }
 		var http = new XMLHttpRequest();
-		var url = config.url + "/v1/admin/comments";
+		var url = window.location.origin + "/v1/admin/comments";
 		http.open("PATCH", url, true);
 		var context = this;
 		http.onreadystatechange = function () {
@@ -99,15 +98,16 @@ export default class Panel extends Component {
 	}
 
 	render() {
-		if (!this.state.loaded) {
-			this.loadThreads(this)
-			this.loadComments(this)
-		}
 		if (!this.state.authorized) {
 			return (<div class={style.mouthful_container}>
 			<Login onLogin={this.loggedIn} />
 			</div>)
 		}
+		if (!this.state.loaded) {
+			this.loadThreads(this)
+			this.loadComments(this)
+		}
+		
 		// if we have no threads or comments
 		if (!(this.state.threads && this.state.comments && this.state.threads.length && this.state.comments.length)) {
 			return <div class={style.mouthful_container}><div class={style.mouthful_login}>No comments yet!</div></div>

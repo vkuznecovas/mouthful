@@ -2,10 +2,8 @@
 set +x
 rm -rf ./static
 mkdir ./static
-# create client config
-go run cmd/util/transformConfig.go ./config.json
-cp config.front.json client/src/components/client/config.json
-mv config.front.json admin/src/routes/panel/config.json
+mkdir ./static/admin
+mkdir ./static/client
 
 # bundle client
 cd ./client
@@ -16,5 +14,5 @@ cd ..
 # bundle admin
 cd ./admin
 npm run build
-mv ./build/* ../static
+mv ./build/* ../static/
 cd ..

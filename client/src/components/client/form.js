@@ -2,11 +2,6 @@ import { h, Component } from "preact";
 import style from "./style";
 import timeago from "./timeago"
 import cookies from "./cookies"
-import config from "./config"
-
-function getStyle(c) {
-  return config.useDefaultStyle ? style[c] : c
-}
 
 export default class Form extends Component {
   
@@ -24,8 +19,11 @@ export default class Form extends Component {
     this.handleNewCommentSubmit = this.handleNewCommentSubmit.bind(this);
     this.refMap = new Map();
     this.focus = this.focus.bind(this);
+    this.getStyle = this.getStyle.bind(this);
   }
-
+  getStyle(c) {
+    return this.props.config.useDefaultStyle ? style[c] : c
+  }
   focus(focusThis) {
     var tf = this.refMap.get(focusThis);
     if (tf) {
@@ -39,9 +37,9 @@ export default class Form extends Component {
       this.setState({ email: value })
   }
   handleBodyChange(value) {
-      if (config.maxMessageLength > 0) {
+      if (this.props.config.maxMessageLength > 0) {
         var currentComment = this.state.comment
-        if (currentComment.length > (config.maxMessageLength + 99)) {
+        if (currentComment.length > (this.props.config.maxMessageLength + 99)) {
           if (value.length > currentComment.length) {
             // don't allow for extra characters, reset state to previous
             this.setState({ comment: currentComment })
@@ -56,19 +54,19 @@ export default class Form extends Component {
     var authorCopy = this.state.author.replace(/\s/g,'');
 
     if (authorCopy == "" || authorCopy.length < 3) {
-      this.focus(config.authorInputRefPrefix + this.props.id)
+      this.focus(this.props.config.authorInputRefPrefix + this.props.id)
       return
     }
 
     var commentCopy = this.state.comment.replace(/\s/g,'');
     if (commentCopy == "" || commentCopy.length < 3) {
-      this.focus(config.commentInputRefPrefix + this.props.id)
+      this.focus(this.props.config.commentInputRefPrefix + this.props.id)
       return
     }
 
-    if (config.maxMessageLength > 0) {
+    if (this.props.config.maxMessageLength > 0) {
       if (this.state.comment.length > config.maxMessageLength) {
-        this.focus(config.commentInputRefPrefix + this.props.id)
+        this.focus(this.props.config.commentInputRefPrefix + this.props.id)
         return
       } 
     }
@@ -78,15 +76,15 @@ export default class Form extends Component {
 
   
   render(props) {
-    var diff = config.maxMessageLength - this.state.comment.length;
-    return (<div class={getStyle(this.props.visible ? "mouthful_form" : "mouthful_form_invisible")}>
+    var diff = this.props.config.maxMessageLength - this.state.comment.length;
+    return (<div class={this.getStyle(this.props.visible ? "mouthful_form" : "mouthful_form_invisible")}>
       <input
-        class={getStyle("mouthful_author_input")}
+        class={this.getStyle("mouthful_author_input")}
         type="text" name="author"
         placeholder="Name (required)"
         value={this.state.author}
         ref={c => {
-          this.refMap.set(config.authorInputRefPrefix + this.props.id, c)
+          this.refMap.set(this.props.config.authorInputRefPrefix + this.props.id, c)
         }}
         onChange={(e) => this.handleAuthorChange(e.target.value)}>
              
@@ -100,12 +98,12 @@ export default class Form extends Component {
         onChange={(e) => this.handleEmailChange(e.target.value)}>
       </input>
       <textarea
-        class={getStyle("mouthful_comment_input")}
+        class={this.getStyle("mouthful_comment_input")}
         rows="3"
         name="commentBody"
         placeholder="Type comment here..."
         ref={c => {
-          this.refMap.set(config.commentInputRefPrefix + this.props.id, c)
+          this.refMap.set(this.props.config.commentInputRefPrefix + this.props.id, c)
         }}
         value={this.state.comment}
         onKeyUp={(e) => this.handleBodyChange(e.target.value)}
@@ -113,12 +111,12 @@ export default class Form extends Component {
       </textarea>
      <div>
       <input
-        class={getStyle("mouthful_submit")}
+        class={this.getStyle("mouthful_submit")}
         type="submit"
         value="Submit"
         onClick={(e) => {this.handleNewCommentSubmit()}}>
       </input>
-      {config.maxMessageLength > 0 ? <span class={diff > 0 ? getStyle("mouthful_word_counter") : getStyle("mouthful_word_counter_error")}>
+      {this.props.config.maxMessageLength > 0 ? <span class={diff > 0 ? this.getStyle("mouthful_word_counter") : this.getStyle("mouthful_word_counter_error")}>
                           {diff > 0 ? diff : diff * -1} {diff > 0 ? "characters left" : "characters too many"}
                       </span> : null}
       </div>

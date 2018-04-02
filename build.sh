@@ -5,11 +5,8 @@ rm -rf ./dist
 # make dirs to accomodate files
 mkdir -p ./dist
 mkdir -p ./dist/static
-
-# create client config
-go run cmd/util/transformConfig.go ./config.json
-cp config.front.json client/src/components/client/config.json
-mv config.front.json admin/src/routes/panel/config.json
+mkdir -p ./dist/static/client
+mkdir -p ./dist/static/admin
 
 # bundle client
 cd ./client
@@ -22,7 +19,7 @@ cd ..
 cd ./admin
 npm i
 npm run build
-mv ./build/* ../dist/static
+mv ./build/* ../dist/static/admin
 cd ..
 
 # build binary

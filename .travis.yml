@@ -11,7 +11,6 @@ install:
 script: 
   - go test ./...
   - go build main.go
-  - go build cmd/util/transformConfig.go
   - go build cmd/migration/isso/main.go
   - go build cmd/migration/dynamodb/main.go
 notifications:

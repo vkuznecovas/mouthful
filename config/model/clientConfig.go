@@ -2,10 +2,9 @@ package model
 
 // ClientConfig - config for client
 type ClientConfig struct {
-	MaxCommentLength *int
-	Honeypot         bool
-	UseDefaultStyle  bool
-	Moderation       bool
-	APIPort          *int
-	APIHost          string
+	MaxCommentLength *int `json:"maxCommentLength,omitempty"`
+	Honeypot         bool `json:"honeypot"`
+	UseDefaultStyle  bool `json:"useDefaultStyle"`
+	Moderation       bool `json:"moderation"`
+	PageSize         int  `json:"pageSize"`
 }
