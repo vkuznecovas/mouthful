@@ -1,3 +1,3 @@
 FROM amd64/ubuntu:latest
-ADD dist/ /
+ADD ./dist/ /
 CMD ["/mouthful"]
