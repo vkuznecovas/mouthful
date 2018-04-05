@@ -1,3 +1,4 @@
-FROM amd64/ubuntu:latest
-ADD ./dist/ /
-CMD ["/mouthful"]
+FROM alpine:latest
+RUN apk add --no-cache ca-certificates && update-ca-certificates
+ADD dist/ /
+CMD ["/mouthful"] 
