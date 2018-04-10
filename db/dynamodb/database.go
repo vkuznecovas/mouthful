@@ -81,11 +81,17 @@ func CreateDatabase(databaseConfig model.Database) (abstraction.Database, error)
 	if databaseConfig.TablePrefix != nil {
 		prefix = *databaseConfig.TablePrefix
 	}
-	return &Database{
+
+	newDb := &Database{
 		DB:          db,
 		Config:      databaseConfig,
 		TablePrefix: prefix,
-	}, nil
+	}
+	err = newDb.InitializeDatabase()
+	if err != nil {
+		return nil, err
+	}
+	return newDb, nil
 }
 
 // CreateTestDatabase creates a database instance for testing locally.
