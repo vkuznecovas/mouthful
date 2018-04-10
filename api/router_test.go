@@ -29,6 +29,7 @@ import (
 )
 
 const debug = false
+const adminPassword = "test"
 
 var maxCommentLength int = 10000
 
@@ -36,8 +37,7 @@ var config = configModel.Config{
 	Honeypot: false,
 	Moderation: configModel.Moderation{
 		Enabled:          true,
-		SessionSecret:    "somesecret",
-		AdminPassword:    "test",
+		AdminPassword:    adminPassword,
 		MaxCommentLength: &maxCommentLength,
 	},
 	API: configModel.API{
@@ -109,10 +109,10 @@ var testFunctions = [...]interface{}{
 func GetSessionCookie(db *abstraction.Database, r *gofight.RequestConfig) gofight.H {
 	cookiePrefix := "mouthful-session"
 	cookieValue := ""
-	os.Setenv("ADMIN_PASSWORD", "test")
+	os.Setenv("ADMIN_PASSWORD", adminPassword)
 	server, _ := api.GetServer(db, &config)
 	r.POST("/v1/admin/login").
-		SetBody(`{"password": "test"}`).
+		SetBody(fmt.Sprintf(`{"password": "%v"}`, adminPassword)).
 		SetDebug(debug).
 		Run(server, func(r gofight.HTTPResponse, rq gofight.HTTPRequest) {
 			cookieValue = strings.Split(strings.TrimLeft(r.HeaderMap["Set-Cookie"][0], cookiePrefix+"="), " ")[0]
@@ -629,10 +629,10 @@ func LoginBadPassword(t *testing.T, testDB abstraction.Database) {
 }
 
 func LoginGoodPassword(t *testing.T, testDB abstraction.Database) {
-	os.Setenv("ADMIN_PASSWORD", "test")
+	os.Setenv("ADMIN_PASSWORD", adminPassword)
 	r := gofight.New()
 	body := model.LoginBody{
-		Password: "test",
+		Password: adminPassword,
 	}
 	bodyBytes, err := json.Marshal(body)
 	server, err := api.GetServer(&testDB, &config)
@@ -650,7 +650,7 @@ func LoginGoodPassword(t *testing.T, testDB abstraction.Database) {
 }
 
 func LoginInvalidRequest(t *testing.T, testDB abstraction.Database) {
-	os.Setenv("ADMIN_PASSWORD", "test")
+	os.Setenv("ADMIN_PASSWORD", adminPassword)
 	r := gofight.New()
 	body := "asdasdasdasdasdasdasd"
 	bodyBytes, err := json.Marshal(body)
