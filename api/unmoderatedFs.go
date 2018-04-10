@@ -1,7 +1,6 @@
 package api
 
 import (
-	"log"
 	"net/http"
 	"os"
 	"path"
@@ -22,7 +21,6 @@ func (cfs UnmoderatedFs) Exists(prefix string, filepath string) bool {
 	}
 	if p := strings.TrimPrefix(filepath, prefix); len(p) < len(filepath) {
 		name := path.Join(global.StaticPath, p)
-		log.Println(name)
 		_, err := os.Stat(name)
 		if err != nil {
 			return false
