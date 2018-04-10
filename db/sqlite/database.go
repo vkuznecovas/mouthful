@@ -89,7 +89,12 @@ func periodicWipe(db *sqlx.DB) {
 			select {
 			case <-ticker.C:
 				log.Println("wiping data")
-				db.Exec("truncate table comment")
+				_, err := db.Exec("DELETE FROM COMMENT")
+				if err != nil {
+					log.Println(err)
+				} else {
+					log.Println("data wiped")
+				}
 			case <-quit:
 				ticker.Stop()
 				return
