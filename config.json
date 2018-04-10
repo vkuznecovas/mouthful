@@ -22,6 +22,10 @@
         "rateLimiting": {
             "enabled": true,
             "postsHour": 100
+        },
+        "cors": {
+            "enabled": false,
+            "allowedOrigins": ["https://dizzy.zone"]
         }
     },
     "client": {

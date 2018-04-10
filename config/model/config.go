@@ -42,6 +42,7 @@ type API struct {
 	Debug        bool         `json:"debug"`
 	Cache        Cache        `json:"cache"`
 	RateLimiting RateLimiting `json:"rateLimiting"`
+	Cors         Cors         `json:"cors"`
 }
 
 // Client - client configuration part
@@ -61,4 +62,10 @@ type Cache struct {
 	Enabled           bool `json:"enabled"`
 	ExpiryInSeconds   int  `json:"expiryInSeconds"`
 	IntervalInSeconds int  `json:"entervalInSeconds"`
+}
+
+// Cors represents the cross origin resource sharing settings
+type Cors struct {
+	Enabled        bool      `json:"enabled"`
+	AllowedOrigins *[]string `json:"allowedOrigins,omitempty"`
 }
