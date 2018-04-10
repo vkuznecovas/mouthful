@@ -211,8 +211,7 @@ export default class App extends Component {
       return <div class={this.getStyle("mouthful_wrapper")}><div class={this.getStyle("mouthful_error")}>The comments are temporarily unavailable</div></div>
     }
     if (!this.state.configLoaded || !this.state.loaded) {
-      // TODO spinner
-      return <div class={this.getStyle("mouthful_wrapper")}><div>Loading...</div></div>
+      return <div class={this.getStyle("mouthful_wrapper")}><div class={this.getStyle("mouthful_no_comments")}>Loading...</div></div>
     }
     var commentsFiltered = this.state.comments.filter(x => x.ReplyTo == null).sort(sortComments);
     var commentDiv = <div class={this.getStyle("mouthful_no_comments")}>No comments yet!</div>

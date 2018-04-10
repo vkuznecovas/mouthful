@@ -3,7 +3,6 @@
     "moderation": {
         "enabled": true,
         "adminPassword": "somepassword",
-        "sessionSecret": "somesecret",
         "sessionDurationSeconds": 21600,
         "maxCommentLength": 10000
     },

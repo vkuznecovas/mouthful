@@ -10,14 +10,14 @@ mkdir -p ./dist/static
 cd ./client
 npm i
 npm run build
-mv ./build/bundle.js ../dist/static/client.js
+cp ./build/bundle.js ../dist/static/client.js
 cd ..
 
 # bundle admin
 cd ./admin
 npm i
 npm run build
-mv ./build/* ../dist/static/
+cp -r ./build/* ../dist/static/
 cd ..
 
 # install deps
