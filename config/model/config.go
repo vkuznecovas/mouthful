@@ -21,7 +21,6 @@ type Database struct {
 // Moderation - moderation section of our config
 type Moderation struct {
 	Enabled                bool   `json:"enabled"`
-	SessionSecret          string `json:"sessionSecret"`
 	AdminPassword          string `json:"adminPassword"`
 	SessionDurationSeconds int    `json:"sessionDurationSeconds"`
 	MaxCommentLength       *int   `json:"maxCommentLength,omitempty"`

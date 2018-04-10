@@ -19,17 +19,15 @@ import (
 
 // CheckModerationVariables checks to see if the required moderation flags have been set in the config or not
 func CheckModerationVariables(config *model.Config) error {
-	sessionSecret := config.Moderation.SessionSecret
-	if sessionSecret == "" {
-		return fmt.Errorf("config.Moderation.SessionSecret is not defined in config")
-	}
-	sessionDuration := config.Moderation.SessionDurationSeconds
-	if sessionDuration == 0 {
-		config.Moderation.SessionDurationSeconds = 3600
-	}
 	if config.Moderation.AdminPassword == "" {
 		return fmt.Errorf("config.Moderation.AdminPassword is not defined in config")
 	}
+
+	// force default password change
+	if config.Moderation.AdminPassword == "somepassword" {
+		return fmt.Errorf("Please change the config.Moderation.AdminPassword value in config. Do not leave the default there")
+	}
+
 	return nil
 }
 
@@ -100,10 +98,9 @@ func GetServer(db *abstraction.Database, config *model.Config) (*gin.Engine, err
 		if err != nil {
 			return nil, err
 		}
-		store := sessions.NewCookieStore([]byte(config.Moderation.SessionSecret))
+		store := sessions.NewCookieStore([]byte(config.Moderation.AdminPassword))
 		store.Options(sessions.Options{
-			// TODO - figure this out
-			MaxAge: 0, //int(time.Second * time.Duration(config.Moderation.SessionDurationSeconds)), //30min
+			MaxAge: int(time.Second * time.Duration(config.Moderation.SessionDurationSeconds)), //30min
 			Path:   "/",
 		})
 		v1.PATCH("/admin/comments", sessions.Sessions(global.DefaultSessionName, store), router.UpdateComment)
