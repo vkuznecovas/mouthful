@@ -101,6 +101,9 @@ var testFunctions = [...]interface{}{
 	RateLimitingCommentCreation,
 	GetCommentsWithPathNormalization,
 	GetClientConfigReturnsConfig,
+	CheckNoCorsSetting,
+	CheckCorsSettingAllowsCorrectOrigin,
+	CheckCorsSettingDoesNotAllowIncorrectOrigin,
 }
 
 func GetSessionCookie(db *abstraction.Database, r *gofight.RequestConfig) gofight.H {
@@ -1613,4 +1616,81 @@ func GetClientConfigReturnsConfig(t *testing.T, testDB abstraction.Database) {
 			assert.Equal(t, 10000, *cc.MaxCommentLength)
 			assert.Equal(t, 10, cc.PageSize)
 		})
+}
+
+func CheckNoCorsSetting(t *testing.T, testDB abstraction.Database) {
+	server, err := api.GetServer(&testDB, &config)
+	assert.Nil(t, err)
+	r := gofight.New()
+
+	r.GET("/v1/client/config").
+		SetHeader(gofight.H{"Origin": "http://google.co.uk"}).
+		SetDebug(debug).
+		Run(server, func(r gofight.HTTPResponse, rq gofight.HTTPRequest) {
+			assert.Equal(t, 200, r.Code)
+			var cc configModel.ClientConfig
+			body, err := ioutil.ReadAll(r.Body)
+			assert.Nil(t, err)
+			err = json.Unmarshal(body, &cc)
+			assert.Nil(t, err)
+			assert.Equal(t, false, cc.Honeypot)
+			assert.Equal(t, true, cc.UseDefaultStyle)
+			assert.Equal(t, true, cc.Moderation)
+			assert.Equal(t, 10000, *cc.MaxCommentLength)
+			assert.Equal(t, 10, cc.PageSize)
+			assert.Equal(t, "*", r.HeaderMap.Get("Access-Control-Allow-Origin"))
+		})
+}
+
+func CheckCorsSettingAllowsCorrectOrigin(t *testing.T, testDB abstraction.Database) {
+	c := config
+	origins := []string{"http://google.co.uk", "https://google.co.uk"}
+	c.API.Cors = configModel.Cors{
+		Enabled:        true,
+		AllowedOrigins: &origins,
+	}
+	server, err := api.GetServer(&testDB, &c)
+	assert.Nil(t, err)
+	r := gofight.New()
+
+	for _, v := range origins {
+		r.GET("/v1/client/config").
+			SetHeader(gofight.H{"Origin": v}).
+			SetDebug(debug).
+			Run(server, func(r gofight.HTTPResponse, rq gofight.HTTPRequest) {
+				assert.Equal(t, 200, r.Code)
+				var cc configModel.ClientConfig
+				body, err := ioutil.ReadAll(r.Body)
+				assert.Nil(t, err)
+				err = json.Unmarshal(body, &cc)
+				assert.Nil(t, err)
+				assert.Equal(t, false, cc.Honeypot)
+				assert.Equal(t, true, cc.UseDefaultStyle)
+				assert.Equal(t, true, cc.Moderation)
+				assert.Equal(t, 10000, *cc.MaxCommentLength)
+				assert.Equal(t, 10, cc.PageSize)
+				assert.Equal(t, v, r.HeaderMap.Get("Access-Control-Allow-Origin"))
+			})
+	}
+
+}
+
+func CheckCorsSettingDoesNotAllowIncorrectOrigin(t *testing.T, testDB abstraction.Database) {
+	c := config
+	origins := []string{"http://google.co.uk", "https://google.co.uk"}
+	c.API.Cors = configModel.Cors{
+		Enabled:        true,
+		AllowedOrigins: &origins,
+	}
+	server, err := api.GetServer(&testDB, &c)
+	assert.Nil(t, err)
+	r := gofight.New()
+
+	r.GET("/v1/client/config").
+		SetHeader(gofight.H{"Origin": "http://example.com"}).
+		SetDebug(debug).
+		Run(server, func(r gofight.HTTPResponse, rq gofight.HTTPRequest) {
+			assert.Equal(t, 403, r.Code)
+		})
+
 }
