@@ -45,10 +45,13 @@ func GetServer(db *abstraction.Database, config *model.Config) (*gin.Engine, err
 	r.ForwardedByClientIP = true
 
 	if config.API.Cors.Enabled {
+		fmt.Println("coorsing")
 		corsConfig := cors.DefaultConfig()
 		corsConfig.AllowOrigins = *config.API.Cors.AllowedOrigins
 		corsConfig.AllowMethods = []string{"PUT", "PATCH", "GET", "DELETE", "HEAD", "OPTIONS", "POST"}
 		r.Use(cors.New(corsConfig))
+	} else {
+		r.Use(cors.Default())
 	}
 
 	var cacheInstance *cache.Cache
@@ -68,7 +71,6 @@ func GetServer(db *abstraction.Database, config *model.Config) (*gin.Engine, err
 		limitMiddleware = &newInstance
 	}
 
-	r.Use(cors.Default())
 	router := New(db, config, cacheInstance)
 
 	if config.Moderation.Enabled {
