@@ -43,10 +43,14 @@ func GetServer(db *abstraction.Database, config *model.Config) (*gin.Engine, err
 
 	r := gin.Default()
 	r.ForwardedByClientIP = true
-	// same as
-	// config := cors.DefaultConfig()
-	// config.AllowAllOrigins = true
-	// router.Use(cors.New(config))
+
+	if config.API.Cors.Enabled {
+		corsConfig := cors.DefaultConfig()
+		corsConfig.AllowOrigins = *config.API.Cors.AllowedOrigins
+		corsConfig.AllowMethods = []string{"PUT", "PATCH", "GET", "DELETE", "HEAD", "OPTIONS", "POST"}
+		r.Use(cors.New(corsConfig))
+	}
+
 	var cacheInstance *cache.Cache
 	if config.API.Cache.Enabled {
 		expiry := time.Duration(config.API.Cache.ExpiryInSeconds) * time.Second
