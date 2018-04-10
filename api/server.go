@@ -45,7 +45,6 @@ func GetServer(db *abstraction.Database, config *model.Config) (*gin.Engine, err
 	r.ForwardedByClientIP = true
 
 	if config.API.Cors.Enabled {
-		fmt.Println("coorsing")
 		corsConfig := cors.DefaultConfig()
 		corsConfig.AllowOrigins = *config.API.Cors.AllowedOrigins
 		corsConfig.AllowMethods = []string{"PUT", "PATCH", "GET", "DELETE", "HEAD", "OPTIONS", "POST"}
