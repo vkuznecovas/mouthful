@@ -8,11 +8,11 @@ mkdir ./static/client
 # bundle client
 cd ./client
 npm run build
-mv ./build/bundle.js ../static/client.js
+cp ./build/bundle.js ../static/client.js
 cd ..
 
 # bundle admin
 cd ./admin
 npm run build
-mv ./build/* ../static/
+cp -R ./build/* ../static/
 cd ..

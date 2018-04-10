@@ -96,7 +96,9 @@ export default class Panel extends Component {
 	reload() {
 		this.setState({ loaded: false, threads: [], comments: [] })
 	}
-
+	componentWillMount() {
+		this.loggedIn();
+	}
 	render() {
 		if (!this.state.authorized) {
 			return (<div class={style.mouthful_container}>
