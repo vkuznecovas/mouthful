@@ -258,7 +258,7 @@ export default class App extends Component {
         }}>
           <Comment comment={comment} config={this.state.config}/>
           <FormWrapper comment={comment} config={this.state.config} flipFormVisibility={this.flipFormVisiblity} visible={this.state.forms[this.findFormIndex(comment.Id)].visible}  author={this.state.author}  replyTo={comment.Id} submitForm={this.submitForm}/>
-          <div class={this.getStyle("mouthful_comment_replies")}>
+          <div>
             {replies}
             {loadMoreReplies}
           </div>
