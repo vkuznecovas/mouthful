@@ -51,7 +51,11 @@ func (db *Database) InitializeDatabase() error {
 			noPrefix := strings.Replace(t, prefix, "", 1)
 			readUnits := tableUnitsMap[noPrefix][0]
 			writeUnits := tableUnitsMap[noPrefix][1]
-			err := db.DB.CreateTable(t, tableModelMap[noPrefix]).Provision(readUnits, writeUnits).Run()
+			provision := db.DB.CreateTable(t, tableModelMap[noPrefix]).Provision(readUnits, writeUnits)
+			if t == global.DefaultDynamoDbCommentTableName {
+				provision.ProvisionIndex("ThreadId_index", *db.Config.DynamoDBIndexReadUnits, *db.Config.DynamoDBIndexWriteUnits)
+			}
+			err := provision.Run()
 			if err != nil {
 				return err
 			}
@@ -145,11 +149,13 @@ func (db *Database) CreateComment(body string, author string, path string, confi
 			}
 			return nil, err
 		}
-		// We allow for only a single layer of nesting. (Maybe just for now? who knows.)
-		// Check if the comment is a reply to this thread, and the comment you're replying to actually is a part of the thread
-
-		if comment.ReplyTo != nil || !uuid.Equal(comment.ThreadId, thread.Id) {
+		// Check if the comment you're replying to actually is a part of the thread
+		if !uuid.Equal(comment.ThreadId, thread.Id) {
 			return nil, global.ErrWrongReplyTo
+		}
+		// We allow for only a single layer of nesting. (Maybe just for now? who knows.)
+		if comment.ReplyTo != nil && replyTo != nil {
+			replyTo = comment.ReplyTo
 		}
 	}
 	uid := global.GetUUID()
