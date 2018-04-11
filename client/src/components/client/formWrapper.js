@@ -25,7 +25,7 @@ export default class FormWrapper extends Component {
                 type="submit"
                 value={this.props.visible ? "Close" : "Reply"}>
             </input>
-            <Form id={this.props.comment.Id} config={this.props.config} visible={this.props.visible} author={this.props.author} comment={""} replyTo={this.props.comment.Id} submitForm={this.props.submitForm} />
+            <Form id={this.props.comment.Id} config={this.props.config} visible={this.props.visible} author={this.props.author} comment={""} replyTo={this.props.replyTo} submitForm={this.props.submitForm} />
         </div>
 
     }
