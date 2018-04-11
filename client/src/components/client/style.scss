@@ -55,7 +55,6 @@
     }
     .mouthful_comment_reply {
         margin: 1em 0;
-        padding-left: 24px;
         text-align: left;
         border-left: 2px solid #8e8e8d;
     }
@@ -125,5 +124,8 @@
         font-style: italic;
         margin-left: 20px;
         color: #ce1458;
+    }
+    .mouthful_comment_replies {
+        padding-left: 24px;        
     }
 }

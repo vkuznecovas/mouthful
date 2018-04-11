@@ -104,7 +104,8 @@ func main() {
 				copied := commentMap[*res].Uid
 				replyTo = &copied
 			}
-			_, err = mouthDB.Exec(mouthDB.Rebind("INSERT INTO comment(id, threadId, body, author, confirmed, createdAt, replyTo, deletedAt) VALUES(?,?,?,?,?,?,?,?)"), commentId, tuid, *c.Text, *c.Author, confirmed, createdTime, replyTo, deletedAt)
+			body := global.ParseAndSaniziteMarkdown(*c.Text)
+			_, err = mouthDB.Exec(mouthDB.Rebind("INSERT INTO comment(id, threadId, body, author, confirmed, createdAt, replyTo, deletedAt) VALUES(?,?,?,?,?,?,?,?)"), commentId, tuid, body, *c.Author, confirmed, createdTime, replyTo, deletedAt)
 			if err != nil {
 				panic(err)
 			}
