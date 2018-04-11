@@ -249,7 +249,7 @@ export default class App extends Component {
             this.refMap.set(this.state.config.commentRefPrefix + x.Id, c)
           }}>
             <Comment comment={x} config={this.state.config}/>
-            <FormWrapper comment={x} config={this.state.config} flipFormVisibility={this.flipFormVisiblity} visible={this.state.forms[this.findFormIndex(x.Id)].visible}  author={this.state.author}  replyTo={x.Id} submitForm={this.submitForm}/>
+            <FormWrapper comment={x} config={this.state.config} flipFormVisibility={this.flipFormVisiblity} visible={this.state.forms[this.findFormIndex(x.Id)].visible}  author={this.state.author}  replyTo={comment.Id} submitForm={this.submitForm}/>
           </div>
         });
         var formIndex = this.findFormIndex(comment.Id);
