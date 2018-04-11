@@ -1,8 +1,9 @@
-package sqlite
+package sqlxDriver
 
 import (
 	"time"
 
+	"github.com/jmoiron/sqlx"
 	// We absolutely need the sqlite driver here, this whole package depends on it
 	_ "github.com/mattn/go-sqlite3"
 	"github.com/satori/go.uuid"
@@ -10,31 +11,9 @@ import (
 	"github.com/vkuznecovas/mouthful/global"
 )
 
-var SqliteQueries = []string{
-	`CREATE TABLE IF NOT EXISTS Thread(
-		Id BLOB PRIMARY KEY,
-		CreatedAt TIMESTAMP DEFAULT CURRENT_TIMESTAMP not null,
-		Path varchar(1024) not null UNIQUE
-	)`,
-	`CREATE TABLE IF NOT EXISTS Comment(
-		Id BLOB PRIMARY KEY,
-		ThreadId INTEGER not null,
-		Body text not null,
-		Author varchar(255) not null,
-		Confirmed bool not null default false,
-		CreatedAt TIMESTAMP DEFAULT CURRENT_TIMESTAMP not null,
-		ReplyTo BLOB default null,
-		DeletedAt TIMESTAMP DEFAULT null,
-		FOREIGN KEY(ThreadId) references Thread(Id)
-	)`,
-}
-
-// InitializeDatabase runs the queries for an initial database seed
-func (db *Database) InitializeDatabase() error {
-	for _, v := range SqliteQueries {
-		db.DB.MustExec(v)
-	}
-	return nil
+// Database is a database instance for sqlx
+type Database struct {
+	DB *sqlx.DB
 }
 
 // CreateThread takes the thread path and creates it in the database
@@ -184,13 +163,4 @@ func (db *Database) GetAllThreads() (threads []model.Thread, err error) {
 func (db *Database) GetAllComments() (comments []model.Comment, err error) {
 	err = db.DB.Select(&comments, "select * from comment")
 	return comments, err
-}
-
-// GetDatabaseDialect returns the current database dialect
-func (db *Database) GetDatabaseDialect() string {
-	return "sqlite3"
-}
-
-func (db *Database) GetUnderlyingStruct() interface{} {
-	return db
 }

@@ -4,12 +4,11 @@ import (
 	"testing"
 	"time"
 
-	"github.com/jmoiron/sqlx"
 	uuid "github.com/satori/go.uuid"
 	"github.com/stretchr/testify/assert"
 	"github.com/vkuznecovas/mouthful/db/abstraction"
 	"github.com/vkuznecovas/mouthful/db/dynamodb"
-	"github.com/vkuznecovas/mouthful/db/sqlite"
+	"github.com/vkuznecovas/mouthful/db/sqlxDriver"
 	"github.com/vkuznecovas/mouthful/global"
 )
 
@@ -50,21 +49,8 @@ func setupDynamoTestDb() abstraction.Database {
 }
 
 func setupSqliteTestDb() abstraction.Database {
-	database := sqlite.Database{}
-	db, err := sqlx.Open("sqlite3", ":memory:")
-	if err != nil {
-		panic(err)
-	}
-	err = db.Ping()
-	if err != nil {
-		panic(err)
-	}
-	database.DB = db
-	err = database.InitializeDatabase()
-	if err != nil {
-		panic(err)
-	}
-	return &database
+	database := sqlxDriver.CreateTestDatabase()
+	return database
 }
 
 func TestDynamoDb(t *testing.T) {

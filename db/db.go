@@ -5,7 +5,7 @@ import (
 	"strings"
 
 	"github.com/vkuznecovas/mouthful/db/dynamodb"
-	"github.com/vkuznecovas/mouthful/db/sqlite"
+	"github.com/vkuznecovas/mouthful/db/sqlxDriver"
 
 	"github.com/vkuznecovas/mouthful/config/model"
 	"github.com/vkuznecovas/mouthful/db/abstraction"
@@ -15,7 +15,7 @@ import (
 func GetDBInstance(databaseConfig model.Database) (db abstraction.Database, err error) {
 	switch strings.ToLower(databaseConfig.Dialect) {
 	case "sqlite3":
-		db, err = sqlite.CreateDatabase(databaseConfig)
+		db, err = sqlxDriver.CreateDatabase(databaseConfig)
 		return db, err
 	case "dynamodb":
 		db, err = dynamodb.CreateDatabase(databaseConfig)

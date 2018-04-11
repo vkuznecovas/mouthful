@@ -10,7 +10,6 @@ import (
 	"strings"
 	"testing"
 
-	"github.com/jmoiron/sqlx"
 	"github.com/satori/go.uuid"
 	"github.com/vkuznecovas/mouthful/global"
 
@@ -25,7 +24,7 @@ import (
 	configModel "github.com/vkuznecovas/mouthful/config/model"
 
 	dbmodel "github.com/vkuznecovas/mouthful/db/model"
-	"github.com/vkuznecovas/mouthful/db/sqlite"
+	"github.com/vkuznecovas/mouthful/db/sqlxDriver"
 )
 
 const debug = false
@@ -131,21 +130,8 @@ func setupDynamoTestDb() abstraction.Database {
 }
 
 func setupSqliteTestDb() abstraction.Database {
-	database := sqlite.Database{}
-	db, err := sqlx.Open("sqlite3", ":memory:")
-	if err != nil {
-		panic(err)
-	}
-	err = db.Ping()
-	if err != nil {
-		panic(err)
-	}
-	database.DB = db
-	err = database.InitializeDatabase()
-	if err != nil {
-		panic(err)
-	}
-	return &database
+	database := sqlxDriver.CreateTestDatabase()
+	return database
 }
 
 func TestRouterWithSqlite(t *testing.T) {
