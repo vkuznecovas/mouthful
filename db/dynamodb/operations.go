@@ -51,7 +51,11 @@ func (db *Database) InitializeDatabase() error {
 			noPrefix := strings.Replace(t, prefix, "", 1)
 			readUnits := tableUnitsMap[noPrefix][0]
 			writeUnits := tableUnitsMap[noPrefix][1]
-			err := db.DB.CreateTable(t, tableModelMap[noPrefix]).Provision(readUnits, writeUnits).Run()
+			provision := db.DB.CreateTable(t, tableModelMap[noPrefix]).Provision(readUnits, writeUnits)
+			if t == global.DefaultDynamoDbCommentTableName {
+				provision.ProvisionIndex("ThreadId_index", *db.Config.DynamoDBIndexReadUnits, *db.Config.DynamoDBIndexWriteUnits)
+			}
+			err := provision.Run()
 			if err != nil {
 				return err
 			}
