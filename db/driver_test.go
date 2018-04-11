@@ -151,9 +151,9 @@ func CreateCommentWithReply(t *testing.T, database abstraction.Database) {
 }
 
 func CreateCommentWrongReply(t *testing.T, database abstraction.Database) {
-	uid1, err := database.CreateComment("body", "author", "/test", true, nil)
+	_, err := database.CreateComment("body", "author", "/test", true, nil)
 	assert.Nil(t, err)
-	uid2, err := database.CreateComment("body", "author", "/test", true, uid1)
+	uid2, err := database.CreateComment("body", "author", "/test1", true, nil)
 	assert.Nil(t, err)
 	_, err = database.CreateComment("body", "author", "/test", true, uid2)
 	assert.NotNil(t, err)
