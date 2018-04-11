@@ -1,4 +1,4 @@
-package sqlxDriver
+package sqlite
 
 import (
 	"errors"
@@ -11,6 +11,7 @@ import (
 	_ "github.com/mattn/go-sqlite3"
 	"github.com/vkuznecovas/mouthful/config/model"
 	"github.com/vkuznecovas/mouthful/db/abstraction"
+	"github.com/vkuznecovas/mouthful/db/sqlxDriver"
 )
 
 var SqliteQueries = []string{
@@ -30,23 +31,6 @@ var SqliteQueries = []string{
 			DeletedAt TIMESTAMP DEFAULT null,
 			FOREIGN KEY(ThreadId) references Thread(Id)
 		)`,
-}
-
-// InitializeDatabase runs the queries for an initial database seed
-func (db *Database) InitializeDatabase() error {
-	for _, v := range SqliteQueries {
-		db.DB.MustExec(v)
-	}
-	return nil
-}
-
-// GetDatabaseDialect returns the current database dialect
-func (db *Database) GetDatabaseDialect() string {
-	return "sqlite3"
-}
-
-func (db *Database) GetUnderlyingStruct() interface{} {
-	return db
 }
 
 // ValidateConfig validates the config for sqlite
@@ -85,8 +69,10 @@ func CreateDatabase(databaseConfig model.Database) (abstraction.Database, error)
 		}
 		db = d
 	}
-	DB := Database{
-		DB: db,
+	DB := sqlxDriver.Database{
+		DB:      db,
+		Queries: SqliteQueries,
+		Dialect: "sqlite3",
 	}
 	err = DB.InitializeDatabase()
 	if err != nil {
@@ -101,8 +87,11 @@ func CreateTestDatabase() abstraction.Database {
 	if err != nil {
 		panic(err)
 	}
-	DB := Database{
-		DB: db,
+	DB := sqlxDriver.Database{
+		DB:      db,
+		Queries: SqliteQueries,
+		Dialect: "sqlite3",
+		IsTest:  true,
 	}
 	err = DB.InitializeDatabase()
 	if err != nil {

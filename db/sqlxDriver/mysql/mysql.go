@@ -1,0 +1,104 @@
+package mysql
+
+import (
+	"errors"
+	"fmt"
+
+	"github.com/jmoiron/sqlx"
+	// We absolutely need the mysql driver here, this whole file depends on it
+	_ "github.com/go-sql-driver/mysql"
+	"github.com/vkuznecovas/mouthful/config/model"
+	"github.com/vkuznecovas/mouthful/db/abstraction"
+	"github.com/vkuznecovas/mouthful/db/sqlxDriver"
+)
+
+var MysqlQueries = []string{
+	`CREATE TABLE IF NOT EXISTS Thread(
+			Id BLOB PRIMARY KEY,
+			CreatedAt TIMESTAMP DEFAULT CURRENT_TIMESTAMP not null,
+			Path varchar(1024) not null UNIQUE
+		)`,
+	`CREATE TABLE IF NOT EXISTS Comment(
+			Id BLOB PRIMARY KEY,
+			ThreadId INTEGER not null,
+			Body text not null,
+			Author varchar(255) not null,
+			Confirmed bool not null default false,
+			CreatedAt TIMESTAMP DEFAULT CURRENT_TIMESTAMP not null,
+			ReplyTo BLOB default null,
+			DeletedAt TIMESTAMP DEFAULT null,
+			FOREIGN KEY(ThreadId) references Thread(Id)
+		)`,
+}
+
+// ValidateConfig validates the config for mysql
+func ValidateConfig(config model.Database) error {
+	err := ""
+	if config.Database == nil {
+		err += "Please specify the database name in config(Database.Database)"
+	}
+	if config.Username == nil {
+		err += "Please specify the database username in config(Database.Username)"
+	}
+	if config.Password == nil {
+		err += "Please specify the database password in config(Database.Password)"
+	}
+	if config.Host == nil {
+		err += "Please specify the database host in config(Database.Host)"
+	}
+	if config.Port == nil {
+		err += "Please specify the database port in config(Database.Port)"
+	}
+	if config.Database == nil {
+		err += "Please specify the database name in config(Database.Database)"
+	}
+	if err != "" {
+		return errors.New(err)
+	}
+	return nil
+}
+
+// CreateDatabase creates a database instance from the given config
+func CreateDatabase(databaseConfig model.Database) (abstraction.Database, error) {
+	err := ValidateConfig(databaseConfig)
+	if err != nil {
+		return nil, err
+	}
+	var db *sqlx.DB
+	connectionString := fmt.Sprintf("%v:%v@(%v:%v)/%v", *databaseConfig.Username, *databaseConfig.Password, *databaseConfig.Host, *databaseConfig.Port, *databaseConfig.Database)
+	d, err := sqlx.Connect("mysql", connectionString)
+	if err != nil {
+		return nil, err
+	}
+	db = d
+	DB := sqlxDriver.Database{
+		DB:      db,
+		Queries: MysqlQueries,
+		Dialect: "mysql",
+		IsTest:  false,
+	}
+	err = DB.InitializeDatabase()
+	if err != nil {
+		return &DB, err
+	}
+	return &DB, nil
+}
+
+// CreateTestDatabase creates a test database
+func CreateTestDatabase() abstraction.Database {
+	db, err := sqlx.Open("mysql", "root:admin@(localhost:3306)/mouthful")
+	if err != nil {
+		panic(err)
+	}
+	DB := sqlxDriver.Database{
+		DB:      db,
+		Queries: MysqlQueries,
+		Dialect: "sqlite3",
+		IsTest:  true,
+	}
+	err = DB.InitializeDatabase()
+	if err != nil {
+		panic(err)
+	}
+	return &DB
+}

@@ -24,7 +24,7 @@ import (
 	configModel "github.com/vkuznecovas/mouthful/config/model"
 
 	dbmodel "github.com/vkuznecovas/mouthful/db/model"
-	"github.com/vkuznecovas/mouthful/db/sqlxDriver"
+	"github.com/vkuznecovas/mouthful/db/sqlxDriver/sqlite"
 )
 
 const debug = false
@@ -130,7 +130,7 @@ func setupDynamoTestDb() abstraction.Database {
 }
 
 func setupSqliteTestDb() abstraction.Database {
-	database := sqlxDriver.CreateTestDatabase()
+	database := sqlite.CreateTestDatabase()
 	return database
 }
 

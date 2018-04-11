@@ -9,6 +9,9 @@ import (
 	"github.com/vkuznecovas/mouthful/db/abstraction"
 	"github.com/vkuznecovas/mouthful/db/dynamodb"
 	"github.com/vkuznecovas/mouthful/db/sqlxDriver"
+	"github.com/vkuznecovas/mouthful/db/sqlxDriver/mysql"
+	"github.com/vkuznecovas/mouthful/db/sqlxDriver/sqlite"
+
 	"github.com/vkuznecovas/mouthful/global"
 )
 
@@ -49,7 +52,12 @@ func setupDynamoTestDb() abstraction.Database {
 }
 
 func setupSqliteTestDb() abstraction.Database {
-	database := sqlxDriver.CreateTestDatabase()
+	database := sqlite.CreateTestDatabase()
+	return database
+}
+
+func setupMysqlTestDb() abstraction.Database {
+	database := mysql.CreateTestDatabase()
 	return database
 }
 
@@ -68,6 +76,16 @@ func TestDynamoDb(t *testing.T) {
 func TestSqliteDb(t *testing.T) {
 	for _, f := range testFunctions {
 		f.(func(*testing.T, abstraction.Database))(t, setupSqliteTestDb())
+	}
+}
+func TestMysqlDb(t *testing.T) {
+	db := mysql.CreateTestDatabase()
+	driver := db.GetUnderlyingStruct()
+	driverCasted := driver.(*sqlxDriver.Database)
+	// Just in case this is not an in memory instance
+	for _, f := range testFunctions {
+		f.(func(*testing.T, abstraction.Database))(t, db)
+		driverCasted.WipeOutData()
 	}
 }
 

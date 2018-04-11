@@ -13,7 +13,10 @@ import (
 
 // Database is a database instance for sqlx
 type Database struct {
-	DB *sqlx.DB
+	DB      *sqlx.DB
+	Queries []string
+	Dialect string
+	IsTest  bool
 }
 
 // CreateThread takes the thread path and creates it in the database
@@ -163,4 +166,30 @@ func (db *Database) GetAllThreads() (threads []model.Thread, err error) {
 func (db *Database) GetAllComments() (comments []model.Comment, err error) {
 	err = db.DB.Select(&comments, "select * from comment")
 	return comments, err
+}
+
+func (db *Database) GetUnderlyingStruct() interface{} {
+	return db
+}
+
+// InitializeDatabase runs the queries for an initial database seed
+func (db *Database) InitializeDatabase() error {
+	for _, v := range db.Queries {
+		db.DB.MustExec(v)
+	}
+	return nil
+}
+
+// GetDatabaseDialect returns the current database dialect
+func (db *Database) GetDatabaseDialect() string {
+	return db.Dialect
+}
+
+// WipeOutData deletes all the threads and comments in the database if the database is a test one
+func (db *Database) WipeOutData() {
+	if !db.IsTest {
+		return
+	}
+	db.DB.MustExec("truncate table comment")
+	db.DB.MustExec("truncate table thread")
 }
