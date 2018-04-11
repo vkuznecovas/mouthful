@@ -104,6 +104,7 @@ var testFunctions = [...]interface{}{
 	CheckNoCorsSetting,
 	CheckCorsSettingAllowsCorrectOrigin,
 	CheckCorsSettingDoesNotAllowIncorrectOrigin,
+	CreateCommentReplyToAReply,
 }
 
 func GetSessionCookie(db *abstraction.Database, r *gofight.RequestConfig) gofight.H {
@@ -1693,4 +1694,140 @@ func CheckCorsSettingDoesNotAllowIncorrectOrigin(t *testing.T, testDB abstractio
 			assert.Equal(t, 403, r.Code)
 		})
 
+}
+
+func CreateCommentReplyToAReply(t *testing.T, testDB abstraction.Database) {
+	server, err := api.GetServer(&testDB, &config)
+	assert.Nil(t, err)
+	r := gofight.New()
+	cookies := GetSessionCookie(&testDB, r)
+	body := model.CreateCommentBody{
+		Path:   "/1027/test/",
+		Body:   "body",
+		Author: "author",
+	}
+	bodyBytes, err := json.Marshal(body)
+	assert.Nil(t, err)
+	var commentId uuid.UUID
+	r.POST("/v1/comments").
+		SetBody(string(bodyBytes[:])).
+		SetDebug(debug).
+		Run(server, func(r gofight.HTTPResponse, rq gofight.HTTPRequest) {
+			var parsedBody model.CreateCommentResponse
+			err = json.Unmarshal([]byte(r.Body.String()), &parsedBody)
+			assert.Nil(t, err)
+			assert.Equal(t, body.Path, parsedBody.Path)
+			assert.Equal(t, body.Author, parsedBody.Author)
+			assert.Equal(t, global.ParseAndSaniziteMarkdown(body.Body), parsedBody.Body)
+			assert.Equal(t, 200, r.Code)
+			uid, err := global.ParseUUIDFromString(parsedBody.Id)
+			assert.Nil(t, err)
+			commentId = *uid
+		})
+
+	conf := true
+	bodyUpdate := model.UpdateCommentBody{
+		CommentId: commentId.String(),
+		Confirmed: &conf,
+	}
+	bodyBytes, err = json.Marshal(bodyUpdate)
+	r.PATCH("/v1/admin/comments").
+		SetBody(string(bodyBytes[:])).
+		SetDebug(debug).
+		SetCookie(cookies).
+		Run(server, func(r gofight.HTTPResponse, rq gofight.HTTPRequest) {
+			assert.Equal(t, "", r.Body.String())
+			assert.Equal(t, 204, r.Code)
+		})
+	replyTo := commentId.String()
+	body2 := model.CreateCommentBody{
+		Path:    "/1027/test/",
+		Body:    "body",
+		Author:  "author",
+		ReplyTo: &replyTo,
+	}
+	bodyBytes, err = json.Marshal(body2)
+	var commentId2 uuid.UUID
+	r.POST("/v1/comments").
+		SetBody(string(bodyBytes[:])).
+		SetDebug(debug).
+		Run(server, func(r gofight.HTTPResponse, rq gofight.HTTPRequest) {
+			var parsedBody model.CreateCommentResponse
+			err = json.Unmarshal([]byte(r.Body.String()), &parsedBody)
+			assert.Nil(t, err)
+			assert.Equal(t, body2.Path, parsedBody.Path)
+			assert.Equal(t, body2.Author, parsedBody.Author)
+			assert.Equal(t, global.ParseAndSaniziteMarkdown(body2.Body), parsedBody.Body)
+			assert.Equal(t, 200, r.Code)
+			uid, err := global.ParseUUIDFromString(parsedBody.Id)
+			assert.Nil(t, err)
+			commentId2 = *uid
+		})
+	bodyUpdate = model.UpdateCommentBody{
+		CommentId: commentId2.String(),
+		Confirmed: &conf,
+	}
+	bodyBytes, err = json.Marshal(bodyUpdate)
+	assert.Nil(t, err)
+	r.PATCH("/v1/admin/comments").
+		SetBody(string(bodyBytes[:])).
+		SetDebug(debug).
+		SetCookie(cookies).
+		Run(server, func(r gofight.HTTPResponse, rq gofight.HTTPRequest) {
+			assert.Equal(t, "", r.Body.String())
+			assert.Equal(t, 204, r.Code)
+		})
+	replyToReplyId := commentId2.String()
+	body3 := model.CreateCommentBody{
+		Path:    "/1027/test/",
+		Body:    "body",
+		Author:  "author",
+		ReplyTo: &replyToReplyId,
+	}
+	bodyBytes, err = json.Marshal(body3)
+	var commentId3 uuid.UUID
+	r.POST("/v1/comments").
+		SetBody(string(bodyBytes[:])).
+		SetDebug(debug).
+		Run(server, func(r gofight.HTTPResponse, rq gofight.HTTPRequest) {
+			var parsedBody model.CreateCommentResponse
+			err = json.Unmarshal([]byte(r.Body.String()), &parsedBody)
+			assert.Nil(t, err)
+			assert.Equal(t, body2.Path, parsedBody.Path)
+			assert.Equal(t, body2.Author, parsedBody.Author)
+			assert.Equal(t, global.ParseAndSaniziteMarkdown(body2.Body), parsedBody.Body)
+			assert.Equal(t, 200, r.Code)
+			uid, err := global.ParseUUIDFromString(parsedBody.Id)
+			assert.Nil(t, err)
+			commentId3 = *uid
+		})
+	bodyUpdate = model.UpdateCommentBody{
+		CommentId: commentId3.String(),
+		Confirmed: &conf,
+	}
+	bodyBytes, err = json.Marshal(bodyUpdate)
+	assert.Nil(t, err)
+	r.PATCH("/v1/admin/comments").
+		SetBody(string(bodyBytes[:])).
+		SetDebug(debug).
+		SetCookie(cookies).
+		Run(server, func(r gofight.HTTPResponse, rq gofight.HTTPRequest) {
+			assert.Equal(t, "", r.Body.String())
+			assert.Equal(t, 204, r.Code)
+		})
+	r.GET("/v1/comments?uri="+url.QueryEscape(body.Path)).
+		SetDebug(debug).
+		Run(server, func(r gofight.HTTPResponse, rq gofight.HTTPRequest) {
+			assert.Equal(t, 200, r.Code)
+			var comments []dbmodel.Comment
+			body, err := ioutil.ReadAll(r.Body)
+			assert.Nil(t, err)
+			err = json.Unmarshal(body, &comments)
+			assert.Nil(t, err)
+			assert.Len(t, comments, 3)
+			assert.Equal(t, global.ParseAndSaniziteMarkdown("body"), comments[0].Body)
+			assert.Nil(t, comments[0].ReplyTo)
+			assert.True(t, uuid.Equal(commentId, *comments[1].ReplyTo))
+			assert.True(t, uuid.Equal(commentId, *comments[2].ReplyTo))
+		})
 }
