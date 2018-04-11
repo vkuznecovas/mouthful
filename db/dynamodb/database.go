@@ -40,6 +40,12 @@ func ValidateConfig(config model.Database) error {
 	if config.DynamoDBCommentWriteUnits == nil {
 		err += "Please specify the write units for dynamoDb Comment table by adjusting the config value DynamoDBCommentWriteUnits\n"
 	}
+	if config.DynamoDBIndexReadUnits == nil {
+		err += "Please specify the write units for dynamoDb Thread table by adjusting the config value DynamoDBThreadWriteUnits\n"
+	}
+	if config.DynamoDBIndexWriteUnits == nil {
+		err += "Please specify the write units for dynamoDb Comment table by adjusting the config value DynamoDBIndexWriteUnits\n"
+	}
 	if config.AwsRegion == nil {
 		err += "Please specify the AWS region your dynamoDb lives in\n"
 	}

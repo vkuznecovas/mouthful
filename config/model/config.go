@@ -13,6 +13,8 @@ type Database struct {
 	DynamoDBCommentReadUnits  *int64  `json:"dynamoDBCommentReadUnits,omitempty"`
 	DynamoDBThreadWriteUnits  *int64  `json:"dynamoDBThreadWriteUnits,omitempty"`
 	DynamoDBCommentWriteUnits *int64  `json:"dynamoDBCommentWriteUnits,omitempty"`
+	DynamoDBIndexWriteUnits   *int64  `json:"dynamoDBIndexWriteUnits,omitempty"`
+	DynamoDBIndexReadUnits    *int64  `json:"dynamoDBIndexReadUnits,omitempty"`
 	AwsAccessKeyID            *string `json:"awsAccessKeyID,omitempty"`
 	AwsSecretAccessKey        *string `json:"awsSecretAccessKey,omitempty"`
 	AwsRegion                 *string `json:"awsRegion,omitempty"`
