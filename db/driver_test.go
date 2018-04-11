@@ -37,6 +37,7 @@ var testFunctions = [...]interface{}{CreateThread,
 	SoftDelete,
 	GetAllCommentsGetsSoftDeletedComments,
 	DeleteCommentDeletesReplies,
+	CreateCommentReplyToAReply,
 }
 
 func setupDynamoTestDb() abstraction.Database {
@@ -158,6 +159,18 @@ func CreateCommentWrongReply(t *testing.T, database abstraction.Database) {
 	_, err = database.CreateComment("body", "author", "/test", true, uid2)
 	assert.NotNil(t, err)
 	assert.Equal(t, global.ErrWrongReplyTo, err)
+}
+
+func CreateCommentReplyToAReply(t *testing.T, database abstraction.Database) {
+	uid1, err := database.CreateComment("body", "author", "/test", true, nil)
+	assert.Nil(t, err)
+	uid2, err := database.CreateComment("body", "author", "/test", true, uid1)
+	assert.Nil(t, err)
+	uid3, err := database.CreateComment("body", "author", "/test", true, uid2)
+	assert.Nil(t, err)
+	comment, err := database.GetComment(*uid3)
+	assert.Nil(t, err)
+	assert.True(t, uuid.Equal(*comment.ReplyTo, *uid1))
 }
 
 func CreateCommentWrongThread(t *testing.T, database abstraction.Database) {
