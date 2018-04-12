@@ -15,7 +15,7 @@ import (
 	"github.com/jmoiron/sqlx"
 	_ "github.com/mattn/go-sqlite3"
 	"github.com/vkuznecovas/mouthful/cmd/migration/isso/model"
-	"github.com/vkuznecovas/mouthful/db/sqlxdriver/sqlite"
+	"github.com/vkuznecovas/mouthful/db/sqlxDriver/sqlite"
 )
 
 type CommentMap struct {
