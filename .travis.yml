@@ -12,7 +12,7 @@ before_install:
 install:
   - dep ensure
 script: 
-  - go test ./...
+  - go test ./... -v
   - go build main.go
   - go build cmd/migration/isso/main.go
   - go build cmd/migration/dynamodb/main.go

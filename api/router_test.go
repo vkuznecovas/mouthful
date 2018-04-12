@@ -42,7 +42,8 @@ var config = configModel.Config{
 		MaxCommentLength: &maxCommentLength,
 	},
 	API: configModel.API{
-		Debug: false,
+		Debug:   false,
+		Logging: false,
 		Cache: configModel.Cache{
 			Enabled:           false,
 			IntervalInSeconds: 1,

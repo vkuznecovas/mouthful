@@ -44,6 +44,7 @@ type API struct {
 	Cache        Cache        `json:"cache"`
 	RateLimiting RateLimiting `json:"rateLimiting"`
 	Cors         Cors         `json:"cors"`
+	Logging      bool         `json:"logging"`
 }
 
 // Client - client configuration part
