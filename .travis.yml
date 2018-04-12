@@ -5,7 +5,7 @@ services:
 env:
   - AWS_ACCESS_KEY_ID=somekey AWS_SECRET_ACCESS_KEY=somekey
 before_install:
-  - mysql -e 'CREATE DATABASE IF NOT EXISTS test;'
+  - mysql -e 'CREATE DATABASE IF NOT EXISTS mouthful_test;'
   - sudo mkdir /mnt/ramdisk
   - sudo mount -t tmpfs -o size=1024m tmpfs /mnt/ramdisk
   - sudo stop mysql
