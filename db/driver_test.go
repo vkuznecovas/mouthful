@@ -87,8 +87,6 @@ func TestMysqlDb(t *testing.T) {
 		f.(func(*testing.T, abstraction.Database))(t, db)
 		err := driverCasted.WipeOutData()
 		assert.Nil(t, err)
-		// just seeing if it's a race condition
-		time.Sleep(time.Millisecond * 200)
 	}
 }
 

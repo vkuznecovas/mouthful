@@ -9,7 +9,6 @@ import (
 	"os"
 	"strings"
 	"testing"
-	"time"
 
 	"github.com/satori/go.uuid"
 	"github.com/vkuznecovas/mouthful/global"
@@ -169,8 +168,6 @@ func TestRouterWithMysqlDb(t *testing.T) {
 		f.(func(*testing.T, abstraction.Database))(t, db)
 		err := driverCasted.WipeOutData()
 		assert.Nil(t, err)
-		// just seeing if it's a race condition
-		time.Sleep(time.Millisecond * 200)
 	}
 }
 
