@@ -80,7 +80,7 @@ func (db *Database) CreateComment(body string, author string, path string, confi
 		}
 	}
 	uid := global.GetUUID()
-	_, err = db.DB.Exec(db.DB.Rebind("INSERT INTO comment(Id, ThreadId, Body, Author, Confirmed, CreatedAt, ReplyTo) VALUES(?,?,?,?,?,?,?)"), uid, thread.Id, body, author, confirmed, time.Now().UTC(), replyTo)
+	_, err = db.DB.Exec(db.DB.Rebind("INSERT INTO Comment(Id, ThreadId, Body, Author, Confirmed, CreatedAt, ReplyTo) VALUES(?,?,?,?,?,?,?)"), uid, thread.Id, body, author, confirmed, time.Now().UTC(), replyTo)
 	return &uid, err
 }
 
@@ -91,7 +91,7 @@ func (db *Database) GetCommentsByThread(path string) (comments []model.Comment, 
 	if err != nil {
 		return nil, err
 	}
-	err = db.DB.Select(&commentSlice, db.DB.Rebind("select * from comment where ThreadId=? and Confirmed=? and DeletedAt is null"), thread.Id, true)
+	err = db.DB.Select(&commentSlice, db.DB.Rebind("select * from Comment where ThreadId=? and Confirmed=? and DeletedAt is null"), thread.Id, true)
 	if err != nil {
 		return nil, err
 	}
@@ -101,7 +101,7 @@ func (db *Database) GetCommentsByThread(path string) (comments []model.Comment, 
 
 // GetComment gets comment by id
 func (db *Database) GetComment(id uuid.UUID) (comment model.Comment, err error) {
-	err = db.DB.Get(&comment, db.DB.Rebind("select * from comment where Id=?"), id)
+	err = db.DB.Get(&comment, db.DB.Rebind("select * from Comment where Id=?"), id)
 	if err != nil {
 		if err.Error() == "sql: no rows in result set" {
 			return comment, global.ErrCommentNotFound
@@ -113,7 +113,7 @@ func (db *Database) GetComment(id uuid.UUID) (comment model.Comment, err error) 
 
 // UpdateComment updatesComment comment by id
 func (db *Database) UpdateComment(id uuid.UUID, body, author string, confirmed bool) error {
-	res, err := db.DB.Exec(db.DB.Rebind("update comment set Body=?,Author=?,Confirmed=? where Id=?"), body, author, confirmed, id)
+	res, err := db.DB.Exec(db.DB.Rebind("update Comment set Body=?,Author=?,Confirmed=? where Id=?"), body, author, confirmed, id)
 	if err != nil {
 		return err
 	}
@@ -129,7 +129,7 @@ func (db *Database) UpdateComment(id uuid.UUID, body, author string, confirmed b
 
 // DeleteComment soft-deletes the comment by id and all the replies to it
 func (db *Database) DeleteComment(id uuid.UUID) error {
-	res, err := db.DB.Exec(db.DB.Rebind("update comment set DeletedAt = CURRENT_TIMESTAMP where Id=? or ReplyTo=?"), id, id)
+	res, err := db.DB.Exec(db.DB.Rebind("update Comment set DeletedAt = CURRENT_TIMESTAMP where Id=? or ReplyTo=?"), id, id)
 	if err != nil {
 		return err
 	}
@@ -145,7 +145,7 @@ func (db *Database) DeleteComment(id uuid.UUID) error {
 
 // RestoreDeletedComment restores the soft-deleted comment
 func (db *Database) RestoreDeletedComment(id uuid.UUID) error {
-	res, err := db.DB.Exec(db.DB.Rebind("update comment set DeletedAt = null where Id=?"), id)
+	res, err := db.DB.Exec(db.DB.Rebind("update Comment set DeletedAt = null where Id=?"), id)
 	if err != nil {
 		return err
 	}
@@ -162,7 +162,7 @@ func (db *Database) RestoreDeletedComment(id uuid.UUID) error {
 // GetAllThreads gets all the threads found in the database
 func (db *Database) GetAllThreads() (threads []model.Thread, err error) {
 	var threadSlice model.ThreadSlice
-	err = db.DB.Select(&threadSlice, "select * from thread")
+	err = db.DB.Select(&threadSlice, "select * from Thread")
 	if err != nil {
 		return threads, err
 	}
@@ -173,7 +173,7 @@ func (db *Database) GetAllThreads() (threads []model.Thread, err error) {
 // GetAllComments gets all the comments found in the database
 func (db *Database) GetAllComments() (comments []model.Comment, err error) {
 	var commentSlice model.CommentSlice
-	err = db.DB.Select(&commentSlice, "select * from comment")
+	err = db.DB.Select(&commentSlice, "select * from Comment")
 	if err != nil {
 		return comments, err
 	}
