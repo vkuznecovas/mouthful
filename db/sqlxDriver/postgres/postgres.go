@@ -1,4 +1,4 @@
-package mysql
+package postgres
 
 import (
 	"errors"
@@ -6,14 +6,15 @@ import (
 	"strings"
 
 	"github.com/jmoiron/sqlx"
-	// We absolutely need the mysql driver here, this whole file depends on it
-	_ "github.com/go-sql-driver/mysql"
+	"github.com/jmoiron/sqlx/reflectx"
+	// We absolutely need the postgres driver here, this whole file depends on it
+	_ "github.com/lib/pq"
 	"github.com/vkuznecovas/mouthful/config/model"
 	"github.com/vkuznecovas/mouthful/db/abstraction"
 	"github.com/vkuznecovas/mouthful/db/sqlxDriver"
 )
 
-var MysqlQueries = []string{
+var PostgresQueries = []string{
 	`CREATE TABLE IF NOT EXISTS Thread(
 			Id VARCHAR(36) PRIMARY KEY,
 			CreatedAt TIMESTAMP(6) DEFAULT CURRENT_TIMESTAMP(6) not null,
@@ -47,9 +48,6 @@ func ValidateConfig(config model.Database) error {
 	if config.Host == nil {
 		err += "Please specify the database host in config(Database.Host)"
 	}
-	if config.Port == nil {
-		err += "Please specify the database port in config(Database.Port)"
-	}
 	if config.Database == nil {
 		err += "Please specify the database name in config(Database.Database)"
 	}
@@ -66,17 +64,18 @@ func CreateDatabase(databaseConfig model.Database) (abstraction.Database, error)
 		return nil, err
 	}
 	var db *sqlx.DB
-	connectionString := fmt.Sprintf("%v:%v@(%v:%v)/%v?parseTime=true", *databaseConfig.Username, *databaseConfig.Password, *databaseConfig.Host, *databaseConfig.Port, *databaseConfig.Database)
+
+	connectionString := fmt.Sprintf("postgresql://%v:%v@%v/%v?connect_timeout=10", *databaseConfig.Username, *databaseConfig.Password, *databaseConfig.Host, *databaseConfig.Database)
 	d, err := sqlx.Connect("mysql", connectionString)
-	d.MapperFunc(func(s string) string { return strings.ToLower(s) })
+	// d.MapperFunc(func(s string) string { return strings.Title(s) })
 	if err != nil {
 		return nil, err
 	}
 	db = d
 	DB := sqlxDriver.Database{
 		DB:      db,
-		Queries: MysqlQueries,
-		Dialect: "mysql",
+		Queries: PostgresQueries,
+		Dialect: "postgres",
 		IsTest:  false,
 	}
 	err = DB.InitializeDatabase()
@@ -88,15 +87,23 @@ func CreateDatabase(databaseConfig model.Database) (abstraction.Database, error)
 
 // CreateTestDatabase creates a test database
 func CreateTestDatabase() abstraction.Database {
-	db, err := sqlx.Open("mysql", "root:@(localhost:3306)/mouthful_test?parseTime=true")
+	db, err := sqlx.Open("postgres", "postgresql://postgres@localhost/mouthful_test?connect_timeout=10&sslmode=disable")
 	if err != nil {
 		panic(err)
 	}
-	db.MapperFunc(func(s string) string { return strings.ToLower(s) })
+	db.Mapper = reflectx.NewMapperTagFunc("db",
+		nil,
+		func(s string) string {
+			return strings.ToLower(s)
+		},
+	)
+	// db.Mapper = reflectx.NewMapperFunc("postgres", strings.ToLower)
+
+	// db.MapperFunc(func(s string) string { return strings.ToLower(s) })
 	DB := sqlxDriver.Database{
 		DB:      db,
-		Queries: MysqlQueries,
-		Dialect: "mysql",
+		Queries: PostgresQueries,
+		Dialect: "postgres",
 		IsTest:  true,
 	}
 	err = DB.InitializeDatabase()

@@ -42,7 +42,6 @@ func (db *Database) CreateThread(path string) (*uuid.UUID, error) {
 		}
 		return nil, err
 	}
-	time.Sleep(time.Millisecond * 10)
 	return &thread.Id, nil
 }
 
@@ -243,13 +242,23 @@ func (db *Database) WipeOutData() error {
 		return nil
 	}
 	log.Println("Wiping db")
+	if db.Dialect == "postgres" {
+		_, err := db.DB.Exec("truncate table Thread CASCADE")
+		if err != nil {
+			return err
+		}
+		log.Println("DB wiped")
+		return nil
+	}
 	tx, err := db.DB.Begin()
 	if err != nil {
 		return err
 	}
-	_, err = tx.Exec("SET FOREIGN_KEY_CHECKS = 0")
-	if err != nil {
-		return err
+	if db.Dialect == "mysql" {
+		_, err = tx.Exec("SET FOREIGN_KEY_CHECKS = 0")
+		if err != nil {
+			return err
+		}
 	}
 	_, err = tx.Exec("truncate table Comment")
 	if err != nil {
@@ -259,10 +268,13 @@ func (db *Database) WipeOutData() error {
 	if err != nil {
 		return err
 	}
-	_, err = tx.Exec("SET FOREIGN_KEY_CHECKS = 1")
-	if err != nil {
-		return err
+	if db.Dialect == "mysql" {
+		_, err = tx.Exec("SET FOREIGN_KEY_CHECKS = 1")
+		if err != nil {
+			return err
+		}
 	}
+
 	err = tx.Commit()
 	if err != nil {
 		return err
