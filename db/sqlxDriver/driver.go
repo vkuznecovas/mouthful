@@ -1,7 +1,6 @@
 package sqlxDriver
 
 import (
-	"log"
 	"sort"
 	"time"
 
@@ -65,14 +64,11 @@ func (db *Database) CreateComment(body string, author string, path string, confi
 	thread, err := db.GetThread(path)
 	if err != nil {
 		if err == global.ErrThreadNotFound {
-			log.Println("Creating thread")
 			threadId, err := db.CreateThread(path)
 			if err != nil {
 				return nil, err
 			}
-			log.Println("Thread created", path)
 			uid := global.GetUUID()
-			log.Println("inserting comment new", threadId.String())
 			if replyTo != nil {
 				return nil, global.ErrWrongReplyTo
 			}
@@ -109,8 +105,6 @@ func (db *Database) CreateComment(body string, author string, path string, confi
 		}
 	}
 	uid := global.GetUUID()
-	log.Println("inserting comment", thread.Id.String())
-	log.Println("thread", thread)
 	res, err := db.DB.Exec(db.DB.Rebind("INSERT INTO Comment(Id, ThreadId, Body, Author, Confirmed, CreatedAt, ReplyTo) VALUES(?,?,?,?,?,?,?)"), uid, thread.Id, body, author, confirmed, time.Now().UTC(), replyTo)
 	if err != nil {
 		return nil, err
@@ -241,13 +235,11 @@ func (db *Database) WipeOutData() error {
 	if !db.IsTest {
 		return nil
 	}
-	log.Println("Wiping db")
 	if db.Dialect == "postgres" {
 		_, err := db.DB.Exec("truncate table Thread CASCADE")
 		if err != nil {
 			return err
 		}
-		log.Println("DB wiped")
 		return nil
 	}
 	tx, err := db.DB.Begin()
@@ -279,6 +271,5 @@ func (db *Database) WipeOutData() error {
 	if err != nil {
 		return err
 	}
-	log.Println("DB wiped")
 	return nil
 }

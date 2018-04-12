@@ -1,7 +1,6 @@
 package db_test
 
 import (
-	"log"
 	"testing"
 	"time"
 
@@ -371,7 +370,6 @@ func GetAllCommentsGetsSoftDeletedComments(t *testing.T, database abstraction.Da
 }
 
 func DeleteCommentDeletesReplies(t *testing.T, database abstraction.Database) {
-	log.Println("Running DeleteCommentDeletesReplies")
 	author := "author"
 	body := "body"
 	path := "/test"
@@ -386,5 +384,4 @@ func DeleteCommentDeletesReplies(t *testing.T, database abstraction.Database) {
 	assert.Len(t, comments, 2)
 	assert.NotNil(t, comments[0].DeletedAt)
 	assert.NotNil(t, comments[1].DeletedAt)
-	log.Println("Running DeleteCommentDeletesReplies DONE")
 }
