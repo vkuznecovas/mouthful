@@ -81,10 +81,14 @@ func TestMysqlDb(t *testing.T) {
 	db := mysql.CreateTestDatabase()
 	driver := db.GetUnderlyingStruct()
 	driverCasted := driver.(*sqlxDriver.Database)
+	// clean out before start
+	driverCasted.WipeOutData()
 	for _, f := range testFunctions {
 		f.(func(*testing.T, abstraction.Database))(t, db)
 		err := driverCasted.WipeOutData()
 		assert.Nil(t, err)
+		// just seeing if it's a race condition
+		time.Sleep(time.Millisecond * 200)
 	}
 }
 
