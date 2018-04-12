@@ -211,11 +211,11 @@ func (db *Database) WipeOutData() error {
 	if err != nil {
 		return err
 	}
-	_, err = tx.Exec("truncate table comment")
+	_, err = tx.Exec("truncate table Comment")
 	if err != nil {
 		return err
 	}
-	_, err = tx.Exec("truncate table thread")
+	_, err = tx.Exec("truncate table Thread")
 	if err != nil {
 		return err
 	}

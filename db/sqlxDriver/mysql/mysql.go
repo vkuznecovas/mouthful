@@ -68,7 +68,7 @@ func CreateDatabase(databaseConfig model.Database) (abstraction.Database, error)
 	var db *sqlx.DB
 	connectionString := fmt.Sprintf("%v:%v@(%v:%v)/%v?parseTime=true", *databaseConfig.Username, *databaseConfig.Password, *databaseConfig.Host, *databaseConfig.Port, *databaseConfig.Database)
 	d, err := sqlx.Connect("mysql", connectionString)
-	d.MapperFunc(func(s string) string { return strings.Title(s) })
+	d.MapperFunc(func(s string) string { return strings.ToLower(s) })
 	if err != nil {
 		return nil, err
 	}
@@ -92,7 +92,7 @@ func CreateTestDatabase() abstraction.Database {
 	if err != nil {
 		panic(err)
 	}
-	db.MapperFunc(func(s string) string { return strings.Title(s) })
+	db.MapperFunc(func(s string) string { return strings.ToLower(s) })
 	DB := sqlxDriver.Database{
 		DB:      db,
 		Queries: MysqlQueries,
