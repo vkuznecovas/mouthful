@@ -16,18 +16,18 @@ import (
 
 var PostgresQueries = []string{
 	`CREATE TABLE IF NOT EXISTS Thread(
-			Id VARCHAR(36) PRIMARY KEY,
+			Id uuid PRIMARY KEY,
 			CreatedAt TIMESTAMP(6) DEFAULT CURRENT_TIMESTAMP(6) not null,
 			Path varchar(255) not null UNIQUE
 		)`,
 	`CREATE TABLE IF NOT EXISTS Comment(
-			Id VARCHAR(36) PRIMARY KEY,
-			ThreadId VARCHAR(36) not null,
+			Id uuid PRIMARY KEY,
+			ThreadId uuid not null,
 			Body text not null,
 			Author varchar(255) not null,
 			Confirmed bool not null default false,
 			CreatedAt TIMESTAMP(6) DEFAULT CURRENT_TIMESTAMP(6) not null,
-			ReplyTo VARCHAR(36) default null,
+			ReplyTo uuid default null,
 			DeletedAt TIMESTAMP(6) NULL,
 			FOREIGN KEY(ThreadId) references Thread(Id)
 		)`,
@@ -66,11 +66,21 @@ func CreateDatabase(databaseConfig model.Database) (abstraction.Database, error)
 	var db *sqlx.DB
 
 	connectionString := fmt.Sprintf("postgresql://%v:%v@%v/%v?connect_timeout=10", *databaseConfig.Username, *databaseConfig.Password, *databaseConfig.Host, *databaseConfig.Database)
+	if databaseConfig.SSLEnabled != nil {
+		if !*databaseConfig.SSLEnabled {
+			connectionString += "&sslmode=disable"
+		}
+	}
 	d, err := sqlx.Connect("mysql", connectionString)
-	// d.MapperFunc(func(s string) string { return strings.Title(s) })
 	if err != nil {
 		return nil, err
 	}
+	db.Mapper = reflectx.NewMapperTagFunc("db",
+		nil,
+		func(s string) string {
+			return strings.ToLower(s)
+		},
+	)
 	db = d
 	DB := sqlxDriver.Database{
 		DB:      db,
@@ -97,9 +107,6 @@ func CreateTestDatabase() abstraction.Database {
 			return strings.ToLower(s)
 		},
 	)
-	// db.Mapper = reflectx.NewMapperFunc("postgres", strings.ToLower)
-
-	// db.MapperFunc(func(s string) string { return strings.ToLower(s) })
 	DB := sqlxDriver.Database{
 		DB:      db,
 		Queries: PostgresQueries,

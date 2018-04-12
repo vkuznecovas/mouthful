@@ -18,6 +18,7 @@ type Database struct {
 	AwsAccessKeyID            *string `json:"awsAccessKeyID,omitempty"`
 	AwsSecretAccessKey        *string `json:"awsSecretAccessKey,omitempty"`
 	AwsRegion                 *string `json:"awsRegion,omitempty"`
+	SSLEnabled                *bool   `json:"sslEnabled,omitempty"`
 }
 
 // Moderation - moderation section of our config
