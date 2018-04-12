@@ -42,6 +42,7 @@ func (db *Database) CreateThread(path string) (*uuid.UUID, error) {
 		}
 		return nil, err
 	}
+	time.Sleep(time.Millisecond * 10)
 	return &thread.Id, nil
 }
 
