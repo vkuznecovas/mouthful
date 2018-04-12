@@ -70,7 +70,7 @@ func (db *Database) CreateComment(body string, author string, path string, confi
 			if err != nil {
 				return nil, err
 			}
-			log.Println("Thread created")
+			log.Println("Thread created", path)
 			uid := global.GetUUID()
 			log.Println("inserting comment new", threadId.String())
 			if replyTo != nil {
