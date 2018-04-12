@@ -289,7 +289,6 @@ func DeleteCommentBadRequst(t *testing.T, testDB abstraction.Database) {
 		SetCookie(cookies).
 		SetDebug(debug).
 		Run(server, func(r gofight.HTTPResponse, rq gofight.HTTPRequest) {
-			fmt.Println(r.Code)
 			assert.Equal(t, 400, r.Code)
 		})
 }
@@ -1078,7 +1077,6 @@ func RestoreDeletedCommentBadRequst(t *testing.T, testDB abstraction.Database) {
 		SetCookie(cookies).
 		SetDebug(debug).
 		Run(server, func(r gofight.HTTPResponse, rq gofight.HTTPRequest) {
-			fmt.Println(r.Code)
 			assert.Equal(t, 400, r.Code)
 		})
 }
@@ -1368,7 +1366,6 @@ func DeleteCommentBadUUID(t *testing.T, testDB abstraction.Database) {
 		SetCookie(cookies).
 		SetDebug(debug).
 		Run(server, func(r gofight.HTTPResponse, rq gofight.HTTPRequest) {
-			fmt.Println(r.Code)
 			assert.Equal(t, 400, r.Code)
 		})
 }
@@ -1390,7 +1387,6 @@ func UpdateCommentBadUUID(t *testing.T, testDB abstraction.Database) {
 		SetCookie(cookies).
 		SetDebug(debug).
 		Run(server, func(r gofight.HTTPResponse, rq gofight.HTTPRequest) {
-			fmt.Println(r.Code)
 			assert.Equal(t, 400, r.Code)
 		})
 }
@@ -1472,7 +1468,6 @@ func DeleteCommentDeletesReplyToComments(t *testing.T, testDB abstraction.Databa
 			err = json.Unmarshal(body, &comments)
 			assert.Nil(t, err)
 			assert.Len(t, comments, 2)
-			fmt.Println(string(body))
 			for _, v := range comments {
 				assert.NotNil(t, v.DeletedAt)
 			}

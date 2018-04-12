@@ -17,7 +17,7 @@ var MysqlQueries = []string{
 	`CREATE TABLE IF NOT EXISTS Thread(
 			Id CHAR(36) PRIMARY KEY,
 			CreatedAt TIMESTAMP(6) DEFAULT CURRENT_TIMESTAMP(6) not null,
-			Path varchar(1024) not null UNIQUE
+			Path varchar(255) not null UNIQUE
 		)`,
 	`CREATE TABLE IF NOT EXISTS Comment(
 			Id CHAR(36) PRIMARY KEY,
