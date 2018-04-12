@@ -4,12 +4,15 @@ import (
 	"testing"
 	"time"
 
-	"github.com/jmoiron/sqlx"
 	uuid "github.com/satori/go.uuid"
 	"github.com/stretchr/testify/assert"
 	"github.com/vkuznecovas/mouthful/db/abstraction"
 	"github.com/vkuznecovas/mouthful/db/dynamodb"
-	"github.com/vkuznecovas/mouthful/db/sqlite"
+	"github.com/vkuznecovas/mouthful/db/sqlxDriver"
+	"github.com/vkuznecovas/mouthful/db/sqlxDriver/mysql"
+	"github.com/vkuznecovas/mouthful/db/sqlxDriver/postgres"
+	"github.com/vkuznecovas/mouthful/db/sqlxDriver/sqlite"
+
 	"github.com/vkuznecovas/mouthful/global"
 )
 
@@ -50,38 +53,50 @@ func setupDynamoTestDb() abstraction.Database {
 }
 
 func setupSqliteTestDb() abstraction.Database {
-	database := sqlite.Database{}
-	db, err := sqlx.Open("sqlite3", ":memory:")
-	if err != nil {
-		panic(err)
-	}
-	err = db.Ping()
-	if err != nil {
-		panic(err)
-	}
-	database.DB = db
-	err = database.InitializeDatabase()
-	if err != nil {
-		panic(err)
-	}
-	return &database
+	database := sqlite.CreateTestDatabase()
+	return database
 }
 
 func TestDynamoDb(t *testing.T) {
 	db := setupDynamoTestDb()
 	driver := db.GetUnderlyingStruct()
 	driverCasted := driver.(*dynamodb.Database)
-	// Just in case this is not an in memory instance
-	defer driverCasted.DeleteTables()
 	for _, f := range testFunctions {
 		f.(func(*testing.T, abstraction.Database))(t, db)
-		driverCasted.WipeOutData()
+		err := driverCasted.WipeOutData()
+		assert.Nil(t, err)
 	}
 }
 
 func TestSqliteDb(t *testing.T) {
 	for _, f := range testFunctions {
 		f.(func(*testing.T, abstraction.Database))(t, setupSqliteTestDb())
+	}
+}
+
+func TestPostgresDB(t *testing.T) {
+	db := postgres.CreateTestDatabase()
+	driver := db.GetUnderlyingStruct()
+	driverCasted := driver.(*sqlxDriver.Database)
+	// clean out before start
+	driverCasted.WipeOutData()
+	for _, f := range testFunctions {
+		f.(func(*testing.T, abstraction.Database))(t, db)
+		err := driverCasted.WipeOutData()
+		assert.Nil(t, err)
+	}
+}
+
+func TestMysqlDB(t *testing.T) {
+	db := mysql.CreateTestDatabase()
+	driver := db.GetUnderlyingStruct()
+	driverCasted := driver.(*sqlxDriver.Database)
+	// clean out before start
+	driverCasted.WipeOutData()
+	for _, f := range testFunctions {
+		f.(func(*testing.T, abstraction.Database))(t, db)
+		err := driverCasted.WipeOutData()
+		assert.Nil(t, err)
 	}
 }
 

@@ -12,6 +12,7 @@
     },
     "api": {
         "port": 8080,
+        "logging": true,
         "debug": false,
         "cache": {
             "enabled": true,
