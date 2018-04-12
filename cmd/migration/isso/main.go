@@ -12,11 +12,10 @@ import (
 	"github.com/vkuznecovas/mouthful/api"
 	"github.com/vkuznecovas/mouthful/global"
 
-	sqlite "github.com/vkuznecovas/mouthful/db/sqlite"
-
 	"github.com/jmoiron/sqlx"
 	_ "github.com/mattn/go-sqlite3"
 	"github.com/vkuznecovas/mouthful/cmd/migration/isso/model"
+	"github.com/vkuznecovas/mouthful/db/sqlxdriver/sqlite"
 )
 
 type CommentMap struct {
