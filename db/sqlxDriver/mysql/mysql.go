@@ -15,18 +15,18 @@ import (
 
 var MysqlQueries = []string{
 	`CREATE TABLE IF NOT EXISTS Thread(
-			Id CHAR(36) PRIMARY KEY,
+			Id VARCHAR(36) PRIMARY KEY,
 			CreatedAt TIMESTAMP(6) DEFAULT CURRENT_TIMESTAMP(6) not null,
 			Path varchar(255) not null UNIQUE
 		)`,
 	`CREATE TABLE IF NOT EXISTS Comment(
-			Id CHAR(36) PRIMARY KEY,
-			ThreadId CHAR(36) not null,
+			Id VARCHAR(36) PRIMARY KEY,
+			ThreadId VARCHAR(36) not null,
 			Body text not null,
 			Author varchar(255) not null,
 			Confirmed bool not null default false,
 			CreatedAt TIMESTAMP(6) DEFAULT CURRENT_TIMESTAMP(6) not null,
-			ReplyTo CHAR(36) default null,
+			ReplyTo VARCHAR(36) default null,
 			DeletedAt TIMESTAMP(6) NULL,
 			FOREIGN KEY(ThreadId) references Thread(Id)
 		)`,

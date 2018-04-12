@@ -1,6 +1,7 @@
 package sqlxDriver
 
 import (
+	"log"
 	"sort"
 	"time"
 
@@ -26,7 +27,17 @@ func (db *Database) CreateThread(path string) (*uuid.UUID, error) {
 	if err != nil {
 		if err == global.ErrThreadNotFound {
 			uid := global.GetUUID()
-			_, err := db.DB.Exec(db.DB.Rebind("INSERT INTO Thread(Id,Path) VALUES(?, ?)"), uid, path)
+			res, err := db.DB.Exec(db.DB.Rebind("INSERT INTO Thread(Id,Path) VALUES(?, ?)"), uid, path)
+			if err != nil {
+				return nil, err
+			}
+			affected, err := res.RowsAffected()
+			if err != nil {
+				return nil, err
+			}
+			if affected != 1 {
+				return nil, global.ErrInternalServerError
+			}
 			return &uid, err
 		}
 		return nil, err
@@ -54,11 +65,29 @@ func (db *Database) CreateComment(body string, author string, path string, confi
 	thread, err := db.GetThread(path)
 	if err != nil {
 		if err == global.ErrThreadNotFound {
-			_, err := db.CreateThread(path)
+			log.Println("Creating thread")
+			threadId, err := db.CreateThread(path)
 			if err != nil {
 				return nil, err
 			}
-			return db.CreateComment(body, author, path, confirmed, replyTo)
+			log.Println("Thread created")
+			uid := global.GetUUID()
+			log.Println("inserting comment new", threadId.String())
+			if replyTo != nil {
+				return nil, global.ErrWrongReplyTo
+			}
+			res, err := db.DB.Exec(db.DB.Rebind("INSERT INTO Comment(Id, ThreadId, Body, Author, Confirmed, CreatedAt, ReplyTo) VALUES(?,?,?,?,?,?,?)"), uid, threadId, body, author, confirmed, time.Now().UTC(), nil)
+			if err != nil {
+				return nil, err
+			}
+			affected, err := res.RowsAffected()
+			if err != nil {
+				return nil, err
+			}
+			if affected != 1 {
+				return nil, global.ErrInternalServerError
+			}
+			return &uid, err
 		}
 		return nil, err
 	}
@@ -80,7 +109,16 @@ func (db *Database) CreateComment(body string, author string, path string, confi
 		}
 	}
 	uid := global.GetUUID()
-	_, err = db.DB.Exec(db.DB.Rebind("INSERT INTO Comment(Id, ThreadId, Body, Author, Confirmed, CreatedAt, ReplyTo) VALUES(?,?,?,?,?,?,?)"), uid, thread.Id, body, author, confirmed, time.Now().UTC(), replyTo)
+	log.Println("inserting comment", thread.Id.String())
+	log.Println("thread", thread)
+	res, err := db.DB.Exec(db.DB.Rebind("INSERT INTO Comment(Id, ThreadId, Body, Author, Confirmed, CreatedAt, ReplyTo) VALUES(?,?,?,?,?,?,?)"), uid, thread.Id, body, author, confirmed, time.Now().UTC(), replyTo)
+	if err != nil {
+		return nil, err
+	}
+	_, err = res.RowsAffected()
+	if err != nil {
+		return nil, err
+	}
 	return &uid, err
 }
 
@@ -203,6 +241,7 @@ func (db *Database) WipeOutData() error {
 	if !db.IsTest {
 		return nil
 	}
+	log.Println("Wiping db")
 	tx, err := db.DB.Begin()
 	if err != nil {
 		return err
@@ -227,5 +266,6 @@ func (db *Database) WipeOutData() error {
 	if err != nil {
 		return err
 	}
+	log.Println("DB wiped")
 	return nil
 }
