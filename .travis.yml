@@ -1,9 +1,17 @@
 language: go
 services:
+  - mysql
   - postgresql
 env:
   - AWS_ACCESS_KEY_ID=somekey AWS_SECRET_ACCESS_KEY=somekey
 before_install:
+  - mysql -e 'CREATE DATABASE IF NOT EXISTS test;'
+  - sudo mkdir /mnt/ramdisk
+  - sudo mount -t tmpfs -o size=1024m tmpfs /mnt/ramdisk
+  - sudo stop mysql
+  - sudo mv /var/lib/mysql /mnt/ramdisk
+  - sudo ln -s /mnt/ramdisk/mysql /var/lib/mysql
+  - sudo start mysql
   - psql -c 'create database mouthful_test;' -U postgres
   - go get -u github.com/golang/dep/cmd/dep
   - wget http://dynamodb-local.s3-website-us-west-2.amazonaws.com/dynamodb_local_latest.tar.gz -O /tmp/dynamodb_local_latest.tar.gz

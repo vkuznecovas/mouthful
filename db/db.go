@@ -7,6 +7,7 @@ import (
 	"github.com/vkuznecovas/mouthful/config/model"
 	"github.com/vkuznecovas/mouthful/db/abstraction"
 	"github.com/vkuznecovas/mouthful/db/dynamodb"
+	"github.com/vkuznecovas/mouthful/db/sqlxDriver/mysql"
 	"github.com/vkuznecovas/mouthful/db/sqlxDriver/postgres"
 	"github.com/vkuznecovas/mouthful/db/sqlxDriver/sqlite"
 )
@@ -19,6 +20,9 @@ func GetDBInstance(databaseConfig model.Database) (db abstraction.Database, err 
 		return db, err
 	case "postgres":
 		db, err = postgres.CreateDatabase(databaseConfig)
+		return db, err
+	case "mysql":
+		db, err = mysql.CreateDatabase(databaseConfig)
 		return db, err
 	case "dynamodb":
 		db, err = dynamodb.CreateDatabase(databaseConfig)
