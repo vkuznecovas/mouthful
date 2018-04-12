@@ -3,6 +3,7 @@ package mysql
 import (
 	"errors"
 	"fmt"
+	"strings"
 
 	"github.com/jmoiron/sqlx"
 	// We absolutely need the mysql driver here, this whole file depends on it
@@ -14,19 +15,19 @@ import (
 
 var MysqlQueries = []string{
 	`CREATE TABLE IF NOT EXISTS Thread(
-			Id BLOB PRIMARY KEY,
-			CreatedAt TIMESTAMP DEFAULT CURRENT_TIMESTAMP not null,
+			Id CHAR(36) PRIMARY KEY,
+			CreatedAt TIMESTAMP(6) DEFAULT CURRENT_TIMESTAMP(6) not null,
 			Path varchar(1024) not null UNIQUE
 		)`,
 	`CREATE TABLE IF NOT EXISTS Comment(
-			Id BLOB PRIMARY KEY,
-			ThreadId INTEGER not null,
+			Id CHAR(36) PRIMARY KEY,
+			ThreadId CHAR(36) not null,
 			Body text not null,
 			Author varchar(255) not null,
 			Confirmed bool not null default false,
-			CreatedAt TIMESTAMP DEFAULT CURRENT_TIMESTAMP not null,
-			ReplyTo BLOB default null,
-			DeletedAt TIMESTAMP DEFAULT null,
+			CreatedAt TIMESTAMP(6) DEFAULT CURRENT_TIMESTAMP(6) not null,
+			ReplyTo CHAR(36) default null,
+			DeletedAt TIMESTAMP(6) NULL,
 			FOREIGN KEY(ThreadId) references Thread(Id)
 		)`,
 }
@@ -65,8 +66,9 @@ func CreateDatabase(databaseConfig model.Database) (abstraction.Database, error)
 		return nil, err
 	}
 	var db *sqlx.DB
-	connectionString := fmt.Sprintf("%v:%v@(%v:%v)/%v", *databaseConfig.Username, *databaseConfig.Password, *databaseConfig.Host, *databaseConfig.Port, *databaseConfig.Database)
+	connectionString := fmt.Sprintf("%v:%v@(%v:%v)/%v?parseTime=true", *databaseConfig.Username, *databaseConfig.Password, *databaseConfig.Host, *databaseConfig.Port, *databaseConfig.Database)
 	d, err := sqlx.Connect("mysql", connectionString)
+	d.MapperFunc(func(s string) string { return strings.Title(s) })
 	if err != nil {
 		return nil, err
 	}
@@ -86,10 +88,11 @@ func CreateDatabase(databaseConfig model.Database) (abstraction.Database, error)
 
 // CreateTestDatabase creates a test database
 func CreateTestDatabase() abstraction.Database {
-	db, err := sqlx.Open("mysql", "root:admin@(localhost:3306)/mouthful")
+	db, err := sqlx.Open("mysql", "root:@(localhost:3306)/mouthful_test?parseTime=true")
 	if err != nil {
 		panic(err)
 	}
+	db.MapperFunc(func(s string) string { return strings.Title(s) })
 	DB := sqlxDriver.Database{
 		DB:      db,
 		Queries: MysqlQueries,

@@ -15,6 +15,7 @@ import (
 
 	"github.com/vkuznecovas/mouthful/db/abstraction"
 	"github.com/vkuznecovas/mouthful/db/dynamodb"
+	"github.com/vkuznecovas/mouthful/db/sqlxDriver"
 
 	"github.com/appleboy/gofight"
 	"github.com/stretchr/testify/assert"
@@ -24,6 +25,7 @@ import (
 	configModel "github.com/vkuznecovas/mouthful/config/model"
 
 	dbmodel "github.com/vkuznecovas/mouthful/db/model"
+	"github.com/vkuznecovas/mouthful/db/sqlxDriver/mysql"
 	"github.com/vkuznecovas/mouthful/db/sqlxDriver/sqlite"
 )
 
@@ -134,6 +136,11 @@ func setupSqliteTestDb() abstraction.Database {
 	return database
 }
 
+func setupMysqlTestDb() abstraction.Database {
+	database := mysql.CreateTestDatabase()
+	return database
+}
+
 func TestRouterWithSqlite(t *testing.T) {
 	for _, f := range testFunctions {
 		f.(func(*testing.T, abstraction.Database))(t, setupSqliteTestDb())
@@ -144,11 +151,20 @@ func TestRouterWithDynamoDb(t *testing.T) {
 	db := setupDynamoTestDb()
 	driver := db.GetUnderlyingStruct()
 	driverCasted := driver.(*dynamodb.Database)
-	// Just in case this is not an in memory instance
-	defer driverCasted.DeleteTables()
 	for _, f := range testFunctions {
 		f.(func(*testing.T, abstraction.Database))(t, db)
 		driverCasted.WipeOutData()
+	}
+}
+
+func TestRouterWithMysqlDb(t *testing.T) {
+	db := mysql.CreateTestDatabase()
+	driver := db.GetUnderlyingStruct()
+	driverCasted := driver.(*sqlxDriver.Database)
+	for _, f := range testFunctions {
+		f.(func(*testing.T, abstraction.Database))(t, db)
+		err := driverCasted.WipeOutData()
+		assert.Nil(t, err)
 	}
 }
 

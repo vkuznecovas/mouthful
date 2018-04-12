@@ -22,7 +22,7 @@ var SqliteQueries = []string{
 		)`,
 	`CREATE TABLE IF NOT EXISTS Comment(
 			Id BLOB PRIMARY KEY,
-			ThreadId INTEGER not null,
+			ThreadId BLOB not null,
 			Body text not null,
 			Author varchar(255) not null,
 			Confirmed bool not null default false,

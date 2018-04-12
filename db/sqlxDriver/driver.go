@@ -1,6 +1,7 @@
 package sqlxDriver
 
 import (
+	"sort"
 	"time"
 
 	"github.com/jmoiron/sqlx"
@@ -35,7 +36,7 @@ func (db *Database) CreateThread(path string) (*uuid.UUID, error) {
 
 // GetThread takes the thread path and fetches it from the database
 func (db *Database) GetThread(path string) (thread model.Thread, err error) {
-	row := db.DB.QueryRowx(db.DB.Rebind("SELECT id, path, createdAt FROM Thread where path=? LIMIT 1"), path)
+	row := db.DB.QueryRowx(db.DB.Rebind("SELECT Id, Path, CreatedAt FROM Thread where Path=? LIMIT 1"), path)
 	if row != nil {
 		err = row.StructScan(&thread)
 		if err != nil {
@@ -79,26 +80,28 @@ func (db *Database) CreateComment(body string, author string, path string, confi
 		}
 	}
 	uid := global.GetUUID()
-	_, err = db.DB.Exec(db.DB.Rebind("INSERT INTO comment(id, threadId, body, author, confirmed, createdAt, replyTo) VALUES(?,?,?,?,?,?,?)"), uid, thread.Id, body, author, confirmed, time.Now().UTC(), replyTo)
+	_, err = db.DB.Exec(db.DB.Rebind("INSERT INTO comment(Id, ThreadId, Body, Author, Confirmed, CreatedAt, ReplyTo) VALUES(?,?,?,?,?,?,?)"), uid, thread.Id, body, author, confirmed, time.Now().UTC(), replyTo)
 	return &uid, err
 }
 
 // GetCommentsByThread gets all the comments by thread path
 func (db *Database) GetCommentsByThread(path string) (comments []model.Comment, err error) {
+	var commentSlice model.CommentSlice
 	thread, err := db.GetThread(path)
 	if err != nil {
 		return nil, err
 	}
-	err = db.DB.Select(&comments, db.DB.Rebind("select * from comment where threadId=? and confirmed=? and deletedAt is null"), thread.Id, true)
+	err = db.DB.Select(&commentSlice, db.DB.Rebind("select * from comment where ThreadId=? and Confirmed=? and DeletedAt is null"), thread.Id, true)
 	if err != nil {
 		return nil, err
 	}
-	return comments, nil
+	sort.Sort(commentSlice)
+	return commentSlice, nil
 }
 
 // GetComment gets comment by id
 func (db *Database) GetComment(id uuid.UUID) (comment model.Comment, err error) {
-	err = db.DB.Get(&comment, db.DB.Rebind("select * from comment where id=?"), id)
+	err = db.DB.Get(&comment, db.DB.Rebind("select * from comment where Id=?"), id)
 	if err != nil {
 		if err.Error() == "sql: no rows in result set" {
 			return comment, global.ErrCommentNotFound
@@ -110,7 +113,7 @@ func (db *Database) GetComment(id uuid.UUID) (comment model.Comment, err error) 
 
 // UpdateComment updatesComment comment by id
 func (db *Database) UpdateComment(id uuid.UUID, body, author string, confirmed bool) error {
-	res, err := db.DB.Exec(db.DB.Rebind("update comment set body=?,author=?,confirmed=? where id=?"), body, author, confirmed, id)
+	res, err := db.DB.Exec(db.DB.Rebind("update comment set Body=?,Author=?,Confirmed=? where Id=?"), body, author, confirmed, id)
 	if err != nil {
 		return err
 	}
@@ -126,7 +129,7 @@ func (db *Database) UpdateComment(id uuid.UUID, body, author string, confirmed b
 
 // DeleteComment soft-deletes the comment by id and all the replies to it
 func (db *Database) DeleteComment(id uuid.UUID) error {
-	res, err := db.DB.Exec(db.DB.Rebind("update comment set deletedAt = CURRENT_TIMESTAMP where id=? or replyTo=?"), id, id)
+	res, err := db.DB.Exec(db.DB.Rebind("update comment set DeletedAt = CURRENT_TIMESTAMP where Id=? or ReplyTo=?"), id, id)
 	if err != nil {
 		return err
 	}
@@ -142,7 +145,7 @@ func (db *Database) DeleteComment(id uuid.UUID) error {
 
 // RestoreDeletedComment restores the soft-deleted comment
 func (db *Database) RestoreDeletedComment(id uuid.UUID) error {
-	res, err := db.DB.Exec(db.DB.Rebind("update comment set deletedAt = null where id=?"), id)
+	res, err := db.DB.Exec(db.DB.Rebind("update comment set DeletedAt = null where Id=?"), id)
 	if err != nil {
 		return err
 	}
@@ -158,14 +161,24 @@ func (db *Database) RestoreDeletedComment(id uuid.UUID) error {
 
 // GetAllThreads gets all the threads found in the database
 func (db *Database) GetAllThreads() (threads []model.Thread, err error) {
-	err = db.DB.Select(&threads, "select * from thread")
-	return threads, err
+	var threadSlice model.ThreadSlice
+	err = db.DB.Select(&threadSlice, "select * from thread")
+	if err != nil {
+		return threads, err
+	}
+	sort.Sort(threadSlice)
+	return threadSlice, err
 }
 
 // GetAllComments gets all the comments found in the database
 func (db *Database) GetAllComments() (comments []model.Comment, err error) {
-	err = db.DB.Select(&comments, "select * from comment")
-	return comments, err
+	var commentSlice model.CommentSlice
+	err = db.DB.Select(&commentSlice, "select * from comment")
+	if err != nil {
+		return comments, err
+	}
+	sort.Sort(commentSlice)
+	return commentSlice, err
 }
 
 func (db *Database) GetUnderlyingStruct() interface{} {
@@ -186,10 +199,33 @@ func (db *Database) GetDatabaseDialect() string {
 }
 
 // WipeOutData deletes all the threads and comments in the database if the database is a test one
-func (db *Database) WipeOutData() {
+func (db *Database) WipeOutData() error {
 	if !db.IsTest {
-		return
+		return nil
 	}
-	db.DB.MustExec("truncate table comment")
-	db.DB.MustExec("truncate table thread")
+	tx, err := db.DB.Begin()
+	if err != nil {
+		return err
+	}
+	_, err = tx.Exec("SET FOREIGN_KEY_CHECKS = 0")
+	if err != nil {
+		return err
+	}
+	_, err = tx.Exec("truncate table comment")
+	if err != nil {
+		return err
+	}
+	_, err = tx.Exec("truncate table thread")
+	if err != nil {
+		return err
+	}
+	_, err = tx.Exec("SET FOREIGN_KEY_CHECKS = 1")
+	if err != nil {
+		return err
+	}
+	err = tx.Commit()
+	if err != nil {
+		return err
+	}
+	return nil
 }

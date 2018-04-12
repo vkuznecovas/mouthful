@@ -65,11 +65,10 @@ func TestDynamoDb(t *testing.T) {
 	db := setupDynamoTestDb()
 	driver := db.GetUnderlyingStruct()
 	driverCasted := driver.(*dynamodb.Database)
-	// Just in case this is not an in memory instance
-	defer driverCasted.DeleteTables()
 	for _, f := range testFunctions {
 		f.(func(*testing.T, abstraction.Database))(t, db)
-		driverCasted.WipeOutData()
+		err := driverCasted.WipeOutData()
+		assert.Nil(t, err)
 	}
 }
 
@@ -82,10 +81,10 @@ func TestMysqlDb(t *testing.T) {
 	db := mysql.CreateTestDatabase()
 	driver := db.GetUnderlyingStruct()
 	driverCasted := driver.(*sqlxDriver.Database)
-	// Just in case this is not an in memory instance
 	for _, f := range testFunctions {
 		f.(func(*testing.T, abstraction.Database))(t, db)
-		driverCasted.WipeOutData()
+		err := driverCasted.WipeOutData()
+		assert.Nil(t, err)
 	}
 }
 
