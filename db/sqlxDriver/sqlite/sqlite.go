@@ -7,15 +7,30 @@ import (
 	"time"
 
 	"github.com/jmoiron/sqlx"
+	// We absolutely need the sqlite driver here, this whole package depends on it
+	_ "github.com/mattn/go-sqlite3"
 	"github.com/vkuznecovas/mouthful/config/model"
 	"github.com/vkuznecovas/mouthful/db/abstraction"
+	"github.com/vkuznecovas/mouthful/db/sqlxDriver"
 )
 
-// TODO: tests
-
-// Database is a database instance for sqlite
-type Database struct {
-	DB *sqlx.DB
+var SqliteQueries = []string{
+	`CREATE TABLE IF NOT EXISTS Thread(
+			Id BLOB PRIMARY KEY,
+			CreatedAt TIMESTAMP DEFAULT CURRENT_TIMESTAMP not null,
+			Path varchar(1024) not null UNIQUE
+		)`,
+	`CREATE TABLE IF NOT EXISTS Comment(
+			Id BLOB PRIMARY KEY,
+			ThreadId BLOB not null,
+			Body text not null,
+			Author varchar(255) not null,
+			Confirmed bool not null default false,
+			CreatedAt TIMESTAMP DEFAULT CURRENT_TIMESTAMP not null,
+			ReplyTo BLOB default null,
+			DeletedAt TIMESTAMP DEFAULT null,
+			FOREIGN KEY(ThreadId) references Thread(Id)
+		)`,
 }
 
 // ValidateConfig validates the config for sqlite
@@ -54,8 +69,10 @@ func CreateDatabase(databaseConfig model.Database) (abstraction.Database, error)
 		}
 		db = d
 	}
-	DB := Database{
-		DB: db,
+	DB := sqlxDriver.Database{
+		DB:      db,
+		Queries: SqliteQueries,
+		Dialect: "sqlite3",
 	}
 	err = DB.InitializeDatabase()
 	if err != nil {
@@ -70,8 +87,11 @@ func CreateTestDatabase() abstraction.Database {
 	if err != nil {
 		panic(err)
 	}
-	DB := Database{
-		DB: db,
+	DB := sqlxDriver.Database{
+		DB:      db,
+		Queries: SqliteQueries,
+		Dialect: "sqlite3",
+		IsTest:  true,
 	}
 	err = DB.InitializeDatabase()
 	if err != nil {

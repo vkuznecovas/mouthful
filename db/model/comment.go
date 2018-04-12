@@ -17,3 +17,18 @@ type Comment struct {
 	DeletedAt *time.Time `db:"DeletedAt"`
 	ReplyTo   *uuid.UUID `db:"ReplyTo"`
 }
+
+// CommentSlice represents a collection of comments
+type CommentSlice []Comment
+
+func (cs CommentSlice) Len() int {
+	return len(cs)
+}
+
+func (cs CommentSlice) Less(i, j int) bool {
+	return cs[i].CreatedAt.Before(cs[j].CreatedAt)
+}
+
+func (cs CommentSlice) Swap(i, j int) {
+	cs[i], cs[j] = cs[j], cs[i]
+}

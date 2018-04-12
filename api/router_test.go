@@ -10,12 +10,12 @@ import (
 	"strings"
 	"testing"
 
-	"github.com/jmoiron/sqlx"
 	"github.com/satori/go.uuid"
 	"github.com/vkuznecovas/mouthful/global"
 
 	"github.com/vkuznecovas/mouthful/db/abstraction"
 	"github.com/vkuznecovas/mouthful/db/dynamodb"
+	"github.com/vkuznecovas/mouthful/db/sqlxDriver"
 
 	"github.com/appleboy/gofight"
 	"github.com/stretchr/testify/assert"
@@ -25,7 +25,9 @@ import (
 	configModel "github.com/vkuznecovas/mouthful/config/model"
 
 	dbmodel "github.com/vkuznecovas/mouthful/db/model"
-	"github.com/vkuznecovas/mouthful/db/sqlite"
+	"github.com/vkuznecovas/mouthful/db/sqlxDriver/mysql"
+	"github.com/vkuznecovas/mouthful/db/sqlxDriver/postgres"
+	"github.com/vkuznecovas/mouthful/db/sqlxDriver/sqlite"
 )
 
 const debug = false
@@ -41,7 +43,8 @@ var config = configModel.Config{
 		MaxCommentLength: &maxCommentLength,
 	},
 	API: configModel.API{
-		Debug: false,
+		Debug:   false,
+		Logging: false,
 		Cache: configModel.Cache{
 			Enabled:           false,
 			IntervalInSeconds: 1,
@@ -131,21 +134,8 @@ func setupDynamoTestDb() abstraction.Database {
 }
 
 func setupSqliteTestDb() abstraction.Database {
-	database := sqlite.Database{}
-	db, err := sqlx.Open("sqlite3", ":memory:")
-	if err != nil {
-		panic(err)
-	}
-	err = db.Ping()
-	if err != nil {
-		panic(err)
-	}
-	database.DB = db
-	err = database.InitializeDatabase()
-	if err != nil {
-		panic(err)
-	}
-	return &database
+	database := sqlite.CreateTestDatabase()
+	return database
 }
 
 func TestRouterWithSqlite(t *testing.T) {
@@ -158,11 +148,35 @@ func TestRouterWithDynamoDb(t *testing.T) {
 	db := setupDynamoTestDb()
 	driver := db.GetUnderlyingStruct()
 	driverCasted := driver.(*dynamodb.Database)
-	// Just in case this is not an in memory instance
-	defer driverCasted.DeleteTables()
 	for _, f := range testFunctions {
 		f.(func(*testing.T, abstraction.Database))(t, db)
 		driverCasted.WipeOutData()
+	}
+}
+
+func TestRouterWithPostgresDb(t *testing.T) {
+	db := postgres.CreateTestDatabase()
+	driver := db.GetUnderlyingStruct()
+	driverCasted := driver.(*sqlxDriver.Database)
+	// clean out before start
+	driverCasted.WipeOutData()
+	for _, f := range testFunctions {
+		f.(func(*testing.T, abstraction.Database))(t, db)
+		err := driverCasted.WipeOutData()
+		assert.Nil(t, err)
+	}
+}
+
+func TestRouterWithMysqlDb(t *testing.T) {
+	db := mysql.CreateTestDatabase()
+	driver := db.GetUnderlyingStruct()
+	driverCasted := driver.(*sqlxDriver.Database)
+	// clean out before start
+	driverCasted.WipeOutData()
+	for _, f := range testFunctions {
+		f.(func(*testing.T, abstraction.Database))(t, db)
+		err := driverCasted.WipeOutData()
+		assert.Nil(t, err)
 	}
 }
 
@@ -287,7 +301,6 @@ func DeleteCommentBadRequst(t *testing.T, testDB abstraction.Database) {
 		SetCookie(cookies).
 		SetDebug(debug).
 		Run(server, func(r gofight.HTTPResponse, rq gofight.HTTPRequest) {
-			fmt.Println(r.Code)
 			assert.Equal(t, 400, r.Code)
 		})
 }
@@ -1076,7 +1089,6 @@ func RestoreDeletedCommentBadRequst(t *testing.T, testDB abstraction.Database) {
 		SetCookie(cookies).
 		SetDebug(debug).
 		Run(server, func(r gofight.HTTPResponse, rq gofight.HTTPRequest) {
-			fmt.Println(r.Code)
 			assert.Equal(t, 400, r.Code)
 		})
 }
@@ -1366,7 +1378,6 @@ func DeleteCommentBadUUID(t *testing.T, testDB abstraction.Database) {
 		SetCookie(cookies).
 		SetDebug(debug).
 		Run(server, func(r gofight.HTTPResponse, rq gofight.HTTPRequest) {
-			fmt.Println(r.Code)
 			assert.Equal(t, 400, r.Code)
 		})
 }
@@ -1388,7 +1399,6 @@ func UpdateCommentBadUUID(t *testing.T, testDB abstraction.Database) {
 		SetCookie(cookies).
 		SetDebug(debug).
 		Run(server, func(r gofight.HTTPResponse, rq gofight.HTTPRequest) {
-			fmt.Println(r.Code)
 			assert.Equal(t, 400, r.Code)
 		})
 }
@@ -1470,7 +1480,6 @@ func DeleteCommentDeletesReplyToComments(t *testing.T, testDB abstraction.Databa
 			err = json.Unmarshal(body, &comments)
 			assert.Nil(t, err)
 			assert.Len(t, comments, 2)
-			fmt.Println(string(body))
 			for _, v := range comments {
 				assert.NotNil(t, v.DeletedAt)
 			}

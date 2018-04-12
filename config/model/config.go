@@ -18,6 +18,7 @@ type Database struct {
 	AwsAccessKeyID            *string `json:"awsAccessKeyID,omitempty"`
 	AwsSecretAccessKey        *string `json:"awsSecretAccessKey,omitempty"`
 	AwsRegion                 *string `json:"awsRegion,omitempty"`
+	SSLEnabled                *bool   `json:"sslEnabled,omitempty"`
 }
 
 // Moderation - moderation section of our config
@@ -44,6 +45,7 @@ type API struct {
 	Cache        Cache        `json:"cache"`
 	RateLimiting RateLimiting `json:"rateLimiting"`
 	Cors         Cors         `json:"cors"`
+	Logging      bool         `json:"logging"`
 }
 
 // Client - client configuration part

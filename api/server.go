@@ -39,7 +39,12 @@ func GetServer(db *abstraction.Database, config *model.Config) (*gin.Engine, err
 		gin.SetMode(gin.ReleaseMode)
 	}
 
-	r := gin.Default()
+	r := gin.New()
+	r.Use(gin.Recovery())
+	if config.API.Logging {
+		r.Use(gin.Logger())
+	}
+
 	r.ForwardedByClientIP = true
 
 	if config.API.Cors.Enabled {

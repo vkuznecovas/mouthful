@@ -125,45 +125,47 @@ func CreateTestDatabase() abstraction.Database {
 }
 
 // WipeOutData deletes all the threads and comments in the database if the database is a test one
-func (d *Database) WipeOutData() {
+func (d *Database) WipeOutData() error {
 	if !d.IsTest {
-		return
+		return nil
 	}
 	var threads []dynamoModel.Thread
 	var comments []dynamoModel.Comment
 	err := d.DB.Table(d.TablePrefix + global.DefaultDynamoDbThreadTableName).Scan().All(&threads)
 	if err != nil {
-		panic(err)
+		return err
 	}
 	for _, v := range threads {
 		err := d.DB.Table(d.TablePrefix+global.DefaultDynamoDbThreadTableName).Delete("Path", v.Path).Run()
 		if err != nil {
-			panic(err)
+			return err
 		}
 	}
 	err = d.DB.Table(d.TablePrefix + global.DefaultDynamoDbCommentTableName).Scan().All(&comments)
 	if err != nil {
-		panic(err)
+		return err
 	}
 	for _, v := range comments {
 		err := d.DB.Table(d.TablePrefix+global.DefaultDynamoDbCommentTableName).Delete("ID", v.Id).Run()
 		if err != nil {
-			panic(err)
+			return err
 		}
 	}
+	return nil
 }
 
 // DeleteTables deletes the thread and comment tables in the database if the database is a test one
-func (d *Database) DeleteTables() {
+func (d *Database) DeleteTables() error {
 	if !d.IsTest {
-		return
+		return nil
 	}
 	err := d.DB.Table(d.TablePrefix + global.DefaultDynamoDbThreadTableName).DeleteTable().Run()
 	if err != nil {
-		panic(err)
+		return err
 	}
 	err = d.DB.Table(d.TablePrefix + global.DefaultDynamoDbCommentTableName).DeleteTable().Run()
 	if err != nil {
-		panic(err)
+		return err
 	}
+	return nil
 }
