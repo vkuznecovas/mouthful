@@ -19,10 +19,10 @@ The root section contains all the other sections as well as the honeypot variabl
 | Variables     | Use           | Type | Required  | Default value | Recommended setting |
 | ------------- |:-------------:| :---:| :-------: |  :----------: |  :----------------: |
 | honeypot     | determines if honeypot functionality will be used | bool | false | false | true |
-| moderation     | contains the moderation settings for mouthful  | object | true |  | [see below](###Moderation) |
-| api     | changes the api behaviour | object | true |  | [see below](###Api) |
-| client     | changes client behaviour | object | true |  | [see below](###Client) |
-| database     | allows for configuring the data store | object | true |  |  [see below](###Database)|
+| moderation     | contains the moderation settings for mouthful  | object | true |  | [see below](#Moderation) |
+| api     | changes the api behaviour | object | true |  | [see below](#Api) |
+| client     | changes client behaviour | object | true |  | [see below](#Client) |
+| database     | allows for configuring the data store | object | true |  |  [see below](#Database)|
 
 
 ### Moderation
@@ -46,9 +46,9 @@ Api section changes the behaviour of the back-end API.
 | port     | sets the port for API to run on | bool | false | 8080 | up to you |
 | logging     | determines if gin logging will be enabled for the api | bool | false | true | true
 | debug     | enables or disables the gin debug mode with more verbal logging. | bool | false | false | false |
-| cache     | cache settings for the api | object | true |  | [see below](###api.cache) |
-| cors     | cors settings for the api | object | true |  | [see below](###api.cors) |
-| rateLimiting     | rate limiting settings for the api | object | true |  | [see below](###api.rateLimiting) |
+| cache     | cache settings for the api | object | true |  | [see below](#api.cache) |
+| cors     | cors settings for the api | object | true |  | [see below](#api.cors) |
+| rateLimiting     | rate limiting settings for the api | object | true |  | [see below](#api.rateLimiting) |
 
 #### api.cache
 
