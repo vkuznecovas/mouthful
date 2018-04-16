@@ -1,3 +1,4 @@
+// Package sqlxDriver allows for data manipulation through the github.com/jmoiron/sqlx package.
 package sqlxDriver
 
 import (

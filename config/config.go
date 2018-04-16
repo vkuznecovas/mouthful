@@ -1,3 +1,4 @@
+// Package config deals with parsing and manipulation of the config files.
 package config
 
 import (

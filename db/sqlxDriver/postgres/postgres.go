@@ -1,3 +1,4 @@
+// Package postgres is responsible for postgres database connections and initialization.
 package postgres
 
 import (

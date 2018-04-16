@@ -1,3 +1,4 @@
+// Package model contains all the neccessary models for isso migration
 package model
 
 // Thread represents an isso commenting thread

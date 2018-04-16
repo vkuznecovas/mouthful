@@ -1,3 +1,4 @@
+// Package abstraction defines all the required interfaces to make the database layer pluggable.
 package abstraction
 
 import (

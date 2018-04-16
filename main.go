@@ -1,3 +1,6 @@
+// This is the entry point for mouthful, the self hosted commenting engine.
+//
+// Upon providing a config, the main program will parse it and start an API.
 package main
 
 import (
