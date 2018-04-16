@@ -26,7 +26,7 @@ To start using mouthful, you'll need:
 * Node with npm
 * A server to put mouthful on
 
-> If you do not have these tools set up, please refer to the [installing dependencies section](#installing dependencies).
+> If you do not have these tools set up, please refer to the [installing dependencies section](#installing-dependencies).
 
 If you have all the dependencies, clone the mouthful repository. In the root of this repository run `build.sh`. Give it some time, this will install all the dependencies for both go and node and create a directory inside the root of this repository called `/dist`. Inside, you'll find all you need to run mouthful. That is:
 
@@ -34,7 +34,7 @@ If you have all the dependencies, clone the mouthful repository. In the root of 
 * A binary to start the mouthful backend
 * A static directory, containing all the javascript and html needed to serve both the client and the admin panel(if enabled)
 
-To configure your mouthful instance to your hearts content, please refer to the [configuration section](#configuring mouthful).
+To configure your mouthful instance to your hearts content, please refer to the [configuration section](#configuring-mouthful).
 
 Once you've done with the configuration, just copy over the `/dist` contents to your server and run the `/dist/mouthful` binary. Take note that the mouthful binary will look for a config.json file its directory.
 
@@ -87,9 +87,11 @@ Mouthful supports different data stores for different needs. Currently supported
 * mysql
 * aws dynamodb
 
+For a list of configuration options and config file examples, head over to [configuration documentation and examples](./examples/configs/README.md)
+
 # Contributing
 
-Contributions are more than welcome. If you've found a bug, raise an issue. If you've got a feature request, open up an issue as well. Pull requests welcome. I'll try and keep the api stable, as well as tag each release with a semantic version.
+Contributions are more than welcome. If you've found a bug, raise an issue. If you've got a feature request, open up an issue as well. I'll try and keep the api stable, as well as tag each release with a semantic version.
 
 # Wish list
 
