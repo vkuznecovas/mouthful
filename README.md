@@ -99,8 +99,7 @@ I'm a keen backender and not too sharp on the frontend part. If you're willing t
 
 # Get in touch
 
-If you'd like to get in touch with me, you can drop me message on [my twitter](https://twitter.com/DizzyZoneBlog). Feedback or a casual chat - hit me up.
-
+If you'd like to get in touch with me, you can drop me a message on [my twitter](https://twitter.com/DizzyZoneBlog).
 # Who uses mouthful?
 
 * [Mouthful authors' blog, dizzy.zone](https://dizzy.zone)
