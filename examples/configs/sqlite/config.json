@@ -15,7 +15,7 @@
         "logging": true,
         "debug": false,
         "cache": {
-            "enabled": true,
+            "enabled": false,
             "intervalInSeconds": 10,
             "expiryInSeconds": 300
         },
@@ -24,7 +24,7 @@
             "postsHour": 100
         },
         "cors": {
-            "enabled": false,
+            "enabled": true,
             "allowedOrigins": ["https://dizzy.zone"]
         }
     },

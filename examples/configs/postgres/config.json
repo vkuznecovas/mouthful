@@ -29,7 +29,7 @@
             "postsHour": 100
         },
         "cors": {
-            "enabled": false,
+            "enabled": true,
             "allowedOrigins": ["https://dizzy.zone"]
         }
     },
