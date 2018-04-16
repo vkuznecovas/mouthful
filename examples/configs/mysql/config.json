@@ -1,0 +1,39 @@
+{
+    "honeypot": true,
+    "moderation": {
+        "enabled": true,
+        "adminPassword": "somepassword",
+        "sessionDurationSeconds": 21600,
+        "maxCommentLength": 10000
+    },
+    "database": {
+        "dialect": "mysql",
+        "database": "mouthful",
+        "host": "localhost",
+        "username": "postgres",
+        "password": "",
+        "port": "3306"
+    },
+    "api": {
+        "port": 8080,
+        "logging": true,
+        "debug": false,
+        "cache": {
+            "enabled": true,
+            "intervalInSeconds": 10,
+            "expiryInSeconds": 300
+        },
+        "rateLimiting": {
+            "enabled": true,
+            "postsHour": 100
+        },
+        "cors": {
+            "enabled": false,
+            "allowedOrigins": ["https://dizzy.zone"]
+        }
+    },
+    "client": {
+        "useDefaultStyle": true,
+        "pageSize": 10
+    }
+}

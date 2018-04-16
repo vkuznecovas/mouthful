@@ -64,8 +64,11 @@ func CreateDatabase(databaseConfig model.Database) (abstraction.Database, error)
 		return nil, err
 	}
 	var db *sqlx.DB
-
-	connectionString := fmt.Sprintf("postgresql://%v:%v@%v/%v?connect_timeout=10", *databaseConfig.Username, *databaseConfig.Password, *databaseConfig.Host, *databaseConfig.Database)
+	port := ""
+	if databaseConfig.Port != nil {
+		port = ":" + *databaseConfig.Port
+	}
+	connectionString := fmt.Sprintf("postgresql://%v:%v@%v%v/%v?connect_timeout=10", *databaseConfig.Username, *databaseConfig.Password, *databaseConfig.Host, port, *databaseConfig.Database)
 	if databaseConfig.SSLEnabled != nil {
 		if !*databaseConfig.SSLEnabled {
 			connectionString += "&sslmode=disable"
