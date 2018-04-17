@@ -113,6 +113,7 @@ func CreateTestDatabase() abstraction.Database {
 		Dialect: "postgres",
 		IsTest:  true,
 	}
+	db.DB.SetMaxOpenConns(1)
 	err = DB.InitializeDatabase()
 	if err != nil {
 		panic(err)
