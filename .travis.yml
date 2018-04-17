@@ -45,7 +45,4 @@ addons:
     - dynamodb-local
   apt:
     packages:
-    # needed for the nfpm pipe:
     - rpm
-    # needed for the snap pipe:
-    - snapcraft
