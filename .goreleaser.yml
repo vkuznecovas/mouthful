@@ -5,9 +5,7 @@ builds:
   - main: main.go
     binary: mouthful
     goos:
-      # - darwin
       - linux
-      # - windows
     goarch:
       - amd64
     hooks:
@@ -15,8 +13,6 @@ builds:
   - main: main.go
     env:
       - CGO_ENABLED=1
-      - CXX_FOR_TARGET=x86_64-w64-mingw32-g++
-      - CC_FOR_TARGET=x86_64-w64-mingw32-gcc 
       - CC=x86_64-w64-mingw32-gcc
     binary: mouthful
     goos:
