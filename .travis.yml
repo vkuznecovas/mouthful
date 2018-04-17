@@ -45,3 +45,4 @@ addons:
   apt:
     packages:
     - rpm
+    - snapd
