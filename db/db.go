@@ -1,3 +1,4 @@
+// Package db is responsible for database access.
 package db
 
 import (

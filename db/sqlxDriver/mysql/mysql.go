@@ -1,3 +1,4 @@
+// Package mysql is responsible for mysql database connections and initialization.
 package mysql
 
 import (

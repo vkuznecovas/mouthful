@@ -1,3 +1,4 @@
+// Package api contains all the required methods and structs for serving mouthful requests.
 package api
 
 import (

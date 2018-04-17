@@ -1,3 +1,6 @@
+// This is the entry point for isso to mouthful migration
+//
+// Upon providing an isso database file the command will spit out a mouthful equivalent.
 package main
 
 import (

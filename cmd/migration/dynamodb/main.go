@@ -1,3 +1,6 @@
+// This is the entry point for mouthful sqlite to mouthful dynamodb migration
+//
+// Upon providing a mouthful database file and a dynamodb-compliant configuration file the command will migrate existing comments to dynamodb.
 package main
 
 import (

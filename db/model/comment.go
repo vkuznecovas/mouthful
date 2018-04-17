@@ -1,3 +1,4 @@
+// This package contains the models consumed by the databases.
 package model
 
 import (

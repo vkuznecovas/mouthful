@@ -1,3 +1,4 @@
+// Package model deals with specific models for dynamodb(they might be a bit different to db/model). It allows for sorting of the given models and transformation to db/model equivalents.
 package model
 
 import (

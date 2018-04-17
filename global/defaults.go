@@ -1,3 +1,4 @@
+// Package global provides constants, defaults and helper methods to mouthful.
 package global
 
 // StaticPath is the default location for our static files

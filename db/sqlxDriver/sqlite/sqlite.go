@@ -1,3 +1,4 @@
+// Package sqlite is responsible for sqlite database connections and initialization.
 package sqlite
 
 import (
