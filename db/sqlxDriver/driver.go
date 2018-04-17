@@ -47,15 +47,12 @@ func (db *Database) CreateThread(path string) (*uuid.UUID, error) {
 
 // GetThread takes the thread path and fetches it from the database
 func (db *Database) GetThread(path string) (thread model.Thread, err error) {
-	row := db.DB.QueryRowx(db.DB.Rebind("SELECT Id, Path, CreatedAt FROM Thread where Path=? LIMIT 1"), path)
-	if row != nil {
-		err = row.StructScan(&thread)
-		if err != nil {
-			if err.Error() == "sql: no rows in result set" {
-				return thread, global.ErrThreadNotFound
-			}
-			return thread, err
+	err = db.DB.QueryRowx(db.DB.Rebind("SELECT Id, Path, CreatedAt FROM Thread where Path=? LIMIT 1"), path).StructScan(&thread)
+	if err != nil {
+		if err.Error() == "sql: no rows in result set" {
+			return thread, global.ErrThreadNotFound
 		}
+		return thread, err
 	}
 	return thread, err
 }

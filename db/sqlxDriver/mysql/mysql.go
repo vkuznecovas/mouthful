@@ -94,6 +94,7 @@ func CreateTestDatabase() abstraction.Database {
 		panic(err)
 	}
 	db.MapperFunc(func(s string) string { return strings.Title(s) })
+	db.DB.SetMaxOpenConns(1)
 	DB := sqlxDriver.Database{
 		DB:      db,
 		Queries: MysqlQueries,
