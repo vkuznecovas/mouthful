@@ -2,8 +2,10 @@ language: go
 services:
   - mysql
   - postgresql
+  - docker
 env:
   - AWS_ACCESS_KEY_ID=somekey AWS_SECRET_ACCESS_KEY=somekey
+  - PATH=/snap/bin:$PATH
 before_install:
   - mysql -e 'CREATE DATABASE IF NOT EXISTS mouthful_test;'
   - sudo mkdir /mnt/ramdisk
@@ -17,6 +19,7 @@ before_install:
   - sudo start mysql
   - sudo /etc/init.d/postgresql start
   - psql -c 'create database mouthful_test;' -U postgres
+  - sudo snap install snapcraft --classic
   - go get -u github.com/golang/dep/cmd/dep
   - wget http://dynamodb-local.s3-website-us-west-2.amazonaws.com/dynamodb_local_latest.tar.gz -O /tmp/dynamodb_local_latest.tar.gz
   - tar -xzf /tmp/dynamodb_local_latest.tar.gz -C /tmp
@@ -30,6 +33,19 @@ script:
   - go build cmd/migration/dynamodb/main.go
 notifications:
   email: false
+deploy:
+- provider: script
+  skip_cleanup: true
+  script: curl -sL https://git.io/goreleaser | bash
+  on:
+    tags: true
+    condition: $TRAVIS_OS_NAME = linux
 addons:
   hosts:
     - dynamodb-local
+  apt:
+    packages:
+    # needed for the nfpm pipe:
+    - rpm
+    # needed for the snap pipe:
+    - snapcraft
