@@ -27,7 +27,6 @@ before_install:
 install:
   - dep ensure
 script: 
-  - curl -sL https://git.io/goreleaser | bash -s -- --snapshot
   - go test ./... -v
   - go build main.go
   - go build cmd/migration/isso/main.go
