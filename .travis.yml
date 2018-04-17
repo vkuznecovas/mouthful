@@ -26,11 +26,11 @@ before_install:
 install:
   - dep ensure
 script: 
+  - curl -sL http://git.io/goreleaser | bash -s -- --snapshot
   - go test ./... -v
   - go build main.go
   - go build cmd/migration/isso/main.go
   - go build cmd/migration/dynamodb/main.go
-  - curl -sL http://git.io/goreleaser | bash -s -- --snapshot
 notifications:
   email: false
 deploy:
