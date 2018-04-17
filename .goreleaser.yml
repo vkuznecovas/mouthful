@@ -5,9 +5,18 @@ builds:
   - main: main.go
     binary: mouthful
     goos:
-      # - darwin
       - linux
-      # - windows
+    goarch:
+      - amd64
+    hooks:
+      pre: ./goreleaser-pre.sh
+  - main: main.go
+    env:
+      - CGO_ENABLED=1
+      - CC=x86_64-w64-mingw32-gcc
+    binary: mouthful
+    goos:
+      - windows
     goarch:
       - amd64
     hooks:
