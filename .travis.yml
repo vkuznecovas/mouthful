@@ -25,13 +25,12 @@ before_install:
   - java -Djava.library.path=/tmp/DynamoDBLocal_lib -jar /tmp/DynamoDBLocal.jar -inMemory &
 install:
   - dep ensure
-  - go get github.com/goreleaser/goreleaser
 script: 
   - go test ./... -v
   - go build main.go
   - go build cmd/migration/isso/main.go
   - go build cmd/migration/dynamodb/main.go
-  - goreleaser --snapshot
+  - curl -sL http://git.io/goreleaser | bash
 notifications:
   email: false
 deploy:
