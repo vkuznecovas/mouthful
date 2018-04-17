@@ -16,7 +16,7 @@ before_install:
   - sudo ln -s /mnt/ramdisk/mysql /var/lib/mysql
   - sudo ln -s /mnt/ramdisk/postgresql /var/lib/postgresql
   - sudo service mysql start
-  - sudo service postgresql start
+  - sudo /etc/init.d/postgresql start
   - psql -c 'create database mouthful_test;' -U postgres
   - sudo snap install snapcraft --classic
   - go get -u github.com/golang/dep/cmd/dep
