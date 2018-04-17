@@ -6,3 +6,5 @@ static/
 isso.db
 debug.test
 .vscode/
+goreleaser-build/
+.DS_Store

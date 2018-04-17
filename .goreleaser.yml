@@ -1,0 +1,20 @@
+# .goreleaser.yml
+# Build customization
+dist: goreleaser-build
+builds:
+  - main: main.go
+    binary: mouthful
+    goos:
+      # - darwin
+      - linux
+      # - windows
+    goarch:
+      - amd64
+    hooks:
+      pre: ./goreleaser-pre.sh
+# Archive customization
+archive:
+  format: tar.gz
+  files:
+    - static/*
+    - config.json

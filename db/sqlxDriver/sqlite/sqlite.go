@@ -59,10 +59,6 @@ func CreateDatabase(databaseConfig model.Database) (abstraction.Database, error)
 			return nil, err
 		}
 		db = d
-		// this is used for the demo page
-		if os.Getenv("MOUTHFUL_PERIODIC_DELETE") == "enabled" {
-			periodicWipe(d)
-		}
 	} else {
 		d, err := sqlx.Connect("sqlite3", *databaseConfig.Database)
 		if err != nil {
@@ -79,6 +75,17 @@ func CreateDatabase(databaseConfig model.Database) (abstraction.Database, error)
 	if err != nil {
 		return &DB, err
 	}
+
+	// this is used for the demo page
+	if os.Getenv("MOUTHFUL_PERIODIC_DELETE") == "enabled" {
+		_, err := DB.CreateComment("Hello world!", "Mouthful", "/", true, nil)
+		if err != nil {
+			return nil, err
+		}
+		periodicWipe(DB)
+
+	}
+
 	return &DB, nil
 }
 
@@ -101,7 +108,7 @@ func CreateTestDatabase() abstraction.Database {
 	return &DB
 }
 
-func periodicWipe(db *sqlx.DB) {
+func periodicWipe(db sqlxDriver.Database) {
 	ticker := time.NewTicker(24 * time.Hour)
 	quit := make(chan struct{})
 	log.Println("MOUTHFUL WILL DELETE ALL DATA ONCE EVERY 24 HOURS")
@@ -110,9 +117,13 @@ func periodicWipe(db *sqlx.DB) {
 			select {
 			case <-ticker.C:
 				log.Println("wiping data")
-				_, err := db.Exec("DELETE FROM COMMENT")
+				_, err := db.DB.Exec("DELETE FROM COMMENT")
 				if err != nil {
 					log.Println(err)
+					_, err := db.CreateComment("Hello world!", "Mouthful", "/", true, nil)
+					if err != nil {
+						log.Println(err)
+					}
 				} else {
 					log.Println("data wiped")
 				}

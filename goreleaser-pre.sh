@@ -1,9 +1,9 @@
 #!/bin/bash
 set +x
 rm -rf ./static
-mkdir ./static
-mkdir ./static/admin
-mkdir ./static/client
+# make dirs to accomodate files
+mkdir -p ./static
+
 
 # bundle client
 cd ./client
@@ -14,5 +14,5 @@ cd ..
 # bundle admin
 cd ./admin
 npm run build
-cp -R ./build/* ../static/
+cp -r ./build/* ../static/
 cd ..

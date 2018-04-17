@@ -2,19 +2,20 @@ language: go
 services:
   - mysql
   - postgresql
+  - docker
 env:
-  - AWS_ACCESS_KEY_ID=somekey AWS_SECRET_ACCESS_KEY=somekey
+  - AWS_ACCESS_KEY_ID=somekey AWS_SECRET_ACCESS_KEY=somekey PATH=/snap/bin:$PATH CGO_ENABLED=1
 before_install:
   - mysql -e 'CREATE DATABASE IF NOT EXISTS mouthful_test;'
   - sudo mkdir /mnt/ramdisk
   - sudo mount -t tmpfs -o size=2048m tmpfs /mnt/ramdisk
-  - sudo stop mysql
-  - sudo /etc/init.d/postgresql stop
+  - sudo service mysql stop
+  - sudo service postgresql stop
   - sudo mv /var/lib/mysql /mnt/ramdisk
   - sudo mv /var/lib/postgresql /mnt/ramdisk
   - sudo ln -s /mnt/ramdisk/mysql /var/lib/mysql
   - sudo ln -s /mnt/ramdisk/postgresql /var/lib/postgresql
-  - sudo start mysql
+  - sudo service mysql start
   - sudo /etc/init.d/postgresql start
   - psql -c 'create database mouthful_test;' -U postgres
   - go get -u github.com/golang/dep/cmd/dep
@@ -30,6 +31,13 @@ script:
   - go build cmd/migration/dynamodb/main.go
 notifications:
   email: false
+deploy:
+- provider: script
+  skip_cleanup: true
+  script: curl -sL https://git.io/goreleaser | bash 
+  on:
+    tags: true
+    condition: $TRAVIS_OS_NAME = linux
 addons:
   hosts:
     - dynamodb-local
