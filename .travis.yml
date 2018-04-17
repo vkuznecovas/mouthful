@@ -18,18 +18,20 @@ before_install:
   - sudo service mysql start
   - sudo /etc/init.d/postgresql start
   - psql -c 'create database mouthful_test;' -U postgres
-  - sudo snap install snapcraft --classic
+  #- sudo snap install snapcraft --classic
   - go get -u github.com/golang/dep/cmd/dep
   - wget http://dynamodb-local.s3-website-us-west-2.amazonaws.com/dynamodb_local_latest.tar.gz -O /tmp/dynamodb_local_latest.tar.gz
   - tar -xzf /tmp/dynamodb_local_latest.tar.gz -C /tmp
   - java -Djava.library.path=/tmp/DynamoDBLocal_lib -jar /tmp/DynamoDBLocal.jar -inMemory &
 install:
   - dep ensure
+  - go get github.com/goreleaser/goreleaser
 script: 
   - go test ./... -v
   - go build main.go
   - go build cmd/migration/isso/main.go
   - go build cmd/migration/dynamodb/main.go
+  - goreleaser --snapshot
 notifications:
   email: false
 deploy:
@@ -42,7 +44,3 @@ deploy:
 addons:
   hosts:
     - dynamodb-local
-  # apt:
-  #   packages:
-  #   # - rpm
-    #- snapd
