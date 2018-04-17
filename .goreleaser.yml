@@ -5,9 +5,9 @@ builds:
   - main: main.go
     binary: mouthful
     goos:
-      - darwin
+      # - darwin
       - linux
-      - windows
+      # - windows
     goarch:
       - amd64
     hooks:
