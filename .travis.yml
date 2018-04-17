@@ -44,5 +44,5 @@ addons:
     - dynamodb-local
   apt:
     packages:
-    - rpm
+    # - rpm
     - snapd
