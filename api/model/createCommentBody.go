@@ -1,3 +1,4 @@
+// Package model contains the model definitions for mouthful API response and request types.
 package model
 
 // CreateCommentBody is a struct that represents a create comment request

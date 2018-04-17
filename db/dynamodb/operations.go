@@ -1,3 +1,4 @@
+// Package dynamodb is responsible for connections and data manipulation on dynamodb
 package dynamodb
 
 import (

@@ -1,5 +1,5 @@
 {
-    "honeypot": false,
+    "honeypot": true,
     "moderation": {
         "enabled": true,
         "adminPassword": "somepassword",
@@ -7,8 +7,12 @@
         "maxCommentLength": 10000
     },
     "database": {
-        "dialect": "sqlite3",
-        "database": "./test.db"
+        "dialect": "mysql",
+        "database": "mouthful",
+        "host": "localhost",
+        "username": "postgres",
+        "password": "",
+        "port": "3306"
     },
     "api": {
         "port": 8080,
@@ -30,6 +34,6 @@
     },
     "client": {
         "useDefaultStyle": true,
-        "pageSize": 5
+        "pageSize": 10
     }
 }

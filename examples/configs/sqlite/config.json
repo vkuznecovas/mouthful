@@ -1,5 +1,5 @@
 {
-    "honeypot": false,
+    "honeypot": true,
     "moderation": {
         "enabled": true,
         "adminPassword": "somepassword",
@@ -15,7 +15,7 @@
         "logging": true,
         "debug": false,
         "cache": {
-            "enabled": true,
+            "enabled": false,
             "intervalInSeconds": 10,
             "expiryInSeconds": 300
         },
@@ -30,6 +30,6 @@
     },
     "client": {
         "useDefaultStyle": true,
-        "pageSize": 5
+        "pageSize": 10
     }
 }

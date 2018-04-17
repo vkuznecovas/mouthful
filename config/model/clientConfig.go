@@ -1,3 +1,4 @@
+// Package model deals with the model definitions of the configuration file.
 package model
 
 // ClientConfig - config for client
