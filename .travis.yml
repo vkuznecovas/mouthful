@@ -42,7 +42,7 @@ deploy:
 addons:
   hosts:
     - dynamodb-local
-  apt:
-    packages:
-    # - rpm
-    - snapd
+  # apt:
+  #   packages:
+  #   # - rpm
+    #- snapd
