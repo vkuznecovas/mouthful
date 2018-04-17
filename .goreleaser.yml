@@ -12,6 +12,18 @@ builds:
       - amd64
     hooks:
       pre: ./goreleaser-pre.sh
+- main: main.go
+    binary: mouthful
+    goos:
+      - windows
+    goarch:
+      - amd64
+    env:
+      - CGO_ENABLED=1
+      - CXX_FOR_TARGET=x86_64-w64-mingw32-g++
+      - CC_FOR_TARGET=x86_64-w64-mingw32-gcc
+    hooks:
+      pre: ./goreleaser-pre.sh
 # Archive customization
 archive:
   format: tar.gz
