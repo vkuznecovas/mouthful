@@ -5,7 +5,7 @@ builds:
   - main: main.go
     binary: mouthful
     goos:
-      - darwin
+      # - darwin
       - linux
       # - windows
     goarch:
