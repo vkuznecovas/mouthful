@@ -4,8 +4,7 @@ services:
   - postgresql
   - docker
 env:
-  - AWS_ACCESS_KEY_ID=somekey AWS_SECRET_ACCESS_KEY=somekey
-  - PATH=/snap/bin:$PATH
+  - AWS_ACCESS_KEY_ID=somekey AWS_SECRET_ACCESS_KEY=somekey PATH=/snap/bin:$PATH
 before_install:
   - mysql -e 'CREATE DATABASE IF NOT EXISTS mouthful_test;'
   - sudo mkdir /mnt/ramdisk

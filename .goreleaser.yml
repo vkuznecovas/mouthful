@@ -6,6 +6,8 @@ builds:
     binary: mouthful
     goos:
       - darwin
+      - linux
+      - windows
     goarch:
       - amd64
     hooks:
