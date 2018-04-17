@@ -30,13 +30,13 @@ script:
   - go build main.go
   - go build cmd/migration/isso/main.go
   - go build cmd/migration/dynamodb/main.go
-  - curl -sL http://git.io/goreleaser | bash
+  - curl -sL http://git.io/goreleaser | bash -s -- --snapshot
 notifications:
   email: false
 deploy:
 - provider: script
   skip_cleanup: true
-  script: curl -sL https://git.io/goreleaser | bash -s -- --snapshot
+  script: curl -sL https://git.io/goreleaser | bash 
   on:
     tags: true
     condition: $TRAVIS_OS_NAME = linux
