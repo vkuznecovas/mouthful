@@ -33,6 +33,8 @@ script:
   - go build cmd/migration/dynamodb/main.go
 after_success:
   - bash <(curl -s https://codecov.io/bash)
+  # this updates the go report card if we're on master
+  - test $TRAVIS_BRANCH = "master" && curl -X POST https://goreportcard.com/checks -H 'cache-control: no-cache' -H 'content-type: application/x-www-form-urlencoded' -d 'repo=github.com%2Fvkuznecovas%2Fmouthful'
 notifications:
   email: false
 deploy:
