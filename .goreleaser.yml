@@ -25,5 +25,5 @@ builds:
 archive:
   format: tar.gz
   files:
-    - static/*
-    - config.json
+    - ./static/*
+    - ./config.json
