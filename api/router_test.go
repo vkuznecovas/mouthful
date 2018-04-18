@@ -119,7 +119,7 @@ func GetSessionCookie(db *abstraction.Database, r *gofight.RequestConfig) gofigh
 		SetBody(fmt.Sprintf(`{"password": "%v"}`, adminPassword)).
 		SetDebug(debug).
 		Run(server, func(r gofight.HTTPResponse, rq gofight.HTTPRequest) {
-			cookieValue = strings.Split(strings.TrimLeft(r.HeaderMap["Set-Cookie"][0], cookiePrefix+"="), " ")[0]
+			cookieValue = strings.TrimSuffix(strings.Split(strings.TrimLeft(r.HeaderMap["Set-Cookie"][0], cookiePrefix+"="), " ")[0], ";")
 		})
 	return gofight.H{cookiePrefix: cookieValue}
 }

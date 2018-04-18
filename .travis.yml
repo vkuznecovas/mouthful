@@ -27,10 +27,12 @@ before_install:
 install:
   - dep ensure
 script: 
-  - go test ./... -v
+  - ./test.sh
   - go build main.go
   - go build cmd/migration/isso/main.go
   - go build cmd/migration/dynamodb/main.go
+after_success:
+  - bash <(curl -s https://codecov.io/bash)
 notifications:
   email: false
 deploy:

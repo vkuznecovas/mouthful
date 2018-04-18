@@ -11,7 +11,7 @@
     "dev": "preact watch --template src/index.ejs"
   },
   "keywords": [],
-  "author": "Zouhir <zouhir@zouhir.org>",
+  "author": "Viktoras Kuznecovas (viktoras@kuznecovas.net)",
   "license": "MIT",
   "devDependencies": {
     "eslint": "^4.5.0",
