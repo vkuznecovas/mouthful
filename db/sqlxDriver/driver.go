@@ -211,6 +211,7 @@ func (db *Database) GetAllComments() (comments []model.Comment, err error) {
 	return commentSlice, err
 }
 
+// GetUnderlyingStruct returns the underlying database struct for the driver
 func (db *Database) GetUnderlyingStruct() interface{} {
 	return db
 }

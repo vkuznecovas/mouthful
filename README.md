@@ -1,4 +1,6 @@
-[![Build Status](https://travis-ci.org/vkuznecovas/mouthful.svg?branch=master)](https://travis-ci.org/vkuznecovas/mouthful)[![Go Report Card](https://goreportcard.com/badge/github.com/vkuznecovas/mouthful)](https://goreportcard.com/report/github.com/vkuznecovas/mouthful)[![codecov](https://codecov.io/gh/vkuznecovas/mouthful/branch/master/graph/badge.svg)](https://codecov.io/gh/vkuznecovas/mouthful)
+[![Build Status](https://travis-ci.org/vkuznecovas/mouthful.svg?branch=master)](https://travis-ci.org/vkuznecovas/mouthful)
+[![Go Report Card](https://goreportcard.com/badge/github.com/vkuznecovas/mouthful)](https://goreportcard.com/report/github.com/vkuznecovas/mouthful)
+[![codecov](https://codecov.io/gh/vkuznecovas/mouthful/branch/master/graph/badge.svg)](https://codecov.io/gh/vkuznecovas/mouthful)
 [![Documentation](https://godoc.org/github.com/vkuznecovas/mouthful?status.svg)](https://godoc.org/github.com/vkuznecovas/mouthful) 
 
 # Mouthful is a self-hosted alternative to Disqus.

@@ -15,6 +15,7 @@ import (
 	"github.com/vkuznecovas/mouthful/db/sqlxDriver"
 )
 
+// PostgresQueries represents a list of queries for initial table creation in Postgres
 var PostgresQueries = []string{
 	`CREATE TABLE IF NOT EXISTS Thread(
 			Id uuid PRIMARY KEY,
