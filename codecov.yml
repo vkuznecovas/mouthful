@@ -1,0 +1,18 @@
+
+coverage:
+  precision: 2
+  round: down
+  range: 70...100
+
+  status:
+    project: true
+    patch: true
+    changes: false
+
+comment:
+  layout: "header, diff"
+  behavior: default
+
+ignore:
+  # this is a special snowflake, let's ignore it
+  - "db/testSuite.go"
