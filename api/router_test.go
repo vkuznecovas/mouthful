@@ -120,6 +120,7 @@ func GetSessionCookie(db *abstraction.Database, r *gofight.RequestConfig) gofigh
 		SetDebug(debug).
 		Run(server, func(r gofight.HTTPResponse, rq gofight.HTTPRequest) {
 			cookieValue = strings.Split(strings.TrimLeft(r.HeaderMap["Set-Cookie"][0], cookiePrefix+"="), " ")[0]
+			fmt.Println(cookieValue)
 		})
 	return gofight.H{cookiePrefix: cookieValue}
 }
