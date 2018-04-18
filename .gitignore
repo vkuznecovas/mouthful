@@ -8,3 +8,5 @@ debug.test
 .vscode/
 goreleaser-build/
 .DS_Store
+main
+coverage.txt
