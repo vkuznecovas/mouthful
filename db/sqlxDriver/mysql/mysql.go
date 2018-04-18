@@ -14,6 +14,7 @@ import (
 	"github.com/vkuznecovas/mouthful/db/sqlxDriver"
 )
 
+// MysqlQueries represents a list of queries for initial table creation in mysql
 var MysqlQueries = []string{
 	`CREATE TABLE IF NOT EXISTS Thread(
 			Id VARCHAR(36) PRIMARY KEY,

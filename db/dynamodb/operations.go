@@ -318,6 +318,7 @@ func (db *Database) GetDatabaseDialect() string {
 	return "dynamodb"
 }
 
+// GetUnderlyingStruct returns the underlying database struct for the driver
 func (db *Database) GetUnderlyingStruct() interface{} {
 	return db
 }

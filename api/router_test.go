@@ -1435,7 +1435,6 @@ func DeleteCommentDeletesReplyToComments(t *testing.T, testDB abstraction.Databa
 	cookies := GetSessionCookie(&testDB, r)
 
 	replyTo := commentId.String()
-	var commentIdNew uuid.UUID
 	body = model.CreateCommentBody{
 		Path:    "/1027/test/",
 		Body:    "body",
@@ -1454,9 +1453,8 @@ func DeleteCommentDeletesReplyToComments(t *testing.T, testDB abstraction.Databa
 			assert.Equal(t, body.Author, parsedBody.Author)
 			assert.Equal(t, global.ParseAndSaniziteMarkdown(body.Body), parsedBody.Body)
 			assert.Equal(t, 200, r.Code)
-			uid, err := global.ParseUUIDFromString(parsedBody.Id)
+			_, err := global.ParseUUIDFromString(parsedBody.Id)
 			assert.Nil(t, err)
-			commentIdNew = *uid
 		})
 	deleteCommentBody := model.DeleteCommentBody{
 		CommentId: commentId.String(),

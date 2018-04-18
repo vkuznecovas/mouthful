@@ -23,11 +23,10 @@ type Database struct {
 	IsTest      bool
 }
 
-// TODO: write recommended units here
 // ValidateConfig validates the config for sqlite
 func ValidateConfig(config model.Database) error {
 	err := ""
-	// os.Getenv()
+	// TODO: write recommended units here
 	if config.DynamoDBCommentReadUnits == nil {
 		err += "Please specify the read units for dynamoDb Comment table by adjusting the config value DynamoDBCommentReadUnits\n"
 	}

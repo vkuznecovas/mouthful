@@ -15,6 +15,7 @@ import (
 	"github.com/vkuznecovas/mouthful/db/sqlxDriver"
 )
 
+// SqliteQueries represents a list of queries for initial table creation in sqlite
 var SqliteQueries = []string{
 	`CREATE TABLE IF NOT EXISTS Thread(
 			Id BLOB PRIMARY KEY,

@@ -1,4 +1,4 @@
-// This package contains the models consumed by the databases.
+// Package model contains the models consumed by the databases.
 package model
 
 import (

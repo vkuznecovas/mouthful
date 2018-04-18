@@ -1,4 +1,4 @@
-// Package model contains all the neccessary models for isso migration
+// Package model contains all the necessary models for isso migration
 package model
 
 // Thread represents an isso commenting thread
@@ -14,7 +14,7 @@ type Thread struct {
 // 	'    text VARCHAR, author VARCHAR, email VARCHAR, website VARCHAR,',
 // 	'    likes INTEGER DEFAULT 0, dislikes INTEGER DEFAULT 0, voters BLOB NOT NULL);'])
 
-// Thread represents an isso commenting thread
+// Comment represents an isso commenting comment
 type Comment struct {
 	Id            int      `db:"id"`
 	Tid           int      `db:"tid"`

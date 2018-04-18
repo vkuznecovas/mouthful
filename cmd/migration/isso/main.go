@@ -21,7 +21,7 @@ import (
 	"github.com/vkuznecovas/mouthful/db/sqlxDriver/sqlite"
 )
 
-type CommentMap struct {
+type commentParentMap struct {
 	Id     int
 	Uid    uuid.UUID
 	Parent *int
@@ -48,7 +48,7 @@ func main() {
 		panic(err)
 	}
 	log.Println("Migration started")
-	commentMap := make(map[int]CommentMap)
+	commentMap := make(map[int]commentParentMap)
 	for threads.Next() {
 		var t model.Thread
 		err = threads.StructScan(&t)
@@ -72,7 +72,7 @@ func main() {
 			}
 			log.Printf("Migrating comment %v\n", c.Id)
 			commentId := global.GetUUID()
-			commentMap[c.Id] = CommentMap{
+			commentMap[c.Id] = commentParentMap{
 				Id:     c.Id,
 				Parent: c.Parent,
 				Uid:    commentId,
