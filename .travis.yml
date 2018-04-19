@@ -24,6 +24,8 @@ before_install:
   - java -Djava.library.path=/tmp/DynamoDBLocal_lib -jar /tmp/DynamoDBLocal.jar -inMemory &
   - sudo apt-get -y install gcc-multilib
   - sudo apt-get -y install gcc-mingw-w64
+  - (cd client && npm install)
+  - (cd admin && npm install)
 install:
   - dep ensure
 script: 
@@ -31,6 +33,8 @@ script:
   - go build main.go
   - go build cmd/migration/isso/main.go
   - go build cmd/migration/dynamodb/main.go
+  - (cd admin && npm run build)
+  - (cd client && npm run build)
 after_success:
   - bash <(curl -s https://codecov.io/bash)
   # this updates the go report card if we're on master
