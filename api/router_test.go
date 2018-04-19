@@ -108,6 +108,8 @@ var testFunctions = [...]interface{}{
 	CheckCorsSettingAllowsCorrectOrigin,
 	CheckCorsSettingDoesNotAllowIncorrectOrigin,
 	CreateCommentReplyToAReply,
+	CreateCommentWithAuthorTooLongResultsInDefaultTruncation,
+	CreateCommentWithAuthorTooLongTrucatesAccodringToConfig,
 }
 
 func GetSessionCookie(db *abstraction.Database, r *gofight.RequestConfig) gofight.H {
@@ -1837,4 +1839,94 @@ func CreateCommentReplyToAReply(t *testing.T, testDB abstraction.Database) {
 			assert.True(t, uuid.Equal(commentId, *comments[1].ReplyTo))
 			assert.True(t, uuid.Equal(commentId, *comments[2].ReplyTo))
 		})
+}
+
+func CreateCommentWithAuthorTooLongResultsInDefaultTruncation(t *testing.T, testDB abstraction.Database) {
+	server, err := api.GetServer(&testDB, &config)
+	assert.Nil(t, err)
+	r := gofight.New()
+	commentBody := model.CreateCommentBody{
+		Path:   "/1027/test/",
+		Body:   "body",
+		Author: "authorauthorauthorauthorauthorauthorauthorauthorauthorauthorauthorauthorauthorauthorauthorauthorauthorauthorauthorauthorauthorauthorauthorauthorauthorauthorauthorauthorauthorauthorauthorauthorauthorauthorauthorauthorauthorauthor",
+	}
+	bodyBytes, err := json.Marshal(commentBody)
+	assert.Nil(t, err)
+	r.POST("/v1/comments").
+		SetBody(string(bodyBytes[:])).
+		SetDebug(debug).
+		Run(server, func(r gofight.HTTPResponse, rq gofight.HTTPRequest) {
+			var parsedBody model.CreateCommentBody
+			err = json.Unmarshal([]byte(r.Body.String()), &parsedBody)
+			assert.Nil(t, err)
+			assert.Equal(t, commentBody.Path, parsedBody.Path)
+			assert.Equal(t, "authorauthorauthorauthorauthorauthorauthorautho...", parsedBody.Author)
+			assert.Equal(t, global.ParseAndSaniziteMarkdown(commentBody.Body), parsedBody.Body)
+			assert.Equal(t, 200, r.Code)
+		})
+	cookies := GetSessionCookie(&testDB, r)
+	assert.Nil(t, err)
+	r.GET("/v1/admin/comments/all").
+		SetBody(string(bodyBytes[:])).
+		SetDebug(debug).
+		SetCookie(cookies).
+		Run(server, func(r gofight.HTTPResponse, rq gofight.HTTPRequest) {
+			assert.Equal(t, 200, r.Code)
+			var comments []dbmodel.Comment
+			body, err := ioutil.ReadAll(r.Body)
+			assert.Nil(t, err)
+			err = json.Unmarshal(body, &comments)
+			assert.Nil(t, err)
+			assert.Len(t, comments, 1)
+			assert.Equal(t, "authorauthorauthorauthorauthorauthorauthorautho...", comments[0].Author)
+			assert.Equal(t, 50, len(comments[0].Author))
+			assert.Equal(t, global.ParseAndSaniziteMarkdown(commentBody.Body), comments[0].Body)
+		})
+}
+
+func CreateCommentWithAuthorTooLongTrucatesAccodringToConfig(t *testing.T, testDB abstraction.Database) {
+	ml := 10
+	configCopy := config
+	configCopy.Moderation.MaxAuthorLength = &ml
+	server, err := api.GetServer(&testDB, &configCopy)
+	assert.Nil(t, err)
+	r := gofight.New()
+	commentBody := model.CreateCommentBody{
+		Path:   "/1027/test/",
+		Body:   "body",
+		Author: "authorauthorauthorauthorauthorauthorauthorauthorauthorauthorauthorauthorauthorauthorauthorauthorauthorauthorauthorauthorauthorauthorauthorauthorauthorauthorauthorauthorauthorauthorauthorauthorauthorauthorauthorauthorauthorauthor",
+	}
+	bodyBytes, err := json.Marshal(commentBody)
+	assert.Nil(t, err)
+	r.POST("/v1/comments").
+		SetBody(string(bodyBytes[:])).
+		SetDebug(debug).
+		Run(server, func(r gofight.HTTPResponse, rq gofight.HTTPRequest) {
+			var parsedBody model.CreateCommentBody
+			err = json.Unmarshal([]byte(r.Body.String()), &parsedBody)
+			assert.Nil(t, err)
+			assert.Equal(t, commentBody.Path, parsedBody.Path)
+			assert.Equal(t, "authora...", parsedBody.Author)
+			assert.Equal(t, global.ParseAndSaniziteMarkdown(commentBody.Body), parsedBody.Body)
+			assert.Equal(t, 200, r.Code)
+		})
+	cookies := GetSessionCookie(&testDB, r)
+	assert.Nil(t, err)
+	r.GET("/v1/admin/comments/all").
+		SetBody(string(bodyBytes[:])).
+		SetDebug(debug).
+		SetCookie(cookies).
+		Run(server, func(r gofight.HTTPResponse, rq gofight.HTTPRequest) {
+			assert.Equal(t, 200, r.Code)
+			var comments []dbmodel.Comment
+			body, err := ioutil.ReadAll(r.Body)
+			assert.Nil(t, err)
+			err = json.Unmarshal(body, &comments)
+			assert.Nil(t, err)
+			assert.Len(t, comments, 1)
+			assert.Equal(t, "authora...", comments[0].Author)
+			assert.Equal(t, ml, len(comments[0].Author))
+			assert.Equal(t, global.ParseAndSaniziteMarkdown(commentBody.Body), comments[0].Body)
+		})
+
 }

@@ -51,6 +51,7 @@ export default class App extends Component {
         moderation:  false,
         pageSize: 0,
         maxMessageLength: 0,
+        maxAuthorLength: 0,
         authorInputRefPrefix: "__mouthful_author_input_",
         commentInputRefPrefix: "__mouthful_comment_input_",
         commentRefPrefix: "__mouthful_comment_",

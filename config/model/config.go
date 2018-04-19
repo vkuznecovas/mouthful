@@ -27,6 +27,7 @@ type Moderation struct {
 	AdminPassword          string `json:"adminPassword"`
 	SessionDurationSeconds int    `json:"sessionDurationSeconds"`
 	MaxCommentLength       *int   `json:"maxCommentLength,omitempty"`
+	MaxAuthorLength        *int   `json:"maxAuthorLength,omitempty"`
 }
 
 // Config - root of our config

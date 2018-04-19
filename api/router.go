@@ -150,6 +150,14 @@ func (r *Router) CreateComment(c *gin.Context) {
 			return
 		}
 	}
+
+	// author length validation
+	maxAuthorLength := global.DefaultAuthorLengthLimit
+	if r.config.Moderation.MaxAuthorLength != nil {
+		maxAuthorLength = *r.config.Moderation.MaxAuthorLength
+	}
+	createCommentBody.Author = ShortenAuthor(createCommentBody.Author, maxAuthorLength)
+
 	createCommentBody.Body = global.ParseAndSaniziteMarkdown(createCommentBody.Body)
 	createCommentBody.Path = NormalizePath(createCommentBody.Path)
 	if r.config.Honeypot && createCommentBody.Email != nil {

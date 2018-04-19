@@ -60,9 +60,6 @@ func (db *Database) GetThread(path string) (thread model.Thread, err error) {
 // CreateComment takes in a body, author, and path and creates a comment for the given thread. If thread does not exist, it creates one
 func (db *Database) CreateComment(body string, author string, path string, confirmed bool, replyTo *uuid.UUID) (*uuid.UUID, error) {
 	thread, err := db.GetThread(path)
-	if len(author) > 100 {
-		author = author[0:99] + "..."
-	}
 	if err != nil {
 		if err == global.ErrThreadNotFound {
 			threadId, err := db.CreateThread(path)
