@@ -22,6 +22,16 @@ There's a demo hosted at [mouthful.dizzy.zone](https://mouthful.dizzy.zone). Che
 
 # Installation
 
+
+## The easy way
+
+Head over to [release](https://github.com/vkuznecovas/mouthful/releases) page and download an archive for your OS. Extract, change the config.json you find in the archive according to your preferences. For more info on configuration, head to the [configuration section](#configuring-mouthful).
+
+Run the binary and that's it!
+
+
+## Building mouthful yourself
+
 To start using mouthful, you'll need:
 
 * A working GO environment
