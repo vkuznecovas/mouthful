@@ -31,6 +31,7 @@ export default class Form extends Component {
     }
   }
   handleAuthorChange(value) {
+    console.log("config", this.props.config);
     if (this.props.config.maxAuthorLength > 0) {
       var currentAuthor = this.state.author
       if (currentAuthor.length > (this.props.config.maxAuthorLength)) {
@@ -96,8 +97,8 @@ export default class Form extends Component {
         ref={c => {
           this.refMap.set(this.props.config.authorInputRefPrefix + this.props.id, c)
         }}
-        onChange={(e) => this.
-        (e.target.value)}>
+        onChange={(e) => this.handleAuthorChange(e.target.value)}
+        onKeyUp={(e) => this.handleAuthorChange(e.target.value)}>
              
       </input>
       
