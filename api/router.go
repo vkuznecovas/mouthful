@@ -152,13 +152,24 @@ func (r *Router) CreateComment(c *gin.Context) {
 	}
 
 	// author length validation
+	if len(createCommentBody.Author) == 0 {
+		c.AbortWithStatusJSON(400, global.ErrBadRequest.Error())
+		return
+	}
 	maxAuthorLength := global.DefaultAuthorLengthLimit
 	if r.config.Moderation.MaxAuthorLength != nil {
 		maxAuthorLength = *r.config.Moderation.MaxAuthorLength
 	}
 	createCommentBody.Author = ShortenAuthor(createCommentBody.Author, maxAuthorLength)
 
+	// body length validation
 	createCommentBody.Body = global.ParseAndSaniziteMarkdown(createCommentBody.Body)
+	log.Println(createCommentBody.Body)
+	if len(createCommentBody.Body) == 0 {
+		c.AbortWithStatusJSON(400, global.ErrBadRequest.Error())
+		return
+	}
+
 	createCommentBody.Path = NormalizePath(createCommentBody.Path)
 	if r.config.Honeypot && createCommentBody.Email != nil {
 		c.AbortWithStatusJSON(200, createCommentBody)

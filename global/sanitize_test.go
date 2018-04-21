@@ -20,4 +20,8 @@ func TestSanitize(t *testing.T) {
 	> href="javascript:alert('xss')">*you*</a>`
 	res = global.ParseAndSaniziteMarkdown(input)
 	assert.Equal(t, "<blockquote>\n<p>hello  href=“javascript:alert(‘xss’)”&gt;<em>you</em></p>\n</blockquote>\n", res)
+
+	input = `<script>alert("test")</script>`
+	res = global.ParseAndSaniziteMarkdown(input)
+	assert.Equal(t, "", res)
 }

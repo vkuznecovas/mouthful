@@ -110,6 +110,9 @@ var testFunctions = [...]interface{}{
 	CreateCommentReplyToAReply,
 	CreateCommentWithAuthorTooLongResultsInDefaultTruncation,
 	CreateCommentWithAuthorTooLongTrucatesAccodringToConfig,
+	CreateCommentEmptyBody,
+	CreateCommentEmptyBodyAfterSanitization,
+	CreateCommentEmptyAuthor,
 }
 
 func GetSessionCookie(db *abstraction.Database, r *gofight.RequestConfig) gofight.H {
@@ -1929,4 +1932,70 @@ func CreateCommentWithAuthorTooLongTrucatesAccodringToConfig(t *testing.T, testD
 			assert.Equal(t, global.ParseAndSaniziteMarkdown(commentBody.Body), comments[0].Body)
 		})
 
+}
+
+func CreateCommentEmptyBody(t *testing.T, testDB abstraction.Database) {
+	server, err := api.GetServer(&testDB, &config)
+	assert.Nil(t, err)
+	r := gofight.New()
+	commentBody := model.CreateCommentBody{
+		Path:   "/1027/test/",
+		Body:   "",
+		Author: "author",
+	}
+	bodyBytes, err := json.Marshal(commentBody)
+	assert.Nil(t, err)
+	r.POST("/v1/comments").
+		SetBody(string(bodyBytes[:])).
+		SetDebug(debug).
+		Run(server, func(r gofight.HTTPResponse, rq gofight.HTTPRequest) {
+			assert.Equal(t, 400, r.Code)
+			b, err := ioutil.ReadAll(r.Body)
+			assert.Nil(t, err)
+			assert.Equal(t, "\"Bad request\"", string(b))
+		})
+}
+
+func CreateCommentEmptyBodyAfterSanitization(t *testing.T, testDB abstraction.Database) {
+	server, err := api.GetServer(&testDB, &config)
+	assert.Nil(t, err)
+	r := gofight.New()
+	commentBody := model.CreateCommentBody{
+		Path:   "/1027/test/",
+		Body:   `<script>alert("qweqweqwe")</script>`,
+		Author: "author",
+	}
+	bodyBytes, err := json.Marshal(commentBody)
+	assert.Nil(t, err)
+	r.POST("/v1/comments").
+		SetBody(string(bodyBytes[:])).
+		SetDebug(debug).
+		Run(server, func(r gofight.HTTPResponse, rq gofight.HTTPRequest) {
+			assert.Equal(t, 400, r.Code)
+			b, err := ioutil.ReadAll(r.Body)
+			assert.Nil(t, err)
+			assert.Equal(t, "\"Bad request\"", string(b))
+		})
+}
+
+func CreateCommentEmptyAuthor(t *testing.T, testDB abstraction.Database) {
+	server, err := api.GetServer(&testDB, &config)
+	assert.Nil(t, err)
+	r := gofight.New()
+	commentBody := model.CreateCommentBody{
+		Path:   "/1027/test/",
+		Body:   "asdasds",
+		Author: "",
+	}
+	bodyBytes, err := json.Marshal(commentBody)
+	assert.Nil(t, err)
+	r.POST("/v1/comments").
+		SetBody(string(bodyBytes[:])).
+		SetDebug(debug).
+		Run(server, func(r gofight.HTTPResponse, rq gofight.HTTPRequest) {
+			assert.Equal(t, 400, r.Code)
+			b, err := ioutil.ReadAll(r.Body)
+			assert.Nil(t, err)
+			assert.Equal(t, "\"Bad request\"", string(b))
+		})
 }
