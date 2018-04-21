@@ -1,6 +1,7 @@
 package sqlxDriver_test
 
 import (
+	"reflect"
 	"testing"
 
 	"github.com/stretchr/testify/assert"
@@ -18,8 +19,12 @@ func setupSqliteTestDb() abstraction.Database {
 }
 
 func TestSqliteDb(t *testing.T) {
+	suiteReflected := reflect.ValueOf(db.TestSuite{})
+	tReflected := reflect.ValueOf(t)
 	for _, f := range db.TestFunctions {
-		f.(func(*testing.T, abstraction.Database))(t, setupSqliteTestDb())
+		sqliteReflected := reflect.ValueOf(setupSqliteTestDb())
+		in := []reflect.Value{suiteReflected, tReflected, sqliteReflected}
+		f.Call(in)
 	}
 }
 
@@ -29,11 +34,16 @@ func TestPostgresDB(t *testing.T) {
 	driverCasted := driver.(*sqlxDriver.Database)
 	// clean out before start
 	driverCasted.WipeOutData()
+	suiteReflected := reflect.ValueOf(db.TestSuite{})
+	dbReflected := reflect.ValueOf(testDb)
+	tReflected := reflect.ValueOf(t)
 	for _, f := range db.TestFunctions {
-		f.(func(*testing.T, abstraction.Database))(t, testDb)
+		in := []reflect.Value{suiteReflected, tReflected, dbReflected}
+		f.Call(in)
 		err := driverCasted.WipeOutData()
 		assert.Nil(t, err)
 	}
+
 }
 
 func TestMysqlDB(t *testing.T) {
@@ -42,8 +52,12 @@ func TestMysqlDB(t *testing.T) {
 	driverCasted := driver.(*sqlxDriver.Database)
 	// clean out before start
 	driverCasted.WipeOutData()
+	suiteReflected := reflect.ValueOf(db.TestSuite{})
+	dbReflected := reflect.ValueOf(testDb)
+	tReflected := reflect.ValueOf(t)
 	for _, f := range db.TestFunctions {
-		f.(func(*testing.T, abstraction.Database))(t, testDb)
+		in := []reflect.Value{suiteReflected, tReflected, dbReflected}
+		f.Call(in)
 		err := driverCasted.WipeOutData()
 		assert.Nil(t, err)
 	}
