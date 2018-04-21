@@ -1,6 +1,7 @@
 package db
 
 import (
+	"reflect"
 	"testing"
 	"time"
 
@@ -11,35 +12,26 @@ import (
 	"github.com/vkuznecovas/mouthful/global"
 )
 
-// TestFunctions is a list of database test functions used to test the drivers
-var TestFunctions = [...]interface{}{createThread,
-	createThreadUniqueViolation,
-	getThread,
-	getThreadNotFound,
-	createComment,
-	createCommentNoReply,
-	createCommentWithReply,
-	createCommentWrongReply,
-	createCommentWrongThread,
-	getCommentNotFound,
-	getComment,
-	getCommentsByThreadNoThread,
-	getCommentsByThread,
-	updateCommentNotFound,
-	updateComment,
-	deleteCommentNotFound,
-	deleteComment,
-	getAllThreadsEmptyDatabase,
-	getAllThreads,
-	getAllCommentsEmptyDatabase,
-	getAllComments,
-	softDelete,
-	getAllCommentsGetsSoftDeletedComments,
-	deleteCommentDeletesReplies,
-	createCommentReplyToAReply,
+// TestFunctions is a list of database test functions used to test the drivers.
+// If you want to add a test method, just follow this signature
+// func (ts TestSuite) SomeName(t *testing.T, database abstraction.Database)
+// It will then get automagically added to the test functions by init method.
+var TestFunctions []reflect.Value
+
+func init() {
+	testSuiteType := reflect.TypeOf(TestSuite{})
+	for i := 0; i < testSuiteType.NumMethod(); i++ {
+		method := testSuiteType.Method(i)
+		TestFunctions = append(TestFunctions, method.Func)
+	}
 }
 
-func createThread(t *testing.T, database abstraction.Database) {
+// TestSuite contains all the functions that one needs to test database operations against.
+type TestSuite struct {
+}
+
+// CreateThread checks if a thread is correctly created
+func (ts TestSuite) CreateThread(t *testing.T, database abstraction.Database) {
 	uid, err := database.CreateThread("/test")
 	assert.Nil(t, err)
 	assert.NotNil(t, uid)
@@ -49,7 +41,8 @@ func createThread(t *testing.T, database abstraction.Database) {
 	assert.Equal(t, "/test", thread.Path)
 }
 
-func createThreadUniqueViolation(t *testing.T, database abstraction.Database) {
+// CreateThreadUniqueViolation checks if duplicate thread creation throws no errors
+func (ts TestSuite) CreateThreadUniqueViolation(t *testing.T, database abstraction.Database) {
 	uid, err := database.CreateThread("/test")
 	assert.Nil(t, err)
 	assert.NotNil(t, uid)
@@ -58,7 +51,8 @@ func createThreadUniqueViolation(t *testing.T, database abstraction.Database) {
 	assert.True(t, uuid.Equal(*uid, *uidNew))
 }
 
-func getThread(t *testing.T, database abstraction.Database) {
+// GetThread checks if a created thread is gotten alright
+func (ts TestSuite) GetThread(t *testing.T, database abstraction.Database) {
 	uid, err := database.CreateThread("/test")
 	assert.Nil(t, err)
 	assert.NotNil(t, uid)
@@ -68,13 +62,15 @@ func getThread(t *testing.T, database abstraction.Database) {
 	assert.Equal(t, "/test", thread.Path)
 }
 
-func getThreadNotFound(t *testing.T, database abstraction.Database) {
+// GetThreadNotFound asserts that we correctly get a response saying we're not finding the thread
+func (ts TestSuite) GetThreadNotFound(t *testing.T, database abstraction.Database) {
 	_, err := database.GetThread("/test")
 	assert.NotNil(t, err)
 	assert.Equal(t, global.ErrThreadNotFound, err)
 }
 
-func createComment(t *testing.T, database abstraction.Database) {
+// CreateComment checks if we create the comment alright
+func (ts TestSuite) CreateComment(t *testing.T, database abstraction.Database) {
 	now := time.Now().UTC()
 	uid, err := database.CreateComment("body", "author", "/test", true, nil)
 	assert.Nil(t, err)
@@ -91,21 +87,24 @@ func createComment(t *testing.T, database abstraction.Database) {
 
 }
 
-func createCommentNoReply(t *testing.T, database abstraction.Database) {
+// CreateCommentNoReply checks if we return an error upon replying to a non existant reply to
+func (ts TestSuite) CreateCommentNoReply(t *testing.T, database abstraction.Database) {
 	replyTo := global.GetUUID()
 	_, err := database.CreateComment("body", "author", "/test", true, &replyTo)
 	assert.NotNil(t, err)
 	assert.Equal(t, global.ErrWrongReplyTo, err)
 }
 
-func createCommentWithReply(t *testing.T, database abstraction.Database) {
+// CreateCommentWithReply checks if a comment with a proper reply to value gets created correctly
+func (ts TestSuite) CreateCommentWithReply(t *testing.T, database abstraction.Database) {
 	uid, err := database.CreateComment("body", "author", "/test", true, nil)
 	assert.Nil(t, err)
 	_, err = database.CreateComment("body", "author", "/test", true, uid)
 	assert.Nil(t, err)
 }
 
-func createCommentWrongReply(t *testing.T, database abstraction.Database) {
+// CreateCommentWrongReply asserts that upon providing a bad reply to value we turn a ErrWrongReplyTo
+func (ts TestSuite) CreateCommentWrongReply(t *testing.T, database abstraction.Database) {
 	_, err := database.CreateComment("body", "author", "/test", true, nil)
 	assert.Nil(t, err)
 	uid2, err := database.CreateComment("body", "author", "/test1", true, nil)
@@ -115,7 +114,8 @@ func createCommentWrongReply(t *testing.T, database abstraction.Database) {
 	assert.Equal(t, global.ErrWrongReplyTo, err)
 }
 
-func createCommentReplyToAReply(t *testing.T, database abstraction.Database) {
+// CreateCommentReplyToAReply asserts that we only allow 2 levels of nesting by making sure that a reply to a reply will instead point to it's parent
+func (ts TestSuite) CreateCommentReplyToAReply(t *testing.T, database abstraction.Database) {
 	uid1, err := database.CreateComment("body", "author", "/test", true, nil)
 	assert.Nil(t, err)
 	uid2, err := database.CreateComment("body", "author", "/test", true, uid1)
@@ -127,7 +127,8 @@ func createCommentReplyToAReply(t *testing.T, database abstraction.Database) {
 	assert.True(t, uuid.Equal(*comment.ReplyTo, *uid1))
 }
 
-func createCommentWrongThread(t *testing.T, database abstraction.Database) {
+// CreateCommentWrongThread asserts that we return an error upon trying to reply to a comment from another thread
+func (ts TestSuite) CreateCommentWrongThread(t *testing.T, database abstraction.Database) {
 	uid, err := database.CreateComment("body", "author", "/test", true, nil)
 	assert.Nil(t, err)
 	_, err = database.CreateComment("body", "author", "/test", true, uid)
@@ -137,13 +138,15 @@ func createCommentWrongThread(t *testing.T, database abstraction.Database) {
 	assert.Equal(t, global.ErrWrongReplyTo, err)
 }
 
-func getCommentNotFound(t *testing.T, database abstraction.Database) {
+// GetCommentNotFound asserts that we return ErrCommentNotFound if a comment is not found on GetComment
+func (ts TestSuite) GetCommentNotFound(t *testing.T, database abstraction.Database) {
 	_, err := database.GetComment(global.GetUUID())
 	assert.NotNil(t, err)
 	assert.Equal(t, global.ErrCommentNotFound, err)
 }
 
-func getComment(t *testing.T, database abstraction.Database) {
+// GetComment checks if the getComment operation actually gets the comment
+func (ts TestSuite) GetComment(t *testing.T, database abstraction.Database) {
 	uid, err := database.CreateComment("body", "author", "/test", true, nil)
 	assert.Nil(t, err)
 	comment, err := database.GetComment(*uid)
@@ -155,13 +158,15 @@ func getComment(t *testing.T, database abstraction.Database) {
 	assert.Nil(t, comment.ReplyTo)
 }
 
-func getCommentsByThreadNoThread(t *testing.T, database abstraction.Database) {
+// GetCommentsByThreadNoThread asserts that we return ErrThreadNotFound if no thread is found
+func (ts TestSuite) GetCommentsByThreadNoThread(t *testing.T, database abstraction.Database) {
 	_, err := database.GetCommentsByThread("/test")
 	assert.NotNil(t, err)
 	assert.Equal(t, global.ErrThreadNotFound, err)
 }
 
-func getCommentsByThreadEmptyThread(t *testing.T, database abstraction.Database) {
+// GetCommentsByThreadEmptyThread asserts that we return an empty array if the thread has no comments
+func (ts TestSuite) GetCommentsByThreadEmptyThread(t *testing.T, database abstraction.Database) {
 	_, err := database.CreateThread("/test")
 	assert.Nil(t, err)
 	comments, err := database.GetCommentsByThread("/test")
@@ -169,7 +174,8 @@ func getCommentsByThreadEmptyThread(t *testing.T, database abstraction.Database)
 	assert.Len(t, comments, 0)
 }
 
-func getCommentsByThread(t *testing.T, database abstraction.Database) {
+// GetCommentsByThread asserts that we get correct comments for a specific thread, aka only confirmed ones.
+func (ts TestSuite) GetCommentsByThread(t *testing.T, database abstraction.Database) {
 	_, err := database.CreateThread("/test")
 	assert.Nil(t, err)
 	_, err = database.CreateComment("body", "author", "/test", true, nil)
@@ -195,13 +201,16 @@ func getCommentsByThread(t *testing.T, database abstraction.Database) {
 	assert.Equal(t, true, comments[0].Confirmed)
 	assert.Equal(t, true, comments[1].Confirmed)
 }
-func updateCommentNotFound(t *testing.T, database abstraction.Database) {
+
+// UpdateCommentNotFound asserts that we return ErrCommentNotFound upon updating a non existant comment
+func (ts TestSuite) UpdateCommentNotFound(t *testing.T, database abstraction.Database) {
 	err := database.UpdateComment(global.GetUUID(), "t", "t", false)
 	assert.NotNil(t, err)
 	assert.Equal(t, global.ErrCommentNotFound, err)
 }
 
-func updateComment(t *testing.T, database abstraction.Database) {
+// UpdateComment checks if we update the comment alright
+func (ts TestSuite) UpdateComment(t *testing.T, database abstraction.Database) {
 	uid, err := database.CreateComment("body", "author", "/test", true, nil)
 	assert.Nil(t, err)
 	err = database.UpdateComment(*uid, "t", "t", false)
@@ -215,13 +224,15 @@ func updateComment(t *testing.T, database abstraction.Database) {
 	assert.Nil(t, comment.ReplyTo)
 }
 
-func deleteCommentNotFound(t *testing.T, database abstraction.Database) {
+// DeleteCommentNotFound asserts if ErrCommentNotFound is return upon deletion of a non existant comment
+func (ts TestSuite) DeleteCommentNotFound(t *testing.T, database abstraction.Database) {
 	err := database.DeleteComment(global.GetUUID())
 	assert.NotNil(t, err)
 	assert.Equal(t, global.ErrCommentNotFound, err)
 }
 
-func deleteComment(t *testing.T, database abstraction.Database) {
+// DeleteComment asserts that we actually soft delete a comment
+func (ts TestSuite) DeleteComment(t *testing.T, database abstraction.Database) {
 	uid, err := database.CreateComment("body", "author", "/test", true, nil)
 	assert.Nil(t, err)
 	err = database.DeleteComment(*uid)
@@ -231,13 +242,15 @@ func deleteComment(t *testing.T, database abstraction.Database) {
 	assert.NotNil(t, c.DeletedAt)
 }
 
-func getAllThreadsEmptyDatabase(t *testing.T, database abstraction.Database) {
+// GetAllThreadsEmptyDatabase asserts that no threads are returned if none exist
+func (ts TestSuite) GetAllThreadsEmptyDatabase(t *testing.T, database abstraction.Database) {
 	threads, err := database.GetAllThreads()
 	assert.Nil(t, err)
 	assert.Len(t, threads, 0)
 }
 
-func getAllThreads(t *testing.T, database abstraction.Database) {
+// GetAllThreads asserts that we return all the threads correctly
+func (ts TestSuite) GetAllThreads(t *testing.T, database abstraction.Database) {
 	_, err := database.CreateThread("/test")
 	assert.Nil(t, err)
 	_, err = database.CreateThread("/test1")
@@ -249,13 +262,15 @@ func getAllThreads(t *testing.T, database abstraction.Database) {
 	assert.Equal(t, "/test1", threads[1].Path)
 }
 
-func getAllCommentsEmptyDatabase(t *testing.T, database abstraction.Database) {
+// GetAllCommentsEmptyDatabase asserts that we return an empty dataset
+func (ts TestSuite) GetAllCommentsEmptyDatabase(t *testing.T, database abstraction.Database) {
 	comments, err := database.GetAllComments()
 	assert.Nil(t, err)
 	assert.Len(t, comments, 0)
 }
 
-func getAllComments(t *testing.T, database abstraction.Database) {
+// GetAllComments asserts that all comments are gotten correctly.
+func (ts TestSuite) GetAllComments(t *testing.T, database abstraction.Database) {
 	author := "author"
 	body := "body"
 	path := "/test"
@@ -276,7 +291,8 @@ func getAllComments(t *testing.T, database abstraction.Database) {
 	assert.Nil(t, comments[1].ReplyTo)
 }
 
-func softDelete(t *testing.T, database abstraction.Database) {
+// SoftDelete checks if comments are soft deleted
+func (ts TestSuite) SoftDelete(t *testing.T, database abstraction.Database) {
 	author := "author"
 	body := "body"
 	path := "/test"
@@ -297,7 +313,8 @@ func softDelete(t *testing.T, database abstraction.Database) {
 	assert.Nil(t, c.DeletedAt)
 }
 
-func getAllCommentsGetsSoftDeletedComments(t *testing.T, database abstraction.Database) {
+// GetAllCommentsGetsSoftDeletedComments checks if get all comments returns all the comments, even the deleted ones.
+func (ts TestSuite) GetAllCommentsGetsSoftDeletedComments(t *testing.T, database abstraction.Database) {
 	author := "author"
 	body := "body"
 	path := "/test"
@@ -322,7 +339,8 @@ func getAllCommentsGetsSoftDeletedComments(t *testing.T, database abstraction.Da
 	assert.Nil(t, comments[1].ReplyTo)
 }
 
-func deleteCommentDeletesReplies(t *testing.T, database abstraction.Database) {
+// DeleteCommentDeletesReplies asserts that deletes are cascaded
+func (ts TestSuite) DeleteCommentDeletesReplies(t *testing.T, database abstraction.Database) {
 	author := "author"
 	body := "body"
 	path := "/test"
