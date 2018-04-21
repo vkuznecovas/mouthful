@@ -10,3 +10,4 @@ goreleaser-build/
 .DS_Store
 main
 coverage.txt
+disqus.xml
