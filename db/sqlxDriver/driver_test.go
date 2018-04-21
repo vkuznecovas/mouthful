@@ -35,9 +35,9 @@ func TestPostgresDB(t *testing.T) {
 	// clean out before start
 	driverCasted.WipeOutData()
 	suiteReflected := reflect.ValueOf(db.TestSuite{})
+	dbReflected := reflect.ValueOf(testDb)
 	tReflected := reflect.ValueOf(t)
 	for _, f := range db.TestFunctions {
-		dbReflected := reflect.ValueOf(testDb)
 		in := []reflect.Value{suiteReflected, tReflected, dbReflected}
 		f.Call(in)
 		err := driverCasted.WipeOutData()
@@ -53,9 +53,9 @@ func TestMysqlDB(t *testing.T) {
 	// clean out before start
 	driverCasted.WipeOutData()
 	suiteReflected := reflect.ValueOf(db.TestSuite{})
+	dbReflected := reflect.ValueOf(testDb)
 	tReflected := reflect.ValueOf(t)
 	for _, f := range db.TestFunctions {
-		dbReflected := reflect.ValueOf(testDb)
 		in := []reflect.Value{suiteReflected, tReflected, dbReflected}
 		f.Call(in)
 		err := driverCasted.WipeOutData()

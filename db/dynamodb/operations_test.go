@@ -1,6 +1,7 @@
 package dynamodb_test
 
 import (
+	"reflect"
 	"testing"
 
 	"github.com/stretchr/testify/assert"
@@ -22,8 +23,12 @@ func TestDynamoDb(t *testing.T) {
 	testDb := setupDynamoTestDb()
 	driver := testDb.GetUnderlyingStruct()
 	driverCasted := driver.(*dynamodb.Database)
+	suiteReflected := reflect.ValueOf(db.TestSuite{})
+	dbReflected := reflect.ValueOf(testDb)
+	tReflected := reflect.ValueOf(t)
 	for _, f := range db.TestFunctions {
-		f.(func(*testing.T, abstraction.Database))(t, testDb)
+		in := []reflect.Value{suiteReflected, tReflected, dbReflected}
+		f.Call(in)
 		err := driverCasted.WipeOutData()
 		assert.Nil(t, err)
 	}
