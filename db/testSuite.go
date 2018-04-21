@@ -37,7 +37,6 @@ var TestFunctions = [...]interface{}{createThread,
 	getAllCommentsGetsSoftDeletedComments,
 	deleteCommentDeletesReplies,
 	createCommentReplyToAReply,
-	createCommentNameTooLong,
 }
 
 func createThread(t *testing.T, database abstraction.Database) {
@@ -338,14 +337,4 @@ func deleteCommentDeletesReplies(t *testing.T, database abstraction.Database) {
 	assert.Len(t, comments, 2)
 	assert.NotNil(t, comments[0].DeletedAt)
 	assert.NotNil(t, comments[1].DeletedAt)
-}
-func createCommentNameTooLong(t *testing.T, database abstraction.Database) {
-	author := "authorauthorauthorauthorauthorauthorauthorauthorauthorauthorauthorauthorauthorauthorauthorauthorauthorauthorauthorauthorauthorauthorauthorauthorauthorauthorauthorauthorauthorauthorauthorauthorauthorauthorauthorauthorauthorauthorauthorauthorauthorauthorauthorauthorauthorauthorauthorauthorauthorauthorauthorauthorauthorauthorauthorauthorauthorauthorauthor"
-	body := "body"
-	path := "/test"
-	uid, err := database.CreateComment(body, author, path, false, nil)
-	assert.Nil(t, err)
-	comment, err := database.GetComment(*uid)
-	assert.Nil(t, err)
-	assert.True(t, len(comment.Author) < 105)
 }

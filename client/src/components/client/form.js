@@ -31,7 +31,18 @@ export default class Form extends Component {
     }
   }
   handleAuthorChange(value) {
-      this.setState({ author: value })
+    console.log("config", this.props.config);
+    if (this.props.config.maxAuthorLength > 0) {
+      var currentAuthor = this.state.author
+      if (currentAuthor.length > (this.props.config.maxAuthorLength)) {
+        if (value.length > currentAuthor.length) {
+          // don't allow for extra characters, reset state to previous
+          this.setState({ author: currentAuthor })
+          return
+        }
+      }
+    }
+    this.setState({ author: value })
   }
   handleEmailChange(value) {
       this.setState({ email: value })
@@ -86,7 +97,8 @@ export default class Form extends Component {
         ref={c => {
           this.refMap.set(this.props.config.authorInputRefPrefix + this.props.id, c)
         }}
-        onChange={(e) => this.handleAuthorChange(e.target.value)}>
+        onChange={(e) => this.handleAuthorChange(e.target.value)}
+        onKeyUp={(e) => this.handleAuthorChange(e.target.value)}>
              
       </input>
       

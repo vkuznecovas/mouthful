@@ -4,7 +4,8 @@
         "enabled": true,
         "adminPassword": "somepassword",
         "sessionDurationSeconds": 21600,
-        "maxCommentLength": 10000
+        "maxCommentLength": 10000,
+        "maxAuthorLength": 35
     },
     "database": {
         "dialect": "dynamodb",

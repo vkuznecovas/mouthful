@@ -14,3 +14,15 @@ func NormalizePath(input string) string {
 	}
 	return input
 }
+
+// ShortenAuthor shortens the author name to an acceptable lenght, suffixing it with ...
+func ShortenAuthor(input string, allowedLength int) string {
+	// if the allowedLength is 3 or less, we can't really replace anything
+	if allowedLength < 4 {
+		return input
+	}
+	if len(input) > allowedLength {
+		return input[0:allowedLength-3] + "..."
+	}
+	return input
+}

@@ -35,6 +35,7 @@ Moderation section is responsible for editing the moderation functionality.
 | adminPassword     | sets the administration panel password. | string | true |  |  Please make sure to set it to something that's strong and not a couple of symbols long. |
 | sessionDurationSeconds     | determines the length of an admin session or how long until you are forced to log in again. | int | true |  | 21600 |
 | maxCommentLength     | determines the maximum comment length. Setting to a value of 0 or below allows for unlimited length | int | true | 0 | 1000 |
+| maxAuthorLength     | determines the maximum author length. Setting to a value of 3 or below defaults to no limit | int | true | 50 | 35 |
 
 
 ### Api

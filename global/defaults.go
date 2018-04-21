@@ -18,3 +18,6 @@ const DefaultCommentLengthLimit = 0
 
 // DefaultSessionName default sesion name for api
 const DefaultSessionName = "mouthful-session"
+
+// DefaultAuthorLengthLimit default author length limit
+const DefaultAuthorLengthLimit = 50
