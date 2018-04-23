@@ -38,7 +38,7 @@ Now, all that's left to do is include the following html in your blog/website on
 
 ```
 <div id="mouthful-comments" data-url="http://localhost:8080"></div>
-<script src="https://api.dizzy.zone/client.js"></script>
+<script src="http://localhost:8080/client.js"></script>
 ```
 
 Once that is set up, you should be able to start using mouthful.
