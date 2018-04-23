@@ -25,10 +25,23 @@ There's a demo hosted at [mouthful.dizzy.zone](https://mouthful.dizzy.zone). Che
 
 ## The easy way
 
+
+### Backend
+
 Head over to [release](https://github.com/vkuznecovas/mouthful/releases) page and download an archive for your OS. Extract, change the config.json you find in the archive according to your preferences. For more info on configuration, head to the [configuration section](#configuring-mouthful).
 
-Run the binary and that's it!
+Run the binary and that's it! You now have the backend running. 
 
+### Client 
+
+Now, all that's left to do is include the following html in your blog/website on the pages you want mouthful to work on:
+
+```
+<div id="mouthful-comments" data-url="http://localhost:8080"></div>
+<script src="https://api.dizzy.zone/client.js"></script>
+```
+
+Once that is set up, you should be able to start using mouthful.
 
 ## Building mouthful yourself
 
