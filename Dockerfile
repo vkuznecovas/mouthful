@@ -21,5 +21,4 @@ ENV REPO vkuznecovas/$APP
 COPY --from=build /go/src/github.com/${REPO}/dist /${APP}
 WORKDIR /${APP}
 VOLUME /${APP}/_mouthful_db/mouthful.db
-RUN ls -la
 CMD ["./mouthful"] 
