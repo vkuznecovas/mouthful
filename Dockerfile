@@ -9,7 +9,7 @@ RUN set -ex; \
     echo "http://dl-cdn.alpinelinux.org/alpine/edge/main" >> /etc/apk/repositories && \
     apk add --no-cache upx nodejs nodejs-npm && \
     go get -d github.com/vkuznecovas/mouthful && \
-    go get github.com/golang/dep
+    go get -u github.com/golang/dep/cmd/dep
 WORKDIR /go/src/github.com/vkuznecovas/mouthful
 RUN git checkout $MOUTHFUL_VER && \
     ./build.sh && \
