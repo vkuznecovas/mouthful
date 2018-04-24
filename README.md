@@ -9,6 +9,24 @@ Mouthful is a lightweight commenting server written in GO and Preact. It's a sel
 
 There's a demo hosted at [mouthful.dizzy.zone](https://mouthful.dizzy.zone). Check it out!
 
+* [Features](#features)
+* [Get mouthful](#installation)
+    * [The easy way](#the-easy-way)
+    * [Build from source](#building-mouthful-yourself)
+    * [Run it on Docker](#mouthful-on-docker)
+* [Configure mouthful](#configuring-mouthful)
+    * [Moderation](#moderation)
+    * [Caching](#caching)
+    * [Rate limiting](#rate-limiting)
+    * [Styling](#styling)
+    * [Cross-origin resource sharing](#cross-origin resource sharing)
+    * [Data sources](#data-source)
+    * [Config file from Docker image](#config-file-from-docker)
+* [Contributing](#contributing)
+* [Wish list](#wish-list)
+* [Get in touch](#get-in-touch)
+* [Who uses mouthful](#who-uses-mouthful?)
+
 # Features
 
 * Multiple database support(sqlite, mysql, postgres, dynamodb)
@@ -19,12 +37,9 @@ There's a demo hosted at [mouthful.dizzy.zone](https://mouthful.dizzy.zone). Che
 * Migrations from existing commenting engines(isso)
 * Configuration - most of the features can be turned on or off, as well as customized to your preferences.
 
-
 # Installation
 
-
 ## The easy way
-
 
 ### Backend
 
@@ -64,12 +79,58 @@ To configure your mouthful instance to your hearts content, please refer to the 
 
 Once you've done with the configuration, just copy over the `/dist` contents to your server and run the `/dist/mouthful` binary. Take note that the mouthful binary will look for a config.json file its directory.
 
-## Installing dependencies
+### Installing dependencies
 
 1) To install Go, please refer to the GO documentation found [here](https://golang.org/doc/install#install)
 1) To install node and npm, please refer to the Node documentation found [here](https://nodejs.org/en/download/package-manager/)
 1) To install Dep, please refer to Dep documentation found [here](https://github.com/golang/dep#installation)
 1) Once you have all the tools installed, follow the [Installation guide](#installation)
+
+## Mouthful on Docker
+
+### Build the image
+
+1. Clone the project
+
+```sh
+git clone https://github.com/vkuznecovas/mouthful.git
+```
+
+2. Get in the project folder then build the image
+    
+```sh
+docker build -t mouthful .
+```
+
+The [`Dockerfile`](Dockerfile) is going to build on the master branch by default, you can specify a version
+
+```sh
+docker build --build-args "MOUTHFUL_VER=1.0.3" -t mouthful .
+```
+
+### Run the image
+
+Once image is built, simply run
+
+```sh
+docker run -d \
+    --name mouthful \
+    -v $(pwd)/data
+    -p 8080:8080
+    mouthful
+```
+
+Alternatively you can use the official image `vkuznecovas/mouthful`
+
+```sh
+docker run -d \
+    --name mouthful \
+    -v $(pwd)/app/data
+    -p 8080:8080
+    vkuznecovas/mouthful
+```
+
+**Note:** `/app/data` needs to contain a valid `config.json` file, read the note in [moderation](#moderation). You can extract the config file from the docker image, see [getting config file from docker](#config-file-from-docker).
 
 # Configuring mouthful
 
@@ -77,34 +138,36 @@ Nearly all the features of mouthful can be customized and turned on or off. All 
 
 Here's a short overview:
 
-### Moderation
+## Moderation
 
 Mouthful comes with moderation support out of the box. If moderation is enabled, it does not show the comments users post instantly, those will have to be approved first through the mouthful admin panel. This also allows for comment modification or deletion.
 
-### Caching
+**Note:** You need to change the default password in [config.json](config.json#L5), else `mouthful` will fail to start.
+
+## Caching
 
 Mouthful can cache end results(full sets of comments for threads) for a given period of time. This allows for quicker responses, lower number of database queries at the cost of extra memory for the running mouthful binary.
 
-### Rate limiting
+## Rate limiting
 
 Mouthful can limit the amount of posts a person can post within the same hour.
 
-### Styling
+## Styling
 
 Mouthful comes with a default style out of the box, but you can override it in a couple of ways:
 
 1) Disable the default styling in config and add the required css to your webpage.
 2) Fork the repo and change the style in `client/src/components/client/style.scss`.
 
-### Paging of comments
+## Paging of comments
 
 Mouthful can either display all the comments on page load, or page them. The page size can be specified in config.
 
-### Cross-Origin Resource Sharing
+## Cross-Origin Resource Sharing
 
 Mouthful can either allow all origins to access its backend from browser or limit that to a given list of domains.
 
-### Data sources
+## Data sources
 
 Mouthful supports different data stores for different needs. Currently supported data store list is as follows:
 
@@ -114,6 +177,16 @@ Mouthful supports different data stores for different needs. Currently supported
 * aws dynamodb
 
 For a list of configuration options and config file examples, head over to [configuration documentation and examples](./examples/configs/README.md)
+
+## Config file from Docker
+
+You can get the default `config.json` by running
+
+```sh
+docker run --rm vkuznecovas/mouthful cat /app/data/config.json > config.json
+```
+
+This will create a file name `config.json` in your host machine, you can edit it as you please. Make sure it is present in the `data` folder before runnig the docker image, read the note in [run the image](#run-the-image).
 
 # Contributing
 
