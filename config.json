@@ -9,7 +9,7 @@
     },
     "database": {
         "dialect": "sqlite3",
-        "database": "./test.db"
+        "database": "./_mouthful_db/test.db"
     },
     "api": {
         "port": 8080,
