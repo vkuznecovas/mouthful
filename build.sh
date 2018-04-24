@@ -1,10 +1,11 @@
 #!/bin/bash
 
-set +x
+set -euxo
 rm -rf ./dist
 # make dirs to accomodate files
 mkdir -p ./dist
 mkdir -p ./dist/static
+mkdir -p ./dist/data
 
 # bundle client
 cd ./client
@@ -24,8 +25,8 @@ cd ..
 dep ensure
 
 # build binary
-go build -o dist/mouthful main.go
+go build -a -ldflags="-s -w" -installsuffix cgo -o dist/mouthful main.go
 chmod +x dist/mouthful
 
 # copy over config
-cp ./config.json dist/config.json
+cp ./config.json dist/data/config.json

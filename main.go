@@ -17,7 +17,7 @@ import (
 
 func main() {
 	// read config.json
-	contents, err := ioutil.ReadFile("./config.json")
+	contents, err := ioutil.ReadFile("./data/config.json")
 	if err != nil {
 		panic(err)
 	}
