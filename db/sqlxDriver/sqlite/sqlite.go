@@ -5,7 +5,10 @@ import (
 	"errors"
 	"log"
 	"os"
+	"path/filepath"
 	"time"
+
+	"github.com/spf13/afero"
 
 	"github.com/jmoiron/sqlx"
 	// We absolutely need the sqlite driver here, this whole package depends on it
@@ -61,6 +64,10 @@ func CreateDatabase(databaseConfig model.Database) (abstraction.Database, error)
 		}
 		db = d
 	} else {
+		err := CreateDirectoryIfNotExists(*databaseConfig.Database, afero.NewOsFs())
+		if err != nil {
+			return nil, err
+		}
 		d, err := sqlx.Connect("sqlite3", *databaseConfig.Database)
 		if err != nil {
 			return nil, err
@@ -107,6 +114,18 @@ func CreateTestDatabase() abstraction.Database {
 		panic(err)
 	}
 	return &DB
+}
+
+// CreateDirectoryIfNotExists checks for the given directory and if not found - creates it. Used for sqlite database initialization
+func CreateDirectoryIfNotExists(path string, fs afero.Fs) error {
+	dir := filepath.Dir(path)
+	if _, err := fs.Stat(dir); os.IsNotExist(err) {
+		err = fs.MkdirAll(dir, os.ModePerm)
+		if err != nil {
+			return err
+		}
+	}
+	return nil
 }
 
 func periodicWipe(db sqlxDriver.Database) {
