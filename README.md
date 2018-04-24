@@ -19,7 +19,7 @@ There's a demo hosted at [mouthful.dizzy.zone](https://mouthful.dizzy.zone). Che
     * [Caching](#caching)
     * [Rate limiting](#rate-limiting)
     * [Styling](#styling)
-    * [Cross-origin resource sharing](#cross-origin resource sharing)
+    * [Cross-origin resource sharing](#cross-origin-resource-sharing)
     * [Data sources](#data-source)
     * [Config file from Docker image](#config-file-from-docker)
 * [Contributing](#contributing)
