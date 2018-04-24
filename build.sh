@@ -1,6 +1,6 @@
 #!/bin/bash
 
-set +x
+set -euxo
 rm -rf ./dist
 # make dirs to accomodate files
 mkdir -p ./dist
