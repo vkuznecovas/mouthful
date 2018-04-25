@@ -25,7 +25,7 @@ There's a demo hosted at [mouthful.dizzy.zone](https://mouthful.dizzy.zone). Che
 * [Contributing](#contributing)
 * [Wish list](#wish-list)
 * [Get in touch](#get-in-touch)
-* [Who uses mouthful](#who-uses-mouthful?)
+* [Who uses mouthful](#who-uses-mouthful)
 
 # Features
 
