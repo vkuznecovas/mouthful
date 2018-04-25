@@ -11,3 +11,4 @@ goreleaser-build/
 main
 coverage.txt
 _mouthful_db
+data/
