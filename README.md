@@ -120,7 +120,7 @@ docker run -d \
     mouthful
 ```
 
-Alternatively you can use the official image `vkuznecovas/mouthful`
+Alternatively you can use the official image [`vkuznecovas/mouthful`](https://hub.docker.com/r/vkuznecovas/mouthful/)
 
 ```sh
 docker run -d \
