@@ -25,7 +25,7 @@ There's a demo hosted at [mouthful.dizzy.zone](https://mouthful.dizzy.zone). Che
 * [Contributing](#contributing)
 * [Wish list](#wish-list)
 * [Get in touch](#get-in-touch)
-* [Who uses mouthful](#who-uses-mouthful?)
+* [Who uses mouthful](#who-uses-mouthful)
 
 # Features
 
@@ -115,17 +115,17 @@ Once image is built, simply run
 ```sh
 docker run -d \
     --name mouthful \
-    -v $(pwd)/data
+    -v $(pwd)/data:/app/data
     -p 8080:8080
     mouthful
 ```
 
-Alternatively you can use the official image `vkuznecovas/mouthful`
+Alternatively you can use the official image [`vkuznecovas/mouthful`](https://hub.docker.com/r/vkuznecovas/mouthful/)
 
 ```sh
 docker run -d \
     --name mouthful \
-    -v $(pwd)/app/data
+    -v $(pwd)/data:/app/data
     -p 8080:8080
     vkuznecovas/mouthful
 ```
@@ -186,7 +186,7 @@ You can get the default `config.json` by running
 docker run --rm vkuznecovas/mouthful cat /app/data/config.json > config.json
 ```
 
-This will create a file name `config.json` in your host machine, you can edit it as you please. Make sure it is present in the `data` folder before runnig the docker image, read the note in [run the image](#run-the-image).
+This will create a file named `config.json` in your host machine, you can edit it as you please. Make sure it is present in the `data` folder before runnig the docker image, read the note in [run the image](#run-the-image).
 
 # Contributing
 
