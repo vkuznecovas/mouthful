@@ -22,6 +22,7 @@ There's a demo hosted at [mouthful.dizzy.zone](https://mouthful.dizzy.zone). Che
     * [Cross-origin resource sharing](#cross-origin-resource-sharing)
     * [Data sources](#data-source)
     * [Config file from Docker image](#config-file-from-docker)
+    * [Nginx configuration](#nginx-config)
 * [Contributing](#contributing)
 * [Wish list](#wish-list)
 * [Get in touch](#get-in-touch)
@@ -187,6 +188,21 @@ docker run --rm vkuznecovas/mouthful cat /app/data/config.json > config.json
 ```
 
 This will create a file named `config.json` in your host machine, you can edit it as you please. Make sure it is present in the `data` folder before runnig the docker image, read the note in [run the image](#run-the-image).
+
+## Nginx config
+
+In most cases, you'll want to run mouthful under nginx, or apache, or something else. In that case, this is the config I'm using for the demo:
+
+```
+location /mouthful-demo/ {
+            proxy_pass http://172.17.0.1:1224/;
+            proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
+            proxy_set_header Host $host;
+            proxy_set_header X-Forwarded-Proto $scheme;
+	    add_header Cache-Control 'no-cache' always;
+}
+```
+
 
 # Contributing
 
