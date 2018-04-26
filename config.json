@@ -9,7 +9,7 @@
     },
     "database": {
         "dialect": "sqlite3",
-        "database": "./test.db"
+        "database": "./data/test.db"
     },
     "api": {
         "port": 8080,

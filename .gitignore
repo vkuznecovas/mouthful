@@ -11,3 +11,5 @@ goreleaser-build/
 main
 coverage.txt
 disqus.xml
+_mouthful_db
+data/

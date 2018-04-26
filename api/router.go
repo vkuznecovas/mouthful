@@ -164,7 +164,6 @@ func (r *Router) CreateComment(c *gin.Context) {
 
 	// body length validation
 	createCommentBody.Body = global.ParseAndSaniziteMarkdown(createCommentBody.Body)
-	log.Println(createCommentBody.Body)
 	if len(createCommentBody.Body) == 0 {
 		c.AbortWithStatusJSON(400, global.ErrBadRequest.Error())
 		return
