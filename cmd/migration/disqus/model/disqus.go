@@ -21,7 +21,7 @@ type Ccategory struct {
 
 type CcreatedAt struct {
 	XMLName xml.Name `xml:"createdAt,omitempty" json:"createdAt,omitempty"`
-	string  string   `xml:",chardata" json:",omitempty"`
+	SValue  string   `xml:",chardata" json:",omitempty"`
 }
 
 type Cdisqus struct {
@@ -37,12 +37,12 @@ type Cdisqus struct {
 
 type Cemail struct {
 	XMLName xml.Name `xml:"email,omitempty" json:"email,omitempty"`
-	string  string   `xml:",chardata" json:",omitempty"`
+	SValue  string   `xml:",chardata" json:",omitempty"`
 }
 
 type Cforum struct {
 	XMLName xml.Name `xml:"forum,omitempty" json:"forum,omitempty"`
-	string  string   `xml:",chardata" json:",omitempty"`
+	SValue  string   `xml:",chardata" json:",omitempty"`
 }
 
 type Cid struct {
@@ -51,47 +51,47 @@ type Cid struct {
 
 type CipAddress struct {
 	XMLName xml.Name `xml:"ipAddress,omitempty" json:"ipAddress,omitempty"`
-	string  string   `xml:",chardata" json:",omitempty"`
+	SValue  string   `xml:",chardata" json:",omitempty"`
 }
 
 type CisAnonymous struct {
 	XMLName xml.Name `xml:"isAnonymous,omitempty" json:"isAnonymous,omitempty"`
-	string  string   `xml:",chardata" json:",omitempty"`
+	SValue  string   `xml:",chardata" json:",omitempty"`
 }
 
 type CisClosed struct {
 	XMLName xml.Name `xml:"isClosed,omitempty" json:"isClosed,omitempty"`
-	string  string   `xml:",chardata" json:",omitempty"`
+	SValue  string   `xml:",chardata" json:",omitempty"`
 }
 
 type CisDefault struct {
 	XMLName xml.Name `xml:"isDefault,omitempty" json:"isDefault,omitempty"`
-	string  string   `xml:",chardata" json:",omitempty"`
+	SValue  string   `xml:",chardata" json:",omitempty"`
 }
 
 type CisDeleted struct {
 	XMLName xml.Name `xml:"isDeleted,omitempty" json:"isDeleted,omitempty"`
-	string  string   `xml:",chardata" json:",omitempty"`
+	SValue  string   `xml:",chardata" json:",omitempty"`
 }
 
 type CisSpam struct {
 	XMLName xml.Name `xml:"isSpam,omitempty" json:"isSpam,omitempty"`
-	string  string   `xml:",chardata" json:",omitempty"`
+	SValue  string   `xml:",chardata" json:",omitempty"`
 }
 
 type Clink struct {
 	XMLName xml.Name `xml:"link,omitempty" json:"link,omitempty"`
-	string  string   `xml:",chardata" json:",omitempty"`
+	SValue  string   `xml:",chardata" json:",omitempty"`
 }
 
 type Cmessage struct {
 	XMLName xml.Name `xml:"message,omitempty" json:"message,omitempty"`
-	string  string   `xml:",chardata" json:",omitempty"`
+	SValue  string   `xml:",chardata" json:",omitempty"`
 }
 
 type Cname struct {
 	XMLName xml.Name `xml:"name,omitempty" json:"name,omitempty"`
-	string  string   `xml:",chardata" json:",omitempty"`
+	SValue  string   `xml:",chardata" json:",omitempty"`
 }
 
 type Cparent struct {
@@ -131,10 +131,10 @@ type Cthread struct {
 
 type Ctitle struct {
 	XMLName xml.Name `xml:"title,omitempty" json:"title,omitempty"`
-	string  string   `xml:",chardata" json:",omitempty"`
+	SValue  string   `xml:",chardata" json:",omitempty"`
 }
 
 type Cusername struct {
 	XMLName xml.Name `xml:"username,omitempty" json:"username,omitempty"`
-	string  string   `xml:",chardata" json:",omitempty"`
+	SValue  string   `xml:",chardata" json:",omitempty"`
 }
