@@ -45,6 +45,7 @@ Api section changes the behaviour of the back-end API.
 | Variables     | Use           | Type | Required  | Default value | Recommended setting |
 | ------------- |:-------------:| :---:| :-------: |  :----------: |  :----------------: |
 | port     | sets the port for API to run on | bool | false | 8080 | up to you |
+| bindAddress | sets the address that the api will listen on | string | 0.0.0.0 | up to you |
 | logging     | determines if gin logging will be enabled for the api | bool | false | true | true
 | debug     | enables or disables the gin debug mode with more verbal logging. | bool | false | false | false |
 | cache     | cache settings for the api | object | true |  | [see below](#api.cache) |

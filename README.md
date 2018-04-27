@@ -23,6 +23,7 @@ There's a demo hosted at [mouthful.dizzy.zone](https://mouthful.dizzy.zone). Che
     * [Data sources](#data-source)
     * [Config file from Docker image](#config-file-from-docker)
     * [Nginx configuration](#nginx-config)
+* [Migrations](#migrations)
 * [Contributing](#contributing)
 * [Wish list](#wish-list)
 * [Get in touch](#get-in-touch)
@@ -35,7 +36,7 @@ There's a demo hosted at [mouthful.dizzy.zone](https://mouthful.dizzy.zone). Che
 * Server side caching to prevent excessive database calls
 * Rate limiting
 * Honeypot feature, to prevent bots from posting comments
-* Migrations from existing commenting engines(isso)
+* Migrations from existing commenting engines(isso, disqus)
 * Configuration - most of the features can be turned on or off, as well as customized to your preferences.
 
 # Installation
@@ -203,6 +204,14 @@ location /mouthful-demo/ {
 }
 ```
 
+# Migrations
+
+Mouthful supports migrating existing data from the following commenting engines:
+* [Isso](./cmd/migration/isso/README.md)
+* [Disqus](./cmd/migration/disqus/README.md)
+
+Click on them to read the documentation on how that is done.
+
 
 # Contributing
 
@@ -210,7 +219,7 @@ Contributions are more than welcome. If you've found a bug, raise an issue. If y
 
 # Wish list
 
-I'm a keen backender and not too sharp on the frontend part. If you're willing to contribute, front end(both client and admin) are not in the best of shapes, especially the admin panel. Frontend might require a refactor. Any addition of tests would be great as well. Migrations from other commenting engines would be encouraged as well. If someone could send me a disqus dump, I'd make a migration for that.
+I'm a keen backender and not too sharp on the frontend part. If you're willing to contribute, front end(both client and admin) are not in the best of shapes, especially the admin panel. Frontend might require a refactor. Any addition of tests would be great as well. Migrations from other commenting engines would be encouraged as well. 
 
 # Get in touch
 
