@@ -40,7 +40,6 @@ func getThread(threads *[]*model.Cthread, id string) *model.Cthread {
 }
 
 func insertComment(comment *model.Cpost, comments *[]*model.Cpost, threads *[]*model.Cthread, database sqlxDriver.Database) error {
-
 	// Insert parent if parent exists, and all its parents if needed
 	if _, ok := commentParentMap[comment.AttrDsqSpaceid]; ok {
 		if commentParentMap[comment.AttrDsqSpaceid].Parent != nil {

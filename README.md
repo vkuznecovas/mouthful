@@ -22,6 +22,7 @@ There's a demo hosted at [mouthful.dizzy.zone](https://mouthful.dizzy.zone). Che
     * [Cross-origin resource sharing](#cross-origin-resource-sharing)
     * [Data sources](#data-source)
     * [Config file from Docker image](#config-file-from-docker)
+* [Migrations](#migrations)
 * [Contributing](#contributing)
 * [Wish list](#wish-list)
 * [Get in touch](#get-in-touch)
@@ -34,7 +35,7 @@ There's a demo hosted at [mouthful.dizzy.zone](https://mouthful.dizzy.zone). Che
 * Server side caching to prevent excessive database calls
 * Rate limiting
 * Honeypot feature, to prevent bots from posting comments
-* Migrations from existing commenting engines(isso)
+* Migrations from existing commenting engines(isso, disqus)
 * Configuration - most of the features can be turned on or off, as well as customized to your preferences.
 
 # Installation
@@ -188,13 +189,21 @@ docker run --rm vkuznecovas/mouthful cat /app/data/config.json > config.json
 
 This will create a file named `config.json` in your host machine, you can edit it as you please. Make sure it is present in the `data` folder before runnig the docker image, read the note in [run the image](#run-the-image).
 
+# Migrations
+
+Mouthful supports migrating existing data from the following commenting engines:
+* [Isso](./cmd/migration/isso/README.md)
+* [Disqus](./cmd/migration/disqus/README.md)
+
+Click on them to read the documentation on how that is done.
+
 # Contributing
 
 Contributions are more than welcome. If you've found a bug, raise an issue. If you've got a feature request, open up an issue as well. I'll try and keep the api stable, as well as tag each release with a semantic version.
 
 # Wish list
 
-I'm a keen backender and not too sharp on the frontend part. If you're willing to contribute, front end(both client and admin) are not in the best of shapes, especially the admin panel. Frontend might require a refactor. Any addition of tests would be great as well. Migrations from other commenting engines would be encouraged as well. If someone could send me a disqus dump, I'd make a migration for that.
+I'm a keen backender and not too sharp on the frontend part. If you're willing to contribute, front end(both client and admin) are not in the best of shapes, especially the admin panel. Frontend might require a refactor. Any addition of tests would be great as well. Migrations from other commenting engines would be encouraged as well. 
 
 # Get in touch
 
