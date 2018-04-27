@@ -41,12 +41,19 @@ func main() {
 	}
 
 	// set GIN port
-	port := fmt.Sprintf(":%v", global.DefaultPort)
+	port := global.DefaultPort
 	if config.API.Port != nil {
-		port = fmt.Sprintf(":%v", *config.API.Port)
+		port = *config.API.Port
+	}
+
+	// add GIN bind address, serving on all by default
+	bindAddress := global.DefaultBindAddress
+	if config.API.BindAddress != nil {
+		bindAddress = *config.API.BindAddress
 	}
 
 	// run the server
-	log.Println("Running server on port", port)
-	service.Run(port)
+	fullAddress := fmt.Sprintf("%v:%v", bindAddress, port)
+	log.Println("Running server on ", fullAddress)
+	service.Run(fullAddress)
 }
