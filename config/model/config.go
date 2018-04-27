@@ -42,6 +42,7 @@ type Config struct {
 // API - api configuration part
 type API struct {
 	Port         *int         `json:"port,omitempty"`
+	BindAddress  *string      `json:"bindAddress,omitempty"`
 	Debug        bool         `json:"debug"`
 	Cache        Cache        `json:"cache"`
 	RateLimiting RateLimiting `json:"rateLimiting"`

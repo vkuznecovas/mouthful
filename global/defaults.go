@@ -4,6 +4,9 @@ package global
 // StaticPath is the default location for our static files
 const StaticPath = "./static"
 
+// DefaultBindAddress is the default value for api service bind address
+const DefaultBindAddress = "0.0.0.0"
+
 // DefaultPort is the default value for api port
 const DefaultPort = 8080
 
