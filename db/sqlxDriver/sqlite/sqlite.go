@@ -140,11 +140,11 @@ func periodicWipe(db sqlxDriver.Database) {
 				_, err := db.DB.Exec("DELETE FROM COMMENT")
 				if err != nil {
 					log.Println(err)
+				} else {
 					_, err := db.CreateComment("Hello world!", "Mouthful", "/", true, nil)
 					if err != nil {
 						log.Println(err)
 					}
-				} else {
 					log.Println("data wiped")
 				}
 			case <-quit:
