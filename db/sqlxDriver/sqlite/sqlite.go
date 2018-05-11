@@ -141,12 +141,20 @@ func periodicWipe(db sqlxDriver.Database) {
 				if err != nil {
 					log.Println(err)
 				} else {
+					log.Println("data wiped")
+				}
+				go func() {
+					log.Println("Will create comment in a sec...")
+					// I'll assume a race condition here with the exec above.
+					time.Sleep(time.Second * 1)
+					log.Println("Creating comment")
 					_, err := db.CreateComment("Hello world!", "Mouthful", "/", true, nil)
 					if err != nil {
 						log.Println(err)
+					} else {
+						log.Println("Comment created")
 					}
-					log.Println("data wiped")
-				}
+				}()
 			case <-quit:
 				ticker.Stop()
 				return
