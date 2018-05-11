@@ -21,6 +21,7 @@ There's a demo hosted at [mouthful.dizzy.zone](https://mouthful.dizzy.zone). Che
     * [Styling](#styling)
     * [Cross-origin resource sharing](#cross-origin-resource-sharing)
     * [Data sources](#data-source)
+    * [Multiple domains](#multiple-domains)
     * [Config file from Docker image](#config-file-from-docker)
     * [Nginx configuration](#nginx-config)
 * [Migrations](#migrations)
@@ -179,6 +180,30 @@ Mouthful supports different data stores for different needs. Currently supported
 * aws dynamodb
 
 For a list of configuration options and config file examples, head over to [configuration documentation and examples](./examples/configs/README.md)
+
+## Multiple domains
+
+A single instance of Mouthful supports multiple domains. To distinguish between multiple domains you'll need to change the client side to reflect the domain it's coming from. You need to add a data-domain tag to your client side html, like so:
+
+```
+// Page 1 would look like this
+<div id="mouthful-comments" data-url="http://localhost:8080" data-domain="example.com"></div>
+<script src="http://localhost:8080/client.js"></script>
+```
+
+```
+// Page 2 would look like this
+<div id="mouthful-comments" data-url="http://localhost:8080" data-domain="another.example.com"></div>
+<script src="http://localhost:8080/client.js"></script>
+```
+
+```
+// Page 3 would look like this
+<div id="mouthful-comments" data-url="http://localhost:8080" data-domain="domain.com"></div>
+<script src="http://localhost:8080/client.js"></script>
+```
+
+With this, all the requests going to the back end will now prefix the domain name to the path, therefore if you want to add multiple websites to a single instance of mouthful you can now achieve it! Omitting the data-domain will rely on the path with no domain, so you can have multiple domains showing the same comments if needed.
 
 ## Config file from Docker
 

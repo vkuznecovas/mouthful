@@ -31,7 +31,6 @@ export default class Form extends Component {
     }
   }
   handleAuthorChange(value) {
-    console.log("config", this.props.config);
     if (this.props.config.maxAuthorLength > 0) {
       var currentAuthor = this.state.author
       if (currentAuthor.length > (this.props.config.maxAuthorLength)) {
