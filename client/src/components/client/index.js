@@ -156,10 +156,14 @@ export default class App extends Component {
         }
       }
     }
+    var path = window.location.pathname;
+    if (this.state.pathPrefix) {
+      path = this.state.pathPrefix + window.location.pathname;
+    }
     http.send(JSON.stringify({
       Body: comment,
       Author: author,
-      Path: window.location.pathname,
+      Path: path,
       ReplyTo: replyTo
     }))
   }
@@ -168,7 +172,15 @@ export default class App extends Component {
     return filtered[0].visible;
   }
   componentDidMount() {
-    this.setState({hostUrl: document.querySelector("#mouthful-comments").dataset.url})
+    var prefix = document.querySelector("#mouthful-comments").dataset.domain
+    // remove the trailing slash if it's there
+    if (prefix && prefix.endsWith("/")){
+      prefix = prefix.substring(0, str.length-1);
+    }
+    this.setState({
+      hostUrl: document.querySelector("#mouthful-comments").dataset.url,
+      pathPrefix: prefix,
+    })
     if (!this.state.configLoaded && this.state.hostUrl != "") {
       this.fetchConfig()
     }    
@@ -200,7 +212,11 @@ export default class App extends Component {
     if (typeof window == "undefined") { return }
     var context = this;
     var http = new XMLHttpRequest();
-    var url = this.state.hostUrl + "/v1/comments?uri=" + encodeURIComponent(window.location.pathname);
+    var path = window.location.pathname;
+    if (this.state.pathPrefix) {
+      path = this.state.pathPrefix + window.location.pathname;
+    }
+    var url = this.state.hostUrl + "/v1/comments?uri=" + encodeURIComponent(path);
     http.open("GET", url, true);
     http.onreadystatechange = function () {
       handleStateChange(http, context)
