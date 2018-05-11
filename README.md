@@ -21,6 +21,7 @@ There's a demo hosted at [mouthful.dizzy.zone](https://mouthful.dizzy.zone). Che
     * [Styling](#styling)
     * [Cross-origin resource sharing](#cross-origin-resource-sharing)
     * [Data sources](#data-source)
+    * [Multiple domains](#multiple-domains)
     * [Config file from Docker image](#config-file-from-docker)
     * [Nginx configuration](#nginx-config)
 * [Migrations](#migrations)
