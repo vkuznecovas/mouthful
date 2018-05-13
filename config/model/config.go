@@ -48,6 +48,7 @@ type API struct {
 	RateLimiting RateLimiting `json:"rateLimiting"`
 	Cors         Cors         `json:"cors"`
 	Logging      bool         `json:"logging"`
+	Path         *string      `json:"path,omitempty"`
 }
 
 // Client - client configuration part
