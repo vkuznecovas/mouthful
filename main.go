@@ -47,6 +47,15 @@ func main() {
 		panic(err)
 	}
 
+	// check if we're gonna need to override the path in static admin html
+	if config.API.Path != nil {
+		err = global.OverrideScriptRootInAdminHTML(*config.API.Path, global.StaticPath+"/index.html")
+		if err != nil {
+			fmt.Fprintln(os.Stderr, "Couldn't override the static admin html root")
+			panic(err)
+		}
+	}
+
 	// set up db according to config
 	database, err := db.GetDBInstance(config.Database)
 	if err != nil {
