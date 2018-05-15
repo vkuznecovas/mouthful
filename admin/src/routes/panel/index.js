@@ -46,7 +46,7 @@ export default class Panel extends Component {
 		if (typeof window == "undefined") { return }
 
 		var http = new XMLHttpRequest();
-		var url = window.location.origin + "/v1/admin/threads";
+		var url = window.location.href + "v1/admin/threads";
 		http.open("GET", url, true);
 
 		http.onreadystatechange = function () {
@@ -59,7 +59,7 @@ export default class Panel extends Component {
 		if (typeof window == "undefined") { return }
 
 		var http = new XMLHttpRequest();
-		var url = window.location.origin + "/v1/admin/comments/all";
+		var url = window.location.href + "v1/admin/comments/all";
 		http.open("GET", url, true);
 
 		http.onreadystatechange = function () {
@@ -72,7 +72,7 @@ export default class Panel extends Component {
 	updateComment(commentId, body, author, confirmed) {
 		if (typeof window == "undefined") { return }
 		var http = new XMLHttpRequest();
-		var url = window.location.origin + "/v1/admin/comments";
+		var url = window.location.href + "v1/admin/comments";
 		http.open("PATCH", url, true);
 		var context = this;
 		http.onreadystatechange = function () {

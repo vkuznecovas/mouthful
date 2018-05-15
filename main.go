@@ -47,6 +47,14 @@ func main() {
 		panic(err)
 	}
 
+	// check if we're gonna need to override the path in static admin html
+	if config.Moderation.Path != nil {
+		err := global.RewriteAdminPanelScripts(*config.Moderation.Path)
+		if err != nil {
+			panic(err)
+		}
+	}
+
 	// set up db according to config
 	database, err := db.GetDBInstance(config.Database)
 	if err != nil {
