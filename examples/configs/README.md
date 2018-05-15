@@ -36,7 +36,7 @@ Moderation section is responsible for editing the moderation functionality.
 | sessionDurationSeconds     | determines the length of an admin session or how long until you are forced to log in again. | int | true |  | 21600 |
 | maxCommentLength     | determines the maximum comment length. Setting to a value of 0 or below allows for unlimited length | int | true | 0 | 1000 |
 | maxAuthorLength     | determines the maximum author length. Setting to a value of 3 or below defaults to no limit | int | true | 50 | 35 |
-
+| path     | the path you'll run the admin panel from | string | false | "/" | none |
 
 ### Api
 
@@ -51,6 +51,7 @@ Api section changes the behaviour of the back-end API.
 | cache     | cache settings for the api | object | true |  | [see below](#api.cache) |
 | cors     | cors settings for the api | object | true |  | [see below](#api.cors) |
 | rateLimiting     | rate limiting settings for the api | object | true |  | [see below](#api.rateLimiting) |
+
 
 #### api.cache
 
