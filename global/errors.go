@@ -19,3 +19,6 @@ var ErrCommentNotFound = errors.New("Comment not found")
 
 // ErrWrongReplyTo indicates that the comments replyTo comment Id is invalid
 var ErrWrongReplyTo = errors.New("Can't reply to this comment")
+
+// ErrCouldNotFindBundleFile indicates that we could not find the required bundle file
+var ErrCouldNotFindBundleFile = errors.New("Can't find bundle file")

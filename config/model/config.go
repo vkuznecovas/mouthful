@@ -23,11 +23,12 @@ type Database struct {
 
 // Moderation - moderation section of our config
 type Moderation struct {
-	Enabled                bool   `json:"enabled"`
-	AdminPassword          string `json:"adminPassword"`
-	SessionDurationSeconds int    `json:"sessionDurationSeconds"`
-	MaxCommentLength       *int   `json:"maxCommentLength,omitempty"`
-	MaxAuthorLength        *int   `json:"maxAuthorLength,omitempty"`
+	Enabled                bool    `json:"enabled"`
+	AdminPassword          string  `json:"adminPassword"`
+	SessionDurationSeconds int     `json:"sessionDurationSeconds"`
+	MaxCommentLength       *int    `json:"maxCommentLength,omitempty"`
+	MaxAuthorLength        *int    `json:"maxAuthorLength,omitempty"`
+	Path                   *string `json:"path,omitempty"`
 }
 
 // Config - root of our config
@@ -48,7 +49,6 @@ type API struct {
 	RateLimiting RateLimiting `json:"rateLimiting"`
 	Cors         Cors         `json:"cors"`
 	Logging      bool         `json:"logging"`
-	Path         *string      `json:"path,omitempty"`
 }
 
 // Client - client configuration part
