@@ -28,8 +28,7 @@
         "cors": {
             "enabled": true,
             "allowedOrigins": ["https://dizzy.zone"]
-        },
-        "path": "/"
+        }
     },
     "client": {
         "useDefaultStyle": true,
