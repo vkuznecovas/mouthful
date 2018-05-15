@@ -234,7 +234,7 @@ Take note, that if you're running mouthful with moderation on and run it under a
 * Build mouthful yourself, and when building the admin panel, which is running the npm run build inside the admin folder, specify an env variable called `HOMEPAGE`. For the example above it would be like so: `HOMEPAGE=/mouthful-demo/ npm run build`.
 * Specify the path variable in config inside the API section. `"path":"/mouthful-demo/"` for  for the example above.
 
-This is caused by mouthful using static assets and not serving any HTML itself.
+This is caused by mouthful using static assets and not serving any HTML itself. *I would strongly suggest using the first option.*
 
 # Migrations
 
