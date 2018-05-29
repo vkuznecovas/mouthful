@@ -12,12 +12,20 @@ import (
 
 	"github.com/vkuznecovas/mouthful/global"
 
+	"github.com/fatih/color"
 	"github.com/vkuznecovas/mouthful/api"
 	"github.com/vkuznecovas/mouthful/config"
 	"github.com/vkuznecovas/mouthful/db"
 )
 
 func main() {
+
+	// Print a warning if user is running as root.
+	if os.Geteuid() == 0 {
+		color.Set(color.FgYellow)
+		log.Println("WARNING: Mouthful is running as root. For security reasons please consider creating a non root user for mouthful. Mouthful does not need root permissions to run.")
+		color.Unset()
+	}
 
 	configFlag := flag.String("config", "./data/config.json", "File to read configuration")
 	helpFlag := flag.Bool("h", false, "Show help")
@@ -81,7 +89,9 @@ func main() {
 
 	// run the server
 	fullAddress := fmt.Sprintf("%v:%v", bindAddress, port)
-	log.Println("Running server on ", fullAddress)
+	color.Set(color.FgGreen)
+	log.Println("Running mouthful server on ", fullAddress)
+	color.Unset()
 	service.Run(fullAddress)
 }
 
