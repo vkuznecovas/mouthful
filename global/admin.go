@@ -78,15 +78,15 @@ func FindAdminPanelChunkFilename(root string) (string, error) {
 func RewriteAdminPanelScripts(path string) error {
 	err := OverrideScriptRootInAdminHTML(path, StaticPath+"/index.html")
 	if err != nil {
-		return fmt.Errorf("Couldn't override the static admin html root")
+		return fmt.Errorf("Couldn't override the static admin html root. Please check if the file index file(%v) is available and the mouthful user has the permissions to access it", StaticPath+"/index.html")
 	}
 	fileName, err := FindAdminPanelChunkFilename(StaticPath)
 	if err != nil {
-		return fmt.Errorf("Couldn't find the admin panel chunk file")
+		return fmt.Errorf("Couldn't find the admin panel chunk file. Please check if the budle file is available and the mouthful user has permissions to access it in the directory %v", StaticPath)
 	}
 	err = OverrideScriptPathInBundle(path, StaticPath+"/"+fileName)
 	if err != nil {
-		return fmt.Errorf("Couldn't override the static admin script path")
+		return fmt.Errorf("Couldn't override the static admin script path. Please check if the script file(%v) is available and the mouthful user has the permissions to access it", StaticPath+"/"+fileName)
 	}
 	return nil
 }
