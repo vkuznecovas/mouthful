@@ -70,7 +70,7 @@ func TestOverrideScriptPathInBundle(t *testing.T) {
 		defer file.Close()
 		assert.Nil(t, err)
 
-		_, err = file.WriteString(scriptInput)
+		_, err = file.WriteString(expectedScriptOutput)
 		assert.Nil(t, err)
 
 		file.Close()
@@ -93,6 +93,15 @@ func TestOverrideScriptPathInBundle(t *testing.T) {
 
 	newHtml = string(b)
 	assert.Equal(t, expectedScriptOutput, newHtml)
+
+	err = global.OverrideScriptPathInBundle("/", filepath)
+	assert.Nil(t, err)
+
+	b, err = ioutil.ReadFile(filepath)
+	assert.Nil(t, err)
+
+	newHtml = string(b)
+	assert.Equal(t, scriptInput, newHtml)
 
 	err = os.Remove(filepath)
 	assert.Nil(t, err)
