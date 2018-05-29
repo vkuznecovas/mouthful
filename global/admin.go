@@ -43,6 +43,7 @@ func OverrideScriptRootInAdminHTML(prefix, filepath string) error {
 // hosting the mouthful instance under a path that's different than /, such as "/mouthful". To fix it, on running mouthful
 // this function is run and overrides the src with prefix + src.
 func OverrideScriptPathInBundle(prefix, filepath string) error {
+	budleOverridePattern := `.*e\.p=\"(.*?)\"`
 	b, err := ioutil.ReadFile(filepath)
 	if err != nil {
 		return err
@@ -50,10 +51,20 @@ func OverrideScriptPathInBundle(prefix, filepath string) error {
 	if !strings.HasSuffix(prefix, "/") {
 		prefix += "/"
 	}
+
+	r, err := regexp.Compile(budleOverridePattern)
+	if err != nil {
+		return err
+	}
 	newHTML := string(b)
-	replWith := fmt.Sprintf(`e.p="%v"`, prefix)
-	newHTML = strings.Replace(newHTML, `e.p="/"`, replWith, 1)
-	err = ioutil.WriteFile(filepath, []byte(newHTML), 0644)
+	splits := r.FindStringSubmatchIndex(newHTML)
+	if len(splits) != 4 {
+		return ErrCouldNotOverrideBundlePath
+	}
+	end := splits[1]
+	begin := splits[2]
+	res := newHTML[:begin] + prefix + newHTML[end-1:]
+	err = ioutil.WriteFile(filepath, []byte(res), 0644)
 	return err
 }
 

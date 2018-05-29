@@ -22,3 +22,6 @@ var ErrWrongReplyTo = errors.New("Can't reply to this comment")
 
 // ErrCouldNotFindBundleFile indicates that we could not find the required bundle file
 var ErrCouldNotFindBundleFile = errors.New("Can't find bundle file")
+
+// ErrCouldNotOverrideBundlePath indicates that we could not find override the path in bundle
+var ErrCouldNotOverrideBundlePath = errors.New("Can't override bundle file path")
