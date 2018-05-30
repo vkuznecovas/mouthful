@@ -23,12 +23,13 @@ type Database struct {
 
 // Moderation - moderation section of our config
 type Moderation struct {
-	Enabled                bool    `json:"enabled"`
-	AdminPassword          string  `json:"adminPassword"`
-	SessionDurationSeconds int     `json:"sessionDurationSeconds"`
-	MaxCommentLength       *int    `json:"maxCommentLength,omitempty"`
-	MaxAuthorLength        *int    `json:"maxAuthorLength,omitempty"`
-	Path                   *string `json:"path,omitempty"`
+	Enabled                bool             `json:"enabled"`
+	AdminPassword          string           `json:"adminPassword"`
+	SessionDurationSeconds int              `json:"sessionDurationSeconds"`
+	MaxCommentLength       *int             `json:"maxCommentLength,omitempty"`
+	MaxAuthorLength        *int             `json:"maxAuthorLength,omitempty"`
+	Path                   *string          `json:"path,omitempty"`
+	OAauthProviders        *[]OauthProvider `json:"oauthProviders,omitempty"`
 }
 
 // Config - root of our config
@@ -74,4 +75,13 @@ type Cache struct {
 type Cors struct {
 	Enabled        bool      `json:"enabled"`
 	AllowedOrigins *[]string `json:"allowedOrigins,omitempty"`
+}
+
+// OauthProvider represents the oauth provider configuration
+type OauthProvider struct {
+	Name         string    `json:"name"`
+	Enabled      bool      `json:"enabled"`
+	Secret       *string   `json:"secret,omitempty"`
+	Key          *string   `json:"key,omitempty"`
+	AdminUserIds *[]string `json:"adminUserIds,omitempty"`
 }
