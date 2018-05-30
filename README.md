@@ -39,6 +39,7 @@ There's a demo hosted at [mouthful.dizzy.zone](https://mouthful.dizzy.zone). Che
 * Honeypot feature, to prevent bots from posting comments
 * Migrations from existing commenting engines(isso, disqus)
 * Configuration - most of the features can be turned on or off, as well as customized to your preferences.
+* Admin login through third parties such as facebook and twitter, and 35 more.
 
 # Installation
 
@@ -145,7 +146,7 @@ Here's a short overview:
 
 Mouthful comes with moderation support out of the box. If moderation is enabled, it does not show the comments users post instantly, those will have to be approved first through the mouthful admin panel. This also allows for comment modification or deletion.
 
-You can choose if you want to use a password based authentication or use OAUTH and login through github, facebook or the other 35 providers mouthful supports. [Click here for more on OAUTH](./examples/configs/README.md#Oauth-providers).
+You can choose if you want to use a password based authentication or use OAUTH and login through github, facebook or the other 35 providers mouthful supports. [Click here for more on OAUTH](./examples/configs/README.md#oauth-providers).
 
 **Note:** You need to change the default password in [config.json](config.json#L5), else `mouthful` will fail to start.
 

@@ -39,7 +39,7 @@ Moderation section is responsible for editing the moderation functionality.
 | path     | the path you'll run the admin panel from | string | false | "/" | none |
 | oauthCallbackOrigin | the base url of your API | string | true if using oauth | "" | fully fledged url of your admin panel |
 | disablePasswordLogin | disables the passsword authentication for admin panel if set to true | bool | false | false | true if using oauth, false otherwise | 
-| oauthProviders | determines which oauth providers will be used for mouthful admin panel, [see below](#Oauth-providers)| array | false | none | your preference |
+| oauthProviders | determines which oauth providers will be used for mouthful admin panel, [see below](#oauth-providers)| array | false | none | your preference |
 
 
 #### Oauth providers
@@ -49,7 +49,7 @@ The oauth providers is responsible for setting up your mouthful installation for
 | Variables     | Use           | Type | Required  | Default value | Recommended setting |
 | ------------- |:-------------:| :---:| :-------: |  :----------: |  :----------------: |
 | enabled     | determines if the provider is used or not | bool | false | false | up to you |
-| name | Name of the oauth provider. The list is [available below](#Supported-Oauth-providers)| string | true | none | up to you |
+| name | Name of the oauth provider. The list is [available below](#supported-oauth-providers)| string | true | none | up to you |
 | secret | Secret of the oauth provider. You'll have to head to the providers page to figure it out. | string | true | none | up to you |
 | key | Key or id of the oauth provider. You'll have to head to the providers page to figure it out. | string | true | none | up to you |
 | adminUserIds | Ids of the users that will be assigned admin status. | array of strings | true | none | up to you |

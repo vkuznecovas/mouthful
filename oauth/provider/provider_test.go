@@ -76,3 +76,11 @@ func TestProviderInvalidUri(t *testing.T) {
 	assert.NotNil(t, err)
 	assert.Equal(t, "Invalid callback uri provided for OAUTH provider github", err.Error())
 }
+
+func TestAllProvidersCreatedOk(t *testing.T) {
+	for k := range provider.ProviderNameInitializationMap {
+		p, err := provider.New(k, &secret, &key, []string{"qq"}, "/")
+		assert.Nil(t, err)
+		assert.NotNil(t, p)
+	}
+}

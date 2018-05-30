@@ -50,3 +50,16 @@ func TestGetProvidersReturnsIgnoresDisabled(t *testing.T) {
 	assert.Nil(t, err)
 	assert.Len(t, providers, 1)
 }
+
+func TestGetProvidersBadKey(t *testing.T) {
+	facebookCfg.Enabled = false
+	defer func() { facebookCfg.Enabled = true }()
+	currentKey := githubCfg.Key
+	defer func() { githubCfg.Key = currentKey }()
+	githubCfg.Key = nil
+	inp := []model.OauthProvider{githubCfg, facebookCfg}
+	providers, err := oauth.GetProviders(&inp, "/")
+	assert.NotNil(t, err)
+	assert.Len(t, providers, 0)
+	assert.Equal(t, "No key set for github OAUTH provider in config and environment variable GITHUB_KEY not set, cannot set up OAUTH for github", err.Error())
+}

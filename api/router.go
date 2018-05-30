@@ -46,14 +46,14 @@ func (r *Router) OAuth(c *gin.Context) {
 // OAuthCallback handles the oauth callback which finishes the auth procedure. It checks for the admin flag for the user, and if found it will set the user as admin for the rest of the session
 func (r *Router) OAuthCallback(c *gin.Context) {
 	q := c.Request.URL.Query()
-	q.Add("provider", c.Param("provider"))
+	provider := c.Param("provider")
+	q.Add("provider", provider)
 	c.Request.URL.RawQuery = q.Encode()
 	user, err := gothic.CompleteUserAuth(c.Writer, c.Request)
 	if err != nil {
 		c.AbortWithError(http.StatusInternalServerError, err)
 		return
 	}
-	provider := c.Param("provider")
 	for _, v := range r.providers[provider].AdminUserIds {
 		if user.UserID == v {
 			session := sessions.Default(c)

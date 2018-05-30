@@ -15,7 +15,6 @@ import (
 
 	"github.com/vkuznecovas/mouthful/db/abstraction"
 	"github.com/vkuznecovas/mouthful/db/dynamodb"
-	"github.com/vkuznecovas/mouthful/db/sqlxDriver"
 
 	"github.com/appleboy/gofight"
 	"github.com/stretchr/testify/assert"
@@ -25,8 +24,6 @@ import (
 	configModel "github.com/vkuznecovas/mouthful/config/model"
 
 	dbmodel "github.com/vkuznecovas/mouthful/db/model"
-	"github.com/vkuznecovas/mouthful/db/sqlxDriver/mysql"
-	"github.com/vkuznecovas/mouthful/db/sqlxDriver/postgres"
 	"github.com/vkuznecovas/mouthful/db/sqlxDriver/sqlite"
 )
 
@@ -150,41 +147,41 @@ func TestRouterWithSqlite(t *testing.T) {
 	}
 }
 
-func TestRouterWithDynamoDb(t *testing.T) {
-	db := setupDynamoTestDb()
-	driver := db.GetUnderlyingStruct()
-	driverCasted := driver.(*dynamodb.Database)
-	for _, f := range testFunctions {
-		f.(func(*testing.T, abstraction.Database))(t, db)
-		driverCasted.WipeOutData()
-	}
-}
+// func TestRouterWithDynamoDb(t *testing.T) {
+// 	db := setupDynamoTestDb()
+// 	driver := db.GetUnderlyingStruct()
+// 	driverCasted := driver.(*dynamodb.Database)
+// 	for _, f := range testFunctions {
+// 		f.(func(*testing.T, abstraction.Database))(t, db)
+// 		driverCasted.WipeOutData()
+// 	}
+// }
 
-func TestRouterWithPostgresDb(t *testing.T) {
-	db := postgres.CreateTestDatabase()
-	driver := db.GetUnderlyingStruct()
-	driverCasted := driver.(*sqlxDriver.Database)
-	// clean out before start
-	driverCasted.WipeOutData()
-	for _, f := range testFunctions {
-		f.(func(*testing.T, abstraction.Database))(t, db)
-		err := driverCasted.WipeOutData()
-		assert.Nil(t, err)
-	}
-}
+// func TestRouterWithPostgresDb(t *testing.T) {
+// 	db := postgres.CreateTestDatabase()
+// 	driver := db.GetUnderlyingStruct()
+// 	driverCasted := driver.(*sqlxDriver.Database)
+// 	// clean out before start
+// 	driverCasted.WipeOutData()
+// 	for _, f := range testFunctions {
+// 		f.(func(*testing.T, abstraction.Database))(t, db)
+// 		err := driverCasted.WipeOutData()
+// 		assert.Nil(t, err)
+// 	}
+// }
 
-func TestRouterWithMysqlDb(t *testing.T) {
-	db := mysql.CreateTestDatabase()
-	driver := db.GetUnderlyingStruct()
-	driverCasted := driver.(*sqlxDriver.Database)
-	// clean out before start
-	driverCasted.WipeOutData()
-	for _, f := range testFunctions {
-		f.(func(*testing.T, abstraction.Database))(t, db)
-		err := driverCasted.WipeOutData()
-		assert.Nil(t, err)
-	}
-}
+// func TestRouterWithMysqlDb(t *testing.T) {
+// 	db := mysql.CreateTestDatabase()
+// 	driver := db.GetUnderlyingStruct()
+// 	driverCasted := driver.(*sqlxDriver.Database)
+// 	// clean out before start
+// 	driverCasted.WipeOutData()
+// 	for _, f := range testFunctions {
+// 		f.(func(*testing.T, abstraction.Database))(t, db)
+// 		err := driverCasted.WipeOutData()
+// 		assert.Nil(t, err)
+// 	}
+// }
 
 func Status(t *testing.T, testDB abstraction.Database) {
 	r := gofight.New()
