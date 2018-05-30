@@ -2,6 +2,7 @@ package api
 
 import (
 	"fmt"
+	"strings"
 	"time"
 
 	"github.com/gin-contrib/cors"
@@ -23,13 +24,43 @@ import (
 
 // CheckModerationVariables checks to see if the required moderation flags have been set in the config or not
 func CheckModerationVariables(config *model.Config) error {
-	if config.Moderation.AdminPassword == "" {
+	if config.Moderation.AdminPassword == "" && !config.Moderation.DisablePasswordLogin {
 		return fmt.Errorf("config.Moderation.AdminPassword is not defined in config")
 	}
 
-	// force default password change
-	if config.Moderation.AdminPassword == "somepassword" {
+	// force default password change if password login is not disabled
+	if config.Moderation.AdminPassword == "somepassword" && !config.Moderation.DisablePasswordLogin {
 		return fmt.Errorf("Please change the config.Moderation.AdminPassword value in config. Do not leave the default there")
+	}
+
+	// determine if oauth is in use
+	hasEnabledAuthProviders := false
+	if config.Moderation.OAauthProviders != nil && len(*config.Moderation.OAauthProviders) != 0 {
+		for _, v := range *config.Moderation.OAauthProviders {
+			if v.Enabled == true {
+				hasEnabledAuthProviders = true
+				break
+			}
+		}
+	}
+
+	// check if password is disabled but no OAUTH providers are enabled
+	if config.Moderation.DisablePasswordLogin == true {
+		err := fmt.Errorf("You have moderation enabled with no enabled OAUTH providers or admin password functionality. You will not be able to login on the admin panel. Please check your configuration")
+		if !hasEnabledAuthProviders {
+			return err
+		}
+	}
+
+	// if we have providers, we do need the origin specified as well
+	if hasEnabledAuthProviders {
+		if config.Moderation.OAuthCallbackOrigin == nil || *config.Moderation.OAuthCallbackOrigin == "" {
+			return fmt.Errorf("Please provide a OAuthCallbackOrigin in the config moderation section. For more info, refer to the documentation on github")
+		}
+		if !strings.HasSuffix(*config.Moderation.OAuthCallbackOrigin, "/") {
+			properOrigin := *config.Moderation.OAuthCallbackOrigin + "/"
+			config.Moderation.OAuthCallbackOrigin = &properOrigin
+		}
 	}
 
 	return nil
@@ -112,6 +143,7 @@ func GetServer(db *abstraction.Database, config *model.Config) (*gin.Engine, err
 			MaxAge: int(time.Second * time.Duration(config.Moderation.SessionDurationSeconds)), //30min
 			Path:   "/",
 		})
+		v1.GET("/admin/config", router.GetAdminConfig)
 		v1.PATCH("/admin/comments", sessions.Sessions(global.DefaultSessionName, store), router.UpdateComment)
 		v1.DELETE("/admin/comments", sessions.Sessions(global.DefaultSessionName, store), router.DeleteComment)
 
@@ -127,7 +159,7 @@ func GetServer(db *abstraction.Database, config *model.Config) (*gin.Engine, err
 
 		if config.Moderation.OAauthProviders != nil {
 			gothic.Store = store
-			callbackUrl := "http://localhost:9898/v1/oauth/callbacks/"
+			callbackUrl := *config.Moderation.OAuthCallbackOrigin + "v1/oauth/callbacks/"
 			providers, err := oauth.GetProviders(config.Moderation.OAauthProviders, callbackUrl)
 			if err != nil {
 				return nil, err

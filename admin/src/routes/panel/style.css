@@ -186,3 +186,22 @@
     border-color: #ce1458;
     box-shadow: none;
 }
+
+.mouthful_admin_li {
+    list-style-type: none;
+    border: 1px solid #ce1458;
+    padding: 10px;
+    border-radius: 8px;    
+    margin-bottom: 5px;
+}
+
+.mouthful_admin_oauth_a {
+    font-size: 17px;    
+    text-decoration: none;
+    color: #444;
+}
+.mouthful_admin_oauth_a:hover {
+    color: #ce1458;
+    text-decoration: underline;
+    cursor: pointer;
+}

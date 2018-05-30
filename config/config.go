@@ -41,3 +41,20 @@ func TransformConfigToClientConfig(input *model.Config) (conf *model.ClientConfi
 	conf.UseDefaultStyle = input.Client.UseDefaultStyle
 	return conf
 }
+
+// TransformToAdminConfig takes in a config object and spits out an admin config
+func TransformToAdminConfig(input *model.Config) (conf *model.AdminConfig) {
+	providers := make([]string, 0)
+	if input.Moderation.OAauthProviders != nil && len(*input.Moderation.OAauthProviders) > 0 {
+		for _, v := range *input.Moderation.OAauthProviders {
+			if v.Enabled {
+				providers = append(providers, v.Name)
+			}
+		}
+	}
+	conf = &model.AdminConfig{
+		DisablePasswordLogin: input.Moderation.DisablePasswordLogin,
+		OauthProviders:       &providers,
+	}
+	return conf
+}

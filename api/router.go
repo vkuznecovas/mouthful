@@ -26,6 +26,7 @@ type Router struct {
 	config       *configModel.Config
 	cache        *cache.Cache
 	clientConfig *configModel.ClientConfig
+	adminConfig  *configModel.AdminConfig
 	providers    map[string]*provider.Provider
 }
 
@@ -60,13 +61,14 @@ func (r *Router) OAuthCallback(c *gin.Context) {
 			session.Save()
 		}
 	}
-	c.Redirect(301, "http://localhost:9898")
+	c.Redirect(307, *r.config.Moderation.OAuthCallbackOrigin)
 }
 
 // New returns a new instance of router
 func New(db *abstraction.Database, config *configModel.Config, cache *cache.Cache) *Router {
 	clientConfig := cfg.TransformConfigToClientConfig(config)
-	r := Router{db: db, config: config, cache: cache, clientConfig: clientConfig}
+	adminConfig := cfg.TransformToAdminConfig(config)
+	r := Router{db: db, config: config, cache: cache, clientConfig: clientConfig, adminConfig: adminConfig}
 	return &r
 }
 
@@ -80,6 +82,11 @@ func (r *Router) Status(c *gin.Context) {
 // GetClientConfig returns the client config portion
 func (r *Router) GetClientConfig(c *gin.Context) {
 	c.JSON(200, *r.clientConfig)
+}
+
+// GetAdminConfig returns the admin config portion
+func (r *Router) GetAdminConfig(c *gin.Context) {
+	c.JSON(200, *r.adminConfig)
 }
 
 // GetComments returns the comments from thread that is passed as query parameter uri

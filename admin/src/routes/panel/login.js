@@ -34,14 +34,24 @@ export default class Login extends Component {
 		http.send(JSON.stringify({password: context.state.value}));
 	}
 	render() {
+		var login = <form onSubmit={this.handleSubmit}>
+		<label class={style.passwordTitle}>Password:</label>
+		<input type="password" value={this.state.value} onChange={this.handleChange} />
+		<input class={style.mouthful_submit}type="submit" value="Submit" />
+		</form>
+		var loginDiv = this.props.config.disablePasswordLogin ? null : login;
+		var providersListItems = this.props.config.oauthProviders && this.props.config.oauthProviders.length > 0 
+		? this.props.config.oauthProviders.map(x => <li class={style.mouthful_admin_li}><a class={style.mouthful_admin_oauth_a} href={"v1/oauth/auth/" + x}>Log in with {x}</a></li>)
+		: null
+		var oauthProviders = <div>
+			<ul>
+				{providersListItems}
+			</ul>
+		</div>
 		return (
 			<div class={style.mouthful_login}>
-				<form onSubmit={this.handleSubmit}>
-					<label class={style.passwordTitle}>Password:</label>
-					<input type="password" value={this.state.value} onChange={this.handleChange} />
-					<input class={style.mouthful_submit}type="submit" value="Submit" />
-				</form>
-				{/* <p><a href="/v1/oauth/auth/github">Log in with github</a></p> */}
+				{loginDiv}
+				{oauthProviders}
 			</div>
 		);
 	}

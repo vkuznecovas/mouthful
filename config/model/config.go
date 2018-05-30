@@ -25,11 +25,13 @@ type Database struct {
 type Moderation struct {
 	Enabled                bool             `json:"enabled"`
 	AdminPassword          string           `json:"adminPassword"`
+	DisablePasswordLogin   bool             `json:"disablePasswordLogin"`
 	SessionDurationSeconds int              `json:"sessionDurationSeconds"`
 	MaxCommentLength       *int             `json:"maxCommentLength,omitempty"`
 	MaxAuthorLength        *int             `json:"maxAuthorLength,omitempty"`
 	Path                   *string          `json:"path,omitempty"`
 	OAauthProviders        *[]OauthProvider `json:"oauthProviders,omitempty"`
+	OAuthCallbackOrigin    *string          `json:"oauthCallbackOrigin,omitempty"`
 }
 
 // Config - root of our config

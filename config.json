@@ -3,6 +3,8 @@
     "moderation": {
         "enabled": true,
         "adminPassword": "somepassword",
+        "disablePasswordLogin": false,
+        "oauthCallbackOrigin": "https://api.dizzy.zone",
         "sessionDurationSeconds": 21600,
         "maxCommentLength": 10000,
         "maxAuthorLength": 35,
