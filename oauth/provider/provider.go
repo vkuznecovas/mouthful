@@ -210,7 +210,7 @@ type Provider struct {
 	Name           string
 	secret         string
 	key            string
-	adminUserIds   []string
+	AdminUserIds   []string
 	Implementation *goth.Provider
 }
 
@@ -257,6 +257,7 @@ func New(name string, secret, key *string, adminUserIds []string, uri string) (*
 	return &Provider{
 		Implementation: &gothProvider,
 		Name:           name,
+		AdminUserIds:   adminUserIds,
 		secret:         *secret,
 		key:            *key,
 	}, nil

@@ -75,6 +75,12 @@
   version = "v1.1.0"
 
 [[projects]]
+  name = "github.com/fatih/color"
+  packages = ["."]
+  revision = "5b77d2a35fb0ede96d138fc9a99f5c9b6aef11b4"
+  version = "v1.7.0"
+
+[[projects]]
   name = "github.com/garyburd/redigo"
   packages = [
     "internal",
@@ -142,6 +148,12 @@
   version = "v1.1"
 
 [[projects]]
+  name = "github.com/gorilla/mux"
+  packages = ["."]
+  revision = "e3702bed27f0d39777b0b37b664b6280e8ef8fbf"
+  version = "v1.6.2"
+
+[[projects]]
   name = "github.com/gorilla/securecookie"
   packages = ["."]
   revision = "667fe4e3466a040b780561fe9b51a83a3753eefc"
@@ -192,6 +204,65 @@
   revision = "d34b9ff171c21ad295489235aec8b6626023cd04"
 
 [[projects]]
+  branch = "master"
+  name = "github.com/markbates/going"
+  packages = ["defaults"]
+  revision = "0576708c56cea02331f864fe6e157ac7841923e4"
+
+[[projects]]
+  name = "github.com/markbates/goth"
+  packages = [
+    ".",
+    "gothic",
+    "providers/amazon",
+    "providers/battlenet",
+    "providers/bitbucket",
+    "providers/box",
+    "providers/dailymotion",
+    "providers/deezer",
+    "providers/digitalocean",
+    "providers/discord",
+    "providers/dropbox",
+    "providers/eveonline",
+    "providers/facebook",
+    "providers/fitbit",
+    "providers/github",
+    "providers/gitlab",
+    "providers/gplus",
+    "providers/heroku",
+    "providers/influxcloud",
+    "providers/instagram",
+    "providers/intercom",
+    "providers/lastfm",
+    "providers/linkedin",
+    "providers/meetup",
+    "providers/microsoftonline",
+    "providers/naver",
+    "providers/onedrive",
+    "providers/salesforce",
+    "providers/slack",
+    "providers/soundcloud",
+    "providers/spotify",
+    "providers/stripe",
+    "providers/twitch",
+    "providers/twitter",
+    "providers/uber",
+    "providers/vk",
+    "providers/wepay",
+    "providers/xero",
+    "providers/yahoo",
+    "providers/yammer"
+  ]
+  revision = "aefb600c0c37063c4280d47c42b11984b63cece4"
+  version = "v1.45.7"
+
+[[projects]]
+  name = "github.com/mattn/go-colorable"
+  packages = ["."]
+  revision = "167de6bfdfba052fa6b2d3664c8f5272e23c9072"
+  version = "v0.0.9"
+
+[[projects]]
   name = "github.com/mattn/go-isatty"
   packages = ["."]
   revision = "0360b2af4f38e8d38c7fce2a9f4e702702d73a39"
@@ -208,6 +279,12 @@
   name = "github.com/microcosm-cc/bluemonday"
   packages = ["."]
   revision = "542fd4642604d0d0c26112396ce5b1a9d01eee0b"
+
+[[projects]]
+  branch = "master"
+  name = "github.com/mrjones/oauth"
+  packages = ["."]
+  revision = "78d64468d6ec7b74e4b0d47cf61b4f4e288b944b"
 
 [[projects]]
   name = "github.com/patrickmn/go-cache"
@@ -279,10 +356,20 @@
   name = "golang.org/x/net"
   packages = [
     "context",
+    "context/ctxhttp",
     "html",
     "html/atom"
   ]
   revision = "92b859f39abd2d91a854c9f9c4621b2f5054a92d"
+
+[[projects]]
+  branch = "master"
+  name = "golang.org/x/oauth2"
+  packages = [
+    ".",
+    "internal"
+  ]
+  revision = "ec22f46f877b4505e0117eeaab541714644fdd28"
 
 [[projects]]
   branch = "master"
@@ -302,6 +389,20 @@
   ]
   revision = "f21a4dfb5e38f5895301dc265a8def02365cc3d0"
   version = "v0.3.0"
+
+[[projects]]
+  name = "google.golang.org/appengine"
+  packages = [
+    "internal",
+    "internal/base",
+    "internal/datastore",
+    "internal/log",
+    "internal/remote_api",
+    "internal/urlfetch",
+    "urlfetch"
+  ]
+  revision = "150dc57a1b433e64154302bdc40b6bb8aefa313a"
+  version = "v1.0.0"
 
 [[projects]]
   name = "gopkg.in/go-playground/validator.v8"
@@ -336,6 +437,6 @@
 [solve-meta]
   analyzer-name = "dep"
   analyzer-version = 1
-  inputs-digest = "097c5cc4c45950b19ceabd2e4ea0536aa0be230dafdddf8f1d02532687ef81b3"
+  inputs-digest = "828efc0eda51e9a4f2090a48c180d951ef378f4c8d19a1bfedd3436c7e6f96ce"
   solver-name = "gps-cdcl"
   solver-version = 1

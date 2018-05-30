@@ -8,6 +8,7 @@ import (
 	"github.com/gin-contrib/sessions"
 	"github.com/gin-contrib/static"
 	"github.com/gin-gonic/gin"
+	"github.com/markbates/goth/gothic"
 	cache "github.com/patrickmn/go-cache"
 	"github.com/ulule/limiter"
 	mgin "github.com/ulule/limiter/drivers/middleware/gin"
@@ -15,6 +16,8 @@ import (
 	"github.com/vkuznecovas/mouthful/config/model"
 	"github.com/vkuznecovas/mouthful/db/abstraction"
 	"github.com/vkuznecovas/mouthful/global"
+	"github.com/vkuznecovas/mouthful/oauth"
+	"github.com/vkuznecovas/mouthful/oauth/provider"
 )
 
 // CheckModerationVariables checks to see if the required moderation flags have been set in the config or not
@@ -120,6 +123,23 @@ func GetServer(db *abstraction.Database, config *model.Config) (*gin.Engine, err
 		v1.POST("/admin/comments/restore", sessions.Sessions(global.DefaultSessionName, store), router.RestoreDeletedComment)
 		v1.GET("/admin/threads", sessions.Sessions(global.DefaultSessionName, store), router.GetAllThreads)
 		v1.GET("/admin/comments/all", sessions.Sessions(global.DefaultSessionName, store), router.GetAllComments)
+
+		if config.Moderation.OAauthProviders != nil {
+			gothic.Store = store
+			gothic.GetProviderName(req.)
+			callbackUrl := "/oauth/callbacks/"
+			providers, err := oauth.GetProviders(config.Moderation.OAauthProviders, callbackUrl)
+			if err != nil {
+				return nil, err
+			}
+			providerMap := make(map[string]*provider.Provider)
+			for _, provider := range providers {
+				providerMap[provider.Name] = &provider
+			}
+			router.SetProviders(providerMap)
+			v1.GET("/oauth/callbacks/:provider", router.OAuthCallback)
+			v1.GET("/oauth/:provider", router.OAuth)
+		}
 	}
 
 	return r, nil

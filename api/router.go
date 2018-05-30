@@ -3,17 +3,21 @@ package api
 
 import (
 	"log"
+	"net/http"
 
 	"github.com/gin-contrib/sessions"
 	"github.com/gin-gonic/gin"
+	"github.com/markbates/goth/gothic"
 	"github.com/patrickmn/go-cache"
 	"github.com/satori/go.uuid"
+
 	"github.com/vkuznecovas/mouthful/api/model"
 	cfg "github.com/vkuznecovas/mouthful/config"
 	configModel "github.com/vkuznecovas/mouthful/config/model"
 	"github.com/vkuznecovas/mouthful/db/abstraction"
 	dbModel "github.com/vkuznecovas/mouthful/db/model"
 	"github.com/vkuznecovas/mouthful/global"
+	"github.com/vkuznecovas/mouthful/oauth/provider"
 )
 
 // Router handles all the different routes as well as stores our  config and db objects
@@ -22,6 +26,35 @@ type Router struct {
 	config       *configModel.Config
 	cache        *cache.Cache
 	clientConfig *configModel.ClientConfig
+	providers    map[string]*provider.Provider
+}
+
+// SetProviders sets the OAUTH providers for the router
+func (r *Router) SetProviders(input map[string]*provider.Provider) {
+	r.providers = input
+}
+
+func (r *Router) OAuth(c *gin.Context) {
+	gothic.BeginAuthHandler(c.Writer, c.Request)
+}
+func (r *Router) OAuthCallback(c *gin.Context) {
+	user, err := gothic.CompleteUserAuth(c.Writer, c.Request)
+	if err != nil {
+		c.AbortWithError(http.StatusInternalServerError, err)
+		return
+	}
+	provider := c.Param("provider")
+	for _, v := r.providers[provider].AdminUserIds {
+		if user.UserID == v {
+			session := sessions.Default(c)
+			session.Set("isAdmin", true)
+			session.Save()
+			c.AbortWithStatus(204)
+			return
+		}
+	}
+	c.AbortWithStatusJSON(401, global.ErrUnauthorized.Error())
+	return
 }
 
 // New returns a new instance of router
