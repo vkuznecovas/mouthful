@@ -41,6 +41,7 @@ export default class Login extends Component {
 					<input type="password" value={this.state.value} onChange={this.handleChange} />
 					<input class={style.mouthful_submit}type="submit" value="Submit" />
 				</form>
+				{/* <p><a href="/v1/oauth/auth/github">Log in with github</a></p> */}
 			</div>
 		);
 	}

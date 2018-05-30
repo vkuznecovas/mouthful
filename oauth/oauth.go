@@ -16,6 +16,7 @@ func GetProviders(providers *[]model.OauthProvider, cbURIBase string) ([]provide
 		if v.Enabled == false {
 			continue
 		}
+
 		uri := cbURIBase + v.Name
 		p, err := provider.New(v.Name, v.Secret, v.Key, *v.AdminUserIds, uri)
 		if err != nil {

@@ -34,27 +34,33 @@ func (r *Router) SetProviders(input map[string]*provider.Provider) {
 	r.providers = input
 }
 
+// OAuth initializes the OAuth flow by redirecting the user to the providers login page
 func (r *Router) OAuth(c *gin.Context) {
+	q := c.Request.URL.Query()
+	q.Add("provider", c.Param("provider"))
+	c.Request.URL.RawQuery = q.Encode()
 	gothic.BeginAuthHandler(c.Writer, c.Request)
 }
+
+// OAuthCallback handles the oauth callback which finishes the auth procedure. It checks for the admin flag for the user, and if found it will set the user as admin for the rest of the session
 func (r *Router) OAuthCallback(c *gin.Context) {
+	q := c.Request.URL.Query()
+	q.Add("provider", c.Param("provider"))
+	c.Request.URL.RawQuery = q.Encode()
 	user, err := gothic.CompleteUserAuth(c.Writer, c.Request)
 	if err != nil {
 		c.AbortWithError(http.StatusInternalServerError, err)
 		return
 	}
 	provider := c.Param("provider")
-	for _, v := r.providers[provider].AdminUserIds {
+	for _, v := range r.providers[provider].AdminUserIds {
 		if user.UserID == v {
 			session := sessions.Default(c)
 			session.Set("isAdmin", true)
 			session.Save()
-			c.AbortWithStatus(204)
-			return
 		}
 	}
-	c.AbortWithStatusJSON(401, global.ErrUnauthorized.Error())
-	return
+	c.Redirect(301, "http://localhost:9898")
 }
 
 // New returns a new instance of router

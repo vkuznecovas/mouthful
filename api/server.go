@@ -8,6 +8,7 @@ import (
 	"github.com/gin-contrib/sessions"
 	"github.com/gin-contrib/static"
 	"github.com/gin-gonic/gin"
+	"github.com/markbates/goth"
 	"github.com/markbates/goth/gothic"
 	cache "github.com/patrickmn/go-cache"
 	"github.com/ulule/limiter"
@@ -126,8 +127,7 @@ func GetServer(db *abstraction.Database, config *model.Config) (*gin.Engine, err
 
 		if config.Moderation.OAauthProviders != nil {
 			gothic.Store = store
-			gothic.GetProviderName(req.)
-			callbackUrl := "/oauth/callbacks/"
+			callbackUrl := "http://localhost:9898/v1/oauth/callbacks/"
 			providers, err := oauth.GetProviders(config.Moderation.OAauthProviders, callbackUrl)
 			if err != nil {
 				return nil, err
@@ -135,10 +135,12 @@ func GetServer(db *abstraction.Database, config *model.Config) (*gin.Engine, err
 			providerMap := make(map[string]*provider.Provider)
 			for _, provider := range providers {
 				providerMap[provider.Name] = &provider
+				goth.UseProviders(*provider.Implementation)
 			}
+
 			router.SetProviders(providerMap)
-			v1.GET("/oauth/callbacks/:provider", router.OAuthCallback)
-			v1.GET("/oauth/:provider", router.OAuth)
+			v1.GET("/oauth/callbacks/:provider", sessions.Sessions(global.DefaultSessionName, store), router.OAuthCallback)
+			v1.GET("/oauth/auth/:provider", sessions.Sessions(global.DefaultSessionName, store), router.OAuth)
 		}
 	}
 
