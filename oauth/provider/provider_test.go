@@ -1,6 +1,7 @@
 package provider_test
 
 import (
+	"os"
 	"testing"
 
 	"github.com/stretchr/testify/assert"
@@ -13,6 +14,35 @@ var key = "key"
 
 func TestProviderNoError(t *testing.T) {
 	provider, err := provider.New("github", &secret, &key, []string{"asdasd"}, "/url")
+	assert.Nil(t, err)
+	assert.NotNil(t, provider)
+}
+
+func TestProviderFallbackToEnvVarOnNoKey(t *testing.T) {
+	envVal := os.Getenv("GITHUB_KEY")
+	os.Setenv("GITHUB_KEY", "somekey")
+	defer func() { os.Setenv("GITHUB_KEY", envVal) }()
+	provider, err := provider.New("github", &secret, nil, []string{"asdasd"}, "/url")
+	assert.Nil(t, err)
+	assert.NotNil(t, provider)
+}
+func TestProviderFallbackToEnvVarOnNoSecret(t *testing.T) {
+	envVal := os.Getenv("GITHUB_SECRET")
+	os.Setenv("GITHUB_SECRET", "somekey")
+	defer func() { os.Setenv("GITHUB_SECRET", envVal) }()
+	provider, err := provider.New("github", nil, &key, []string{"asdasd"}, "/url")
+	assert.Nil(t, err)
+	assert.NotNil(t, provider)
+}
+
+func TestProviderFallbackToEnvVarOnNone(t *testing.T) {
+	envVal := os.Getenv("GITHUB_SECRET")
+	os.Setenv("GITHUB_SECRET", "somekey")
+	defer func() { os.Setenv("GITHUB_SECRET", envVal) }()
+	envVal2 := os.Getenv("GITHUB_KEY")
+	os.Setenv("GITHUB_KEY", "somekey")
+	defer func() { os.Setenv("GITHUB_KEY", envVal2) }()
+	provider, err := provider.New("github", nil, nil, []string{"asdasd"}, "/url")
 	assert.Nil(t, err)
 	assert.NotNil(t, provider)
 }
