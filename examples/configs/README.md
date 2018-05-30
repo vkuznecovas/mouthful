@@ -37,6 +37,65 @@ Moderation section is responsible for editing the moderation functionality.
 | maxCommentLength     | determines the maximum comment length. Setting to a value of 0 or below allows for unlimited length | int | true | 0 | 1000 |
 | maxAuthorLength     | determines the maximum author length. Setting to a value of 3 or below defaults to no limit | int | true | 50 | 35 |
 | path     | the path you'll run the admin panel from | string | false | "/" | none |
+| oauthCallbackOrigin | the base url of your API | string | true if using oauth | "" | fully fledged url of your admin panel |
+| disablePasswordLogin | disables the passsword authentication for admin panel if set to true | bool | false | false | true if using oauth, false otherwise | 
+| oauthProviders | determines which oauth providers will be used for mouthful admin panel, [see below](#Oauth-providers)| array | false | none | your preference |
+
+
+#### Oauth providers
+
+The oauth providers is responsible for setting up your mouthful installation for oauth use. You can use as many providers as you like, or as few as you want. For an example config, head to [example oauth config file](./oauth/config.json)
+
+| Variables     | Use           | Type | Required  | Default value | Recommended setting |
+| ------------- |:-------------:| :---:| :-------: |  :----------: |  :----------------: |
+| enabled     | determines if the provider is used or not | bool | false | false | up to you |
+| name | Name of the oauth provider. The list is [available below](#Supported-Oauth-providers)| string | true | none | up to you |
+| secret | Secret of the oauth provider. You'll have to head to the providers page to figure it out. | string | true | none | up to you |
+| key | Key or id of the oauth provider. You'll have to head to the providers page to figure it out. | string | true | none | up to you |
+| adminUserIds | Ids of the users that will be assigned admin status. | array of strings | true | none | up to you |
+
+##### Supported Oauth providers
+
+Currently mouthful supports 37 oauth providers:
+
+* amazon
+* battlenet
+* bitbucket
+* box
+* dailymotion
+* deezer
+* digitalocean
+* discord
+* dropbox
+* eveonline
+* facebook
+* fitbit
+* github
+* gitlab
+* gplus
+* heroku
+* influxcloud
+* instagram
+* intercom
+* lastfm
+* linkedin
+* meetup
+* microsoftonline
+* naver
+* onedrive
+* salesforce
+* slack
+* soundcloud
+* spotify
+* stripe
+* twitch
+* twitter
+* uber
+* vk
+* wepay
+* xero
+* yahoo
+* yammer
 
 ### Api
 
@@ -159,3 +218,5 @@ Currently supported databases are:
 |awsSecretAccessKey | your secret aws access key. Can be overriden by env variable `AWS_SECRET_ACCESS_KEY` | string | true |  |  |
 
 You can find suggested provision ratios for dynamodb in the [example dynamodb config file](./dynamodb/config.json). They are experimental atm. Will be updated once more data on usage is collected.
+
+

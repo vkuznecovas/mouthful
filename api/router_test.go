@@ -2018,6 +2018,6 @@ func GetAdminConfig(t *testing.T, testDB abstraction.Database) {
 			err = json.Unmarshal(body, &adminConfig)
 			assert.Nil(t, err)
 			assert.False(t, adminConfig.DisablePasswordLogin)
-			assert.Nil(t, adminConfig.OauthProviders)
+			assert.Len(t, *adminConfig.OauthProviders, 0)
 		})
 }
