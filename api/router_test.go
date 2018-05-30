@@ -111,6 +111,7 @@ var testFunctions = [...]interface{}{
 	CreateCommentEmptyBodyAfterSanitization,
 	CreateCommentEmptyAuthor,
 	GetAdminConfig,
+	OauthPathsExist,
 }
 
 func GetSessionCookie(db *abstraction.Database, r *gofight.RequestConfig) gofight.H {
@@ -2016,5 +2017,26 @@ func GetAdminConfig(t *testing.T, testDB abstraction.Database) {
 			assert.Nil(t, err)
 			assert.False(t, adminConfig.DisablePasswordLogin)
 			assert.Len(t, *adminConfig.OauthProviders, 0)
+		})
+}
+
+func OauthPathsExist(t *testing.T, testDB abstraction.Database) {
+	configCopy := config
+	configCopy.Moderation.OAauthProviders = &someFakeOauthProviders
+	configCopy.Moderation.OAuthCallbackOrigin = &fakeOrigin
+	server, err := api.GetServer(&testDB, &configCopy)
+	assert.Nil(t, err)
+	r := gofight.New()
+	r.GET("/v1/oauth/auth/github").
+		SetHeader(gofight.H{"Origin": "http://google.co.uk"}).
+		SetDebug(debug).
+		Run(server, func(r gofight.HTTPResponse, rq gofight.HTTPRequest) {
+			assert.Equal(t, 307, r.Code)
+		})
+	r.GET("/v1/oauth/callbacks/github").
+		SetHeader(gofight.H{"Origin": "http://google.co.uk"}).
+		SetDebug(debug).
+		Run(server, func(r gofight.HTTPResponse, rq gofight.HTTPRequest) {
+			assert.Equal(t, 500, r.Code)
 		})
 }
