@@ -12,7 +12,12 @@ const handleStateChange = (http, context, key) => {
 		context.setState({ authorized: false, loaded: true })
 	}
 }
-
+const getUrl = (state, window) => {
+	if (state.path) {
+		return window.location.origin + state.path
+	} 
+	return window.location.href
+}
 export default class Panel extends Component {
 	constructor() {
 		super();
@@ -47,7 +52,7 @@ export default class Panel extends Component {
 		if (typeof window == "undefined") { return }
 
 		var http = new XMLHttpRequest();
-		var url = (this.state.path || window.location.href) + "v1/admin/threads";
+		var url = getUrl(this.state, window) + "v1/admin/threads";
 		http.open("GET", url, true);
 
 		http.onreadystatechange = function () {
@@ -60,7 +65,7 @@ export default class Panel extends Component {
 		if (typeof window == "undefined") { return }
 
 		var http = new XMLHttpRequest();
-		var url = (this.state.path || window.location.href) + "v1/admin/comments/all";
+		var url = getUrl(this.state, window) + "v1/admin/comments/all";
 		http.open("GET", url, true);
 
 		http.onreadystatechange = function () {
@@ -73,7 +78,7 @@ export default class Panel extends Component {
 	updateComment(commentId, body, author, confirmed) {
 		if (typeof window == "undefined") { return }
 		var http = new XMLHttpRequest();
-		var url = (this.state.path || window.location.href) + "v1/admin/comments";
+		var url = getUrl(this.state, window) + "v1/admin/comments";
 		http.open("PATCH", url, true);
 		var context = this;
 		http.onreadystatechange = function () {
@@ -97,7 +102,7 @@ export default class Panel extends Component {
 		if (typeof window == "undefined") { return }
 		var context = this;
 		var http = new XMLHttpRequest();
-		var url = (this.state.path || window.location.href) + "v1/admin/config";
+		var url = getUrl(this.state, window) + "v1/admin/config";
 		http.open("GET", url, true);
 		http.onreadystatechange = function () {
 		  if (http.readyState != 4) {
@@ -124,8 +129,9 @@ export default class Panel extends Component {
 	}
 	render() {
 		if (!this.state.authorized) {
+			var url = getUrl(this.state, window)
 			return (<div class={style.mouthful_container}>
-			<Login onLogin={this.loggedIn} config={this.state.config}/>
+			<Login url={url} onLogin={this.loggedIn} config={this.state.config}/>
 			</div>)
 		}
 		if (!this.state.loaded) {
@@ -159,7 +165,7 @@ export default class Panel extends Component {
 
 			c = c.filter(filter)
 			if (c.length != 0) {
-				return <Thread key={"___thread" + t.Id} thread={t} comments={c} reload={this.reload} updateComment={this.updateComment} />
+				return <Thread url={url} key={"___thread" + t.Id} thread={t} comments={c} reload={this.reload} updateComment={this.updateComment} />
 			}
 			return null;
 		})

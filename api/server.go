@@ -165,9 +165,9 @@ func GetServer(db *abstraction.Database, config *model.Config) (*gin.Engine, err
 				return nil, err
 			}
 			providerMap := make(map[string]*provider.Provider)
-			for _, provider := range providers {
-				providerMap[provider.Name] = &provider
-				goth.UseProviders(*provider.Implementation)
+			for i := range providers {
+				providerMap[providers[i].Name] = &providers[i]
+				goth.UseProviders(*providers[i].Implementation)
 			}
 
 			router.SetProviders(providerMap)

@@ -24,6 +24,5 @@ func GetProviders(providers *[]model.OauthProvider, cbURIBase string) ([]provide
 		}
 		result = append(result, *p)
 	}
-
 	return result, nil
 }

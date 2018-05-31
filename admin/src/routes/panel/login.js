@@ -21,7 +21,7 @@ export default class Login extends Component {
         
 		event.preventDefault();		
 		var http = new XMLHttpRequest();
-		var url = window.location.href + "v1/admin/login";
+		var url = this.props.url + "v1/admin/login";
 		http.open("POST", url, true);
 		
 		//Send the proper header information along with the request
@@ -41,7 +41,7 @@ export default class Login extends Component {
 		</form>
 		var loginDiv = this.props.config.disablePasswordLogin ? null : login;
 		var providersListItems = this.props.config.oauthProviders && this.props.config.oauthProviders.length > 0 
-		? this.props.config.oauthProviders.map(x => <li class={style.mouthful_admin_li}><a class={style.mouthful_admin_oauth_a} href={"v1/oauth/auth/" + x}>Log in with {x}</a></li>)
+		? this.props.config.oauthProviders.map(x => <li class={style.mouthful_admin_li}><a class={style.mouthful_admin_oauth_a} href={this.props.url + "v1/oauth/auth/" + x}>Log in with {x}</a></li>)
 		: null
 		var oauthProviders = <div>
 			<ul>
