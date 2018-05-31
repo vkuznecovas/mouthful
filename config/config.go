@@ -52,9 +52,14 @@ func TransformToAdminConfig(input *model.Config) (conf *model.AdminConfig) {
 			}
 		}
 	}
+	path := "/"
+	if input.Moderation.Path != nil {
+		path = *input.Moderation.Path
+	}
 	conf = &model.AdminConfig{
 		DisablePasswordLogin: input.Moderation.DisablePasswordLogin,
 		OauthProviders:       &providers,
+		Path:                 path,
 	}
 	return conf
 }

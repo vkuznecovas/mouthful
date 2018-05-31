@@ -16,7 +16,7 @@ const handleStateChange = (http, context, key) => {
 export default class Panel extends Component {
 	constructor() {
 		super();
-		this.state = { threads: [], comments: [],  error: false, authorized: false, loaded: false, showPending: true, showDeleted: false, configLoaded: false, config: {} };
+		this.state = { threads: [], comments: [],  error: false, authorized: false, loaded: false, showPending: true, showDeleted: false, configLoaded: false, config: {}, path:undefined };
 		this.loadThreads = this.loadThreads.bind(this);
 		this.loadComments = this.loadComments.bind(this);
 		this.loggedIn = this.loggedIn.bind(this);
@@ -47,7 +47,7 @@ export default class Panel extends Component {
 		if (typeof window == "undefined") { return }
 
 		var http = new XMLHttpRequest();
-		var url = window.location.href + "v1/admin/threads";
+		var url = (this.state.path || window.location.href) + "v1/admin/threads";
 		http.open("GET", url, true);
 
 		http.onreadystatechange = function () {
@@ -60,7 +60,7 @@ export default class Panel extends Component {
 		if (typeof window == "undefined") { return }
 
 		var http = new XMLHttpRequest();
-		var url = window.location.href + "v1/admin/comments/all";
+		var url = (this.state.path || window.location.href) + "v1/admin/comments/all";
 		http.open("GET", url, true);
 
 		http.onreadystatechange = function () {
@@ -73,7 +73,7 @@ export default class Panel extends Component {
 	updateComment(commentId, body, author, confirmed) {
 		if (typeof window == "undefined") { return }
 		var http = new XMLHttpRequest();
-		var url = window.location.href + "v1/admin/comments";
+		var url = (this.state.path || window.location.href) + "v1/admin/comments";
 		http.open("PATCH", url, true);
 		var context = this;
 		http.onreadystatechange = function () {
@@ -97,7 +97,7 @@ export default class Panel extends Component {
 		if (typeof window == "undefined") { return }
 		var context = this;
 		var http = new XMLHttpRequest();
-		var url = "v1/admin/config";
+		var url = (this.state.path || window.location.href) + "v1/admin/config";
 		http.open("GET", url, true);
 		http.onreadystatechange = function () {
 		  if (http.readyState != 4) {
@@ -105,7 +105,7 @@ export default class Panel extends Component {
 		  }
 		  if (http.status == 200) {
 			var parsedResponse = JSON.parse(http.responseText)
-			context.setState({ configLoaded: true, config: Object.assign(context.state.config, parsedResponse) })
+			context.setState({ configLoaded: true, config: Object.assign(context.state.config, parsedResponse), path: parsedResponse.path })
 		  } else {
 			context.setState({ configLoaded: true, error: true })
 			console.log("error while fetching config");

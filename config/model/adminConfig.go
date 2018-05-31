@@ -4,4 +4,5 @@ package model
 type AdminConfig struct {
 	DisablePasswordLogin bool      `json:"disablePasswordLogin"`
 	OauthProviders       *[]string `json:"oauthProviders,omitempty"`
+	Path                 string    `json:"path"`
 }

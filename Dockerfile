@@ -18,6 +18,8 @@ RUN git checkout $MOUTHFUL_VER && \
 
 FROM alpine:3.7
 COPY --from=0 /go/src/github.com/vkuznecovas/mouthful/dist/ /app/
+# this is needed if we're using ssl
+RUN apk add --no-cache ca-certificates
 WORKDIR /app/
 VOLUME [ "/app/data" ]
 EXPOSE 8080
