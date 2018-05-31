@@ -16,6 +16,10 @@ const getUrl = (state, window) => {
 	if (state.path) {
 		return window.location.origin + state.path
 	} 
+	let index = window.location.href.indexOf("v1/oauth")
+	if (index > 0) {
+		return window.location.href.substring(0, index)
+	}
 	return window.location.href
 }
 export default class Panel extends Component {
