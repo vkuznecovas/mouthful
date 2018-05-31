@@ -12,11 +12,20 @@
         "oauthProviders": [
             {
                 "name": "github",
-                "enabled": false,
+                "enabled": true,
                 "secret": "secret",
                 "key": "key",
                 "adminUserIds": [
                     "id"
+                ]
+            },
+            {
+                "name": "amazon",
+                "enabled": true,
+                "secret": "someothersecret",
+                "key": "someotherkey",
+                "adminUserIds": [
+                    "someotherid"
                 ]
             }
         ]  

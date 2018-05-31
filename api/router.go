@@ -3,17 +3,21 @@ package api
 
 import (
 	"log"
+	"net/http"
 
 	"github.com/gin-contrib/sessions"
 	"github.com/gin-gonic/gin"
+	"github.com/markbates/goth/gothic"
 	"github.com/patrickmn/go-cache"
 	"github.com/satori/go.uuid"
+
 	"github.com/vkuznecovas/mouthful/api/model"
 	cfg "github.com/vkuznecovas/mouthful/config"
 	configModel "github.com/vkuznecovas/mouthful/config/model"
 	"github.com/vkuznecovas/mouthful/db/abstraction"
 	dbModel "github.com/vkuznecovas/mouthful/db/model"
 	"github.com/vkuznecovas/mouthful/global"
+	"github.com/vkuznecovas/mouthful/oauth/provider"
 )
 
 // Router handles all the different routes as well as stores our  config and db objects
@@ -22,12 +26,49 @@ type Router struct {
 	config       *configModel.Config
 	cache        *cache.Cache
 	clientConfig *configModel.ClientConfig
+	adminConfig  *configModel.AdminConfig
+	providers    map[string]*provider.Provider
+}
+
+// SetProviders sets the OAUTH providers for the router
+func (r *Router) SetProviders(input map[string]*provider.Provider) {
+	r.providers = input
+}
+
+// OAuth initializes the OAuth flow by redirecting the user to the providers login page
+func (r *Router) OAuth(c *gin.Context) {
+	q := c.Request.URL.Query()
+	q.Add("provider", c.Param("provider"))
+	c.Request.URL.RawQuery = q.Encode()
+	gothic.BeginAuthHandler(c.Writer, c.Request)
+}
+
+// OAuthCallback handles the oauth callback which finishes the auth procedure. It checks for the admin flag for the user, and if found it will set the user as admin for the rest of the session
+func (r *Router) OAuthCallback(c *gin.Context) {
+	q := c.Request.URL.Query()
+	provider := c.Param("provider")
+	q.Add("provider", provider)
+	c.Request.URL.RawQuery = q.Encode()
+	user, err := gothic.CompleteUserAuth(c.Writer, c.Request)
+	if err != nil {
+		c.AbortWithError(http.StatusInternalServerError, err)
+		return
+	}
+	for _, v := range r.providers[provider].AdminUserIds {
+		if user.UserID == v {
+			session := sessions.Default(c)
+			session.Set("isAdmin", true)
+			session.Save()
+		}
+	}
+	c.Redirect(307, *r.config.Moderation.OAuthCallbackOrigin)
 }
 
 // New returns a new instance of router
 func New(db *abstraction.Database, config *configModel.Config, cache *cache.Cache) *Router {
 	clientConfig := cfg.TransformConfigToClientConfig(config)
-	r := Router{db: db, config: config, cache: cache, clientConfig: clientConfig}
+	adminConfig := cfg.TransformToAdminConfig(config)
+	r := Router{db: db, config: config, cache: cache, clientConfig: clientConfig, adminConfig: adminConfig}
 	return &r
 }
 
@@ -41,6 +82,11 @@ func (r *Router) Status(c *gin.Context) {
 // GetClientConfig returns the client config portion
 func (r *Router) GetClientConfig(c *gin.Context) {
 	c.JSON(200, *r.clientConfig)
+}
+
+// GetAdminConfig returns the admin config portion
+func (r *Router) GetAdminConfig(c *gin.Context) {
+	c.JSON(200, *r.adminConfig)
 }
 
 // GetComments returns the comments from thread that is passed as query parameter uri

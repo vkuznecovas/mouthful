@@ -16,7 +16,7 @@ const handleStateChange = (http, context, key) => {
 export default class Panel extends Component {
 	constructor() {
 		super();
-		this.state = { threads: [], comments: [], authorized: false, loaded: false, showPending: true, showDeleted: false };
+		this.state = { threads: [], comments: [],  error: false, authorized: false, loaded: false, showPending: true, showDeleted: false, configLoaded: false, config: {} };
 		this.loadThreads = this.loadThreads.bind(this);
 		this.loadComments = this.loadComments.bind(this);
 		this.loggedIn = this.loggedIn.bind(this);
@@ -25,6 +25,7 @@ export default class Panel extends Component {
 		this.reload = this.reload.bind(this);
 		this.showDeleted = this.showDeleted.bind(this);
 		this.updateComment = this.updateComment.bind(this);
+		this.fetchConfig = this.fetchConfig.bind(this);
 	}
 
 	showPending() {
@@ -92,24 +93,48 @@ export default class Panel extends Component {
 		this.setState({ authorized: true })
 		this.setState({ loaded: false })
 	}
-
+	fetchConfig() {
+		if (typeof window == "undefined") { return }
+		var context = this;
+		var http = new XMLHttpRequest();
+		var url = "v1/admin/config";
+		http.open("GET", url, true);
+		http.onreadystatechange = function () {
+		  if (http.readyState != 4) {
+			return
+		  }
+		  if (http.status == 200) {
+			var parsedResponse = JSON.parse(http.responseText)
+			context.setState({ configLoaded: true, config: Object.assign(context.state.config, parsedResponse) })
+		  } else {
+			context.setState({ configLoaded: true, error: true })
+			console.log("error while fetching config");
+		  }
+		}
+		http.send()
+	  }
 	reload() {
 		this.setState({ loaded: false, threads: [], comments: [] })
 	}
 	componentWillMount() {
 		this.loggedIn();
+		if (!this.state.configLoaded) {
+			this.fetchConfig()
+		}
 	}
 	render() {
 		if (!this.state.authorized) {
 			return (<div class={style.mouthful_container}>
-			<Login onLogin={this.loggedIn} />
+			<Login onLogin={this.loggedIn} config={this.state.config}/>
 			</div>)
 		}
 		if (!this.state.loaded) {
 			this.loadThreads(this)
 			this.loadComments(this)
 		}
-		
+		if (this.state.error == true) {
+			return <div class={style.mouthful_container}><div class={style.mouthful_login}>There was an error while fetching the config</div></div>
+		}
 		// if we have no threads or comments
 		if (!(this.state.threads && this.state.comments && this.state.threads.length && this.state.comments.length)) {
 			return <div class={style.mouthful_container}><div class={style.mouthful_login}>No comments yet!</div></div>
