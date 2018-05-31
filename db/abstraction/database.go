@@ -4,6 +4,7 @@ package abstraction
 import (
 	"github.com/satori/go.uuid"
 	"github.com/vkuznecovas/mouthful/db/model"
+	"github.com/vkuznecovas/mouthful/global"
 )
 
 // Database is a database instance for your selected DB
@@ -21,4 +22,5 @@ type Database interface {
 	GetAllComments() ([]model.Comment, error)
 	GetDatabaseDialect() string
 	GetUnderlyingStruct() interface{}
+	CleanUpStaleData(target global.CleanupType, timeout int64) error
 }

@@ -322,3 +322,22 @@ func (db *Database) GetDatabaseDialect() string {
 func (db *Database) GetUnderlyingStruct() interface{} {
 	return db
 }
+
+// CleanUpStaleData removes the stale data from the database
+func (db *Database) CleanUpStaleData(target global.CleanupType, timeout int64) error {
+	return nil
+	// timeoutDuration := time.Duration(int64(time.Second) * timeout)
+	// deleteFrom := time.Now().Add(-timeoutDuration)
+	// query := ""
+	// if target == global.Deleted {
+	// 	query = "delete from Comment where deletedAt != null and deletedAt <?"
+	// } else {
+	// 	query = "delete from Comment where deletedAt == null and Confirmed == 0 and CreatedAt <?"
+	// }
+
+	// _, err := db.DB.Exec(db.DB.Rebind(query), deleteFrom)
+	// if err != nil {
+	// 	return err
+	// }
+	// return nil
+}

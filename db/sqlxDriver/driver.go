@@ -2,6 +2,7 @@
 package sqlxDriver
 
 import (
+	"log"
 	"sort"
 	"time"
 
@@ -227,6 +228,28 @@ func (db *Database) InitializeDatabase() error {
 // GetDatabaseDialect returns the current database dialect
 func (db *Database) GetDatabaseDialect() string {
 	return db.Dialect
+}
+
+// CleanUpStaleData removes the stale data from the database
+func (db *Database) CleanUpStaleData(target global.CleanupType, timeout int64) error {
+	timeoutDuration := time.Duration(int64(time.Second) * timeout)
+	deleteFrom := time.Now().Add(-timeoutDuration).UTC()
+	query := ""
+	log.Println(deleteFrom)
+	if target == global.Deleted {
+		query = "delete from Comment where DeletedAt != null and DeletedAt <?"
+	} else {
+		query = "delete from Comment where DeletedAt == null and Confirmed == 0 and CreatedAt <?"
+	}
+
+	r, err := db.DB.Exec(db.DB.Rebind(query), deleteFrom)
+	if err != nil {
+		return err
+	}
+	af, err := r.RowsAffected()
+	log.Println("rows", af)
+	log.Println("err", err)
+	return nil
 }
 
 // WipeOutData deletes all the threads and comments in the database if the database is a test one
