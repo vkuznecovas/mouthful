@@ -2,7 +2,7 @@
 package sqlxDriver
 
 import (
-	"log"
+	"fmt"
 	"sort"
 	"time"
 
@@ -234,21 +234,65 @@ func (db *Database) GetDatabaseDialect() string {
 func (db *Database) CleanUpStaleData(target global.CleanupType, timeout int64) error {
 	timeoutDuration := time.Duration(int64(time.Second) * timeout)
 	deleteFrom := time.Now().Add(-timeoutDuration).UTC()
-	query := ""
-	log.Println(deleteFrom)
 	if target == global.Deleted {
-		query = "delete from Comment where DeletedAt != null and DeletedAt <?"
-	} else {
-		query = "delete from Comment where DeletedAt == null and Confirmed == 0 and CreatedAt <?"
+		return db.CleanupDeleted(deleteFrom)
+	} else if target == global.Unconfirmed {
+		return db.CleanupUnconfirmed(deleteFrom)
 	}
+	return fmt.Errorf("Unknown cleanup type %v", target)
+}
 
-	r, err := db.DB.Exec(db.DB.Rebind(query), deleteFrom)
+// HardDeleteComment permanently deletes the comment from a database.
+func (db *Database) HardDeleteComment(commentId uuid.UUID) error {
+	res, err := db.DB.Exec(db.DB.Rebind("delete from Comment where Id=? or ReplyTo=?"), commentId, commentId)
 	if err != nil {
 		return err
 	}
-	af, err := r.RowsAffected()
-	log.Println("rows", af)
-	log.Println("err", err)
+	affected, err := res.RowsAffected()
+	if err != nil {
+		return err
+	}
+	if affected == 0 {
+		return global.ErrCommentNotFound
+	}
+	return nil
+}
+
+// CleanupUnconfirmed removes the unconfirmed comments that are older than the given time
+func (db *Database) CleanupUnconfirmed(olderThan time.Time) error {
+	query := "select * from Comment where Confirmed=0 and DeletedAt is null"
+	var commentSlice model.CommentSlice
+	err := db.DB.Select(&commentSlice, query)
+	if err != nil {
+		return err
+	}
+	for _, v := range commentSlice {
+		if v.CreatedAt.Before(olderThan) {
+			err = db.HardDeleteComment(v.Id)
+			if err != nil {
+				return err
+			}
+		}
+	}
+	return nil
+}
+
+// CleanupDeleted removes the deleted comments that are older than the given time
+func (db *Database) CleanupDeleted(olderThan time.Time) error {
+	query := "select * from Comment where DeletedAt is not null"
+	var commentSlice model.CommentSlice
+	err := db.DB.Select(&commentSlice, query)
+	if err != nil {
+		return err
+	}
+	for _, v := range commentSlice {
+		if v.DeletedAt.Before(olderThan) {
+			err = db.HardDeleteComment(v.Id)
+			if err != nil {
+				return err
+			}
+		}
+	}
 	return nil
 }
 

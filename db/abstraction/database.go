@@ -23,4 +23,5 @@ type Database interface {
 	GetDatabaseDialect() string
 	GetUnderlyingStruct() interface{}
 	CleanUpStaleData(target global.CleanupType, timeout int64) error
+	HardDeleteComment(commentId uuid.UUID) error
 }
