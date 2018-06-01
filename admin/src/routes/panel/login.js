@@ -1,6 +1,5 @@
 import { h, Component } from 'preact';
 import style from './style';
-import { route } from 'preact-router';
 
 
 export default class Login extends Component {
@@ -11,6 +10,10 @@ export default class Login extends Component {
         
 		this.handleChange = this.handleChange.bind(this);
 		this.handleSubmit = this.handleSubmit.bind(this);
+		this.handleOauthClick = this.handleOauthClick.bind(this);
+	}
+	handleOauthClick(provider) {
+		window.location.replace(this.props.url + "v1/oauth/auth/" + provider);
 	}
 	handleChange(event) {
 		this.setState({ value: event.target.value });
@@ -41,7 +44,7 @@ export default class Login extends Component {
 		</form>
 		var loginDiv = this.props.config.disablePasswordLogin ? null : login;
 		var providersListItems = this.props.config.oauthProviders && this.props.config.oauthProviders.length > 0 
-		? this.props.config.oauthProviders.map(x => <li class={style.mouthful_admin_li}><a class={style.mouthful_admin_oauth_a} href={this.props.url + "v1/oauth/auth/" + x}>Log in with {x}</a></li>)
+		? this.props.config.oauthProviders.map(x => <li class={style.mouthful_admin_li}><a class={style.mouthful_admin_oauth_a} onClick={() => this.handleOauthClick(x)}>Log in with {x}</a></li>)
 		: null
 		var oauthProviders = <div>
 			<ul>
