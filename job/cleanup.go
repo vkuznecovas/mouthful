@@ -1,4 +1,4 @@
-package jobs
+package job
 
 import (
 	"fmt"
@@ -18,7 +18,7 @@ func StartCleanupJobs(db abstraction.Database, config *model.PeriodicCleanUp) er
 	}
 	if config.RemoveDeleted {
 		period := global.DefaultCleanupPeriod
-		if config.RemoveDeletedPeriodSeconds == 0 {
+		if config.RemoveDeletedPeriodSeconds != 0 {
 			period = config.RemoveDeletedPeriodSeconds
 		}
 		if config.DeletedTimeoutSeconds == 0 {
@@ -28,7 +28,7 @@ func StartCleanupJobs(db abstraction.Database, config *model.PeriodicCleanUp) er
 	}
 	if config.RemoveUnconfirmed {
 		period := global.DefaultCleanupPeriod
-		if config.RemoveUnconfirmedPeriodSeconds == 0 {
+		if config.RemoveUnconfirmedPeriodSeconds != 0 {
 			period = config.RemoveUnconfirmedPeriodSeconds
 		}
 		if config.UnconfirmedTimeoutSeconds == 0 {
@@ -41,7 +41,7 @@ func StartCleanupJobs(db abstraction.Database, config *model.PeriodicCleanUp) er
 
 // StartCleanupJob starts the cleanup job of a given type
 func StartCleanupJob(db abstraction.Database, olderThan int64, every int64, t global.CleanupType) {
-	duration := time.Duration(every * int64(time.Second))
+	duration := time.Duration(every) * time.Second
 	ticker := time.NewTicker(duration)
 	log.Printf("Cleanup job %v is up and running.\n", t)
 	go func() {
