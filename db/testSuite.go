@@ -357,12 +357,14 @@ func (ts TestSuite) DeleteCommentDeletesReplies(t *testing.T, database abstracti
 	assert.NotNil(t, comments[1].DeletedAt)
 }
 
+// HardDeleteNoSuchComment tests if hard delete returns an error on a comment that does not exist
 func (ts TestSuite) HardDeleteNoSuchComment(t *testing.T, database abstraction.Database) {
 	err := database.HardDeleteComment(global.GetUUID())
 	assert.NotNil(t, err)
 	assert.Equal(t, global.ErrCommentNotFound, err)
 }
 
+// HardDeleteDeletesComment asserts that the comment is deleted correctly
 func (ts TestSuite) HardDeleteDeletesComment(t *testing.T, database abstraction.Database) {
 	author := "author"
 	body := "body"
@@ -378,6 +380,7 @@ func (ts TestSuite) HardDeleteDeletesComment(t *testing.T, database abstraction.
 	assert.Equal(t, global.ErrCommentNotFound, err)
 }
 
+// HardDeleteDeletesReplies checks if the replies get also hard deleted
 func (ts TestSuite) HardDeleteDeletesReplies(t *testing.T, database abstraction.Database) {
 	author := "author"
 	body := "body"
@@ -395,6 +398,7 @@ func (ts TestSuite) HardDeleteDeletesReplies(t *testing.T, database abstraction.
 	assert.Len(t, comments, 0)
 }
 
+// CleanupStaleDataDeletesDeleted checks if deleted comments get deleted according to timeout
 func (ts TestSuite) CleanupStaleDataDeletesDeleted(t *testing.T, database abstraction.Database) {
 	author := "author"
 	body := "body"
@@ -440,6 +444,7 @@ func (ts TestSuite) CleanupStaleDataDeletesDeleted(t *testing.T, database abstra
 	assert.Nil(t, comments[0].DeletedAt)
 }
 
+// CleanupStaleDataDeletesUnconfirmed checks if unconfirmed comments get deleted according to timeout
 func (ts TestSuite) CleanupStaleDataDeletesUnconfirmed(t *testing.T, database abstraction.Database) {
 	author := "author"
 	body := "body"

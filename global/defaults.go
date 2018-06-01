@@ -24,3 +24,6 @@ const DefaultSessionName = "mouthful-session"
 
 // DefaultAuthorLengthLimit default author length limit
 const DefaultAuthorLengthLimit = 50
+
+// DefaultCleanupPeriod default cleanup period time
+const DefaultCleanupPeriod = int64(86400)

@@ -130,7 +130,6 @@ func CreateDirectoryIfNotExists(path string, fs afero.Fs) error {
 
 func periodicWipe(db sqlxDriver.Database) {
 	ticker := time.NewTicker(24 * time.Hour)
-	quit := make(chan struct{})
 	log.Println("MOUTHFUL WILL DELETE ALL DATA ONCE EVERY 24 HOURS")
 	go func() {
 		for {
@@ -153,9 +152,6 @@ func periodicWipe(db sqlxDriver.Database) {
 						log.Println("Comment created")
 					}
 				}
-			case <-quit:
-				ticker.Stop()
-				return
 			}
 		}
 	}()

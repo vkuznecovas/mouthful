@@ -260,9 +260,9 @@ func (db *Database) HardDeleteComment(commentId uuid.UUID) error {
 
 // CleanupUnconfirmed removes the unconfirmed comments that are older than the given time
 func (db *Database) CleanupUnconfirmed(olderThan time.Time) error {
-	query := "select * from Comment where Confirmed=0 and DeletedAt is null"
+	query := db.DB.Rebind("select * from Comment where Confirmed=? and DeletedAt is null")
 	var commentSlice model.CommentSlice
-	err := db.DB.Select(&commentSlice, query)
+	err := db.DB.Select(&commentSlice, query, false)
 	if err != nil {
 		return err
 	}
