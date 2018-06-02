@@ -21,4 +21,5 @@ type Database interface {
 	GetAllComments() ([]model.Comment, error)
 	GetDatabaseDialect() string
 	GetUnderlyingStruct() interface{}
+	ImportData(pathToDump string) error
 }

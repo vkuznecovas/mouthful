@@ -8,9 +8,9 @@ import (
 
 // Thread represents a commenting thread
 type Thread struct {
-	Id        uuid.UUID `db:"Id" dynamo:"ID"`
-	Path      string    `db:"Path" dynamo:"Path,hash"`
-	CreatedAt time.Time `db:"CreatedAt" dynamo:"CreatedAt,range"`
+	Id        uuid.UUID `db:"Id" dynamo:"ID" json:"id"`
+	Path      string    `db:"Path" dynamo:"Path,hash" json:"path"`
+	CreatedAt time.Time `db:"CreatedAt" dynamo:"CreatedAt,range" json:"createdAt,omitempty"`
 }
 
 // ThreadSlice represents a collection of threads

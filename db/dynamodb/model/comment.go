@@ -27,7 +27,7 @@ func (c *Comment) ToComment() (model.Comment, error) {
 
 	var deletedAt *time.Time
 	if c.DeletedAt != nil {
-		da := global.NanoToTime(*c.DeletedAt)
+		da := global.NanoToTime(*c.DeletedAt).UTC()
 		deletedAt = &da
 	}
 	var replyTo *uuid.UUID
@@ -48,6 +48,24 @@ func (c *Comment) ToComment() (model.Comment, error) {
 		DeletedAt: deletedAt,
 		ReplyTo:   replyTo,
 	}, nil
+}
+
+// FromComment converts mouthful comment object to dynamodb comment
+func (c *Comment) FromComment(input model.Comment) {
+	c.Id = input.Id
+	c.ThreadId = input.ThreadId
+	c.Author = input.Author
+	c.Body = input.Body
+	c.Confirmed = input.Confirmed
+	c.CreatedAt = input.CreatedAt
+	if input.DeletedAt != nil {
+		da := input.DeletedAt.UnixNano()
+		c.DeletedAt = &da
+	}
+	if input.ReplyTo != nil {
+		rt := input.ReplyTo.String()
+		c.ReplyTo = &rt
+	}
 }
 
 // CommentSlice represents a collection of comments
