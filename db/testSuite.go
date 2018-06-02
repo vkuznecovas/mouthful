@@ -435,17 +435,24 @@ func (ts TestSuite) TestDataImport(t *testing.T, database abstraction.Database) 
 	dbThreads, err := database.GetAllThreads()
 	assert.Nil(t, err)
 	for i := range dbThreads {
-		assert.Equal(t, threads[i].CreatedAt, dbThreads[i].CreatedAt)
+		assert.Equal(t, threads[i].CreatedAt.Unix(), dbThreads[i].CreatedAt.Unix())
 		assert.Equal(t, threads[i].Path, dbThreads[i].Path)
 		assert.True(t, uuid.Equal(threads[i].Id, dbThreads[i].Id))
 	}
 	dbComments, err := database.GetAllComments()
 	assert.Nil(t, err)
 	for i := range dbComments {
-		assert.Equal(t, comments[i].CreatedAt, dbComments[i].CreatedAt)
+		// unix should be good enough
+		assert.Equal(t, comments[i].CreatedAt.Unix(), dbComments[i].CreatedAt.Unix())
 		assert.Equal(t, comments[i].Author, dbComments[i].Author)
 		assert.Equal(t, comments[i].Body, dbComments[i].Body)
-		assert.Equal(t, comments[i].DeletedAt, dbComments[i].DeletedAt)
+		// we need a workaround here for mysql and posgres do to their date saving limitations
+		if dbComments[i].DeletedAt != nil {
+			assert.Equal(t, comments[i].DeletedAt.Unix(), dbComments[i].DeletedAt.Unix())
+		} else {
+			assert.Nil(t, comments[i].DeletedAt)
+			assert.Nil(t, dbComments[i].DeletedAt)
+		}
 		assert.Equal(t, comments[i].Confirmed, dbComments[i].Confirmed)
 		assert.Equal(t, comments[i].ReplyTo, dbComments[i].ReplyTo)
 		assert.True(t, uuid.Equal(comments[i].Id, dbComments[i].Id))
