@@ -1,17 +1,16 @@
 package main
 
 import (
-	"bufio"
-	"encoding/json"
 	"errors"
 	"fmt"
 	"io/ioutil"
 	"log"
 	"os"
 
+	"github.com/vkuznecovas/mouthful/db/tool"
+
 	"github.com/vkuznecovas/mouthful/config"
 	"github.com/vkuznecovas/mouthful/db"
-	"github.com/vkuznecovas/mouthful/db/model"
 )
 
 func main() {
@@ -44,56 +43,10 @@ func main() {
 		panic(err)
 	}
 
-	comments, err := database.GetAllComments()
-	if err != nil {
-		panic(err)
-	}
-	threads, err := database.GetAllThreads()
+	err = tool.ExportData("./mouthful.dmp", database.GetAllThreads, database.GetAllComments)
 	if err != nil {
 		panic(err)
 	}
 
-	dump := model.DataDump{
-		ThreadCount:  len(threads),
-		CommentCount: len(comments),
-	}
-	marshaledDump, err := json.Marshal(dump)
-	if err != nil {
-		panic(err)
-	}
-	log.Println(string(marshaledDump))
-	f, err := os.Create("mouthful.dmp")
-	if err != nil {
-		panic(err)
-	}
-	defer f.Close()
-	w := bufio.NewWriter(f)
-	newline := []byte("\n")
-	writeLine(w, newline, marshaledDump)
-	w.Flush()
-	for i, v := range threads {
-		marshaledThread, err := json.Marshal(v)
-		if err != nil {
-			panic(err)
-		}
-		writeLine(w, newline, marshaledThread)
-		if i%100 == 0 {
-			log.Printf("Written %v threads", i)
-			w.Flush()
-		}
-	}
-	w.Flush()
-	for i, v := range comments {
-		marshaledComment, err := json.Marshal(v)
-		if err != nil {
-			panic(err)
-		}
-		writeLine(w, newline, marshaledComment)
-		if i%100 == 0 {
-			log.Printf("Written %v comments", i)
-			w.Flush()
-		}
-	}
-	w.Flush()
 	log.Println("Done!")
 }

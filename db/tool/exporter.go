@@ -57,8 +57,8 @@ func ExportData(path string, threadGetter func() ([]model.Thread, error), commen
 			return err
 		}
 		WriteLine(w, newline, marshaledThread)
+		log.Printf("Written %v threads", i)
 		if i%100 == 0 {
-			log.Printf("Written %v threads", i)
 			w.Flush()
 		}
 	}
@@ -69,8 +69,8 @@ func ExportData(path string, threadGetter func() ([]model.Thread, error), commen
 			return err
 		}
 		WriteLine(w, newline, marshaledComment)
+		log.Printf("Written %v comments", i)
 		if i%100 == 0 {
-			log.Printf("Written %v comments", i)
 			w.Flush()
 		}
 	}
