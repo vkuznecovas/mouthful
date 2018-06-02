@@ -25,6 +25,7 @@ There's a demo hosted at [mouthful.dizzy.zone](https://mouthful.dizzy.zone). Che
     * [Config file from Docker image](#config-file-from-docker)
     * [Nginx configuration](#nginx-config)
 * [Migrations](#migrations)
+* [Backups and import](#backups-and-import)
 * [Contributing](#contributing)
 * [Wish list](#wish-list)
 * [Get in touch](#get-in-touch)
@@ -40,6 +41,7 @@ There's a demo hosted at [mouthful.dizzy.zone](https://mouthful.dizzy.zone). Che
 * Migrations from existing commenting engines(isso, disqus)
 * Configuration - most of the features can be turned on or off, as well as customized to your preferences.
 * Admin login through third parties such as facebook and twitter, and 35 more.
+* Dumping comments out, and importing an old dump.
 
 # Installation
 
@@ -246,6 +248,10 @@ Mouthful supports migrating existing data from the following commenting engines:
 * [Disqus](./cmd/migration/disqus/README.md)
 
 Click on them to read the documentation on how that is done.
+
+# Backups and import
+
+Mouthful allows for easy comment dumping and import of existing dumps. There's an [import tool]((./cmd/backup/import/README.md)) and an [export tool]((./cmd/backup/export/README.md)) you can use to do that. (They will be merged under one roof, some day.) 
 
 
 # Contributing
