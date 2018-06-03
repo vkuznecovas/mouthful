@@ -318,7 +318,13 @@ func (r *Router) DeleteComment(c *gin.Context) {
 		return
 	}
 	db := *r.db
-	err = db.DeleteComment(*commentId)
+
+	if deleteCommentBody.Hard {
+		err = db.HardDeleteComment(*commentId)
+	} else {
+		err = db.DeleteComment(*commentId)
+	}
+
 	if err != nil {
 		if err == global.ErrCommentNotFound {
 			c.AbortWithStatusJSON(404, global.ErrCommentNotFound.Error())
