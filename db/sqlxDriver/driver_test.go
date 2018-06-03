@@ -37,7 +37,7 @@ func TestDialects(t *testing.T) {
 	assert.Equal(t, "postgres", postgresDb.GetDatabaseDialect())
 
 	mysqldb := mysql.CreateTestDatabase()
-	assert.Equal(t, "postgres", mysqldb.GetDatabaseDialect())
+	assert.Equal(t, "mysql", mysqldb.GetDatabaseDialect())
 }
 
 func TestPostgresDB(t *testing.T) {
