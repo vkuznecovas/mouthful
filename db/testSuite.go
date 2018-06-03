@@ -487,6 +487,13 @@ func (ts TestSuite) CleanupStaleDataDeletesUnconfirmed(t *testing.T, database ab
 	assert.NotNil(t, comments[0].DeletedAt)
 }
 
+// CleanupStaleDataReturnsErrorOnInvalidType asserts that invalid cleanup typ checking does exist
+func (ts TestSuite) CleanupStaleDataReturnsErrorOnInvalidType(t *testing.T, database abstraction.Database) {
+	err := database.CleanUpStaleData(global.CleanupType(1414141414), -100)
+	assert.NotNil(t, err)
+	assert.Equal(t, "Unknown cleanup type CleanupType(1414141414)", err.Error())
+}
+
 // TestDataImport tests the data import functionality for the database
 func (ts TestSuite) TestDataImport(t *testing.T, database abstraction.Database) {
 	result := make([]string, 0)
