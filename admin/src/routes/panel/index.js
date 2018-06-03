@@ -121,7 +121,7 @@ export default class Panel extends Component {
 		  }
 		}
 		http.send()
-	  }
+	}
 	reload() {
 		this.setState({ loaded: false, threads: [], comments: [] })
 	}
@@ -169,7 +169,7 @@ export default class Panel extends Component {
 
 			c = c.filter(filter)
 			if (c.length != 0) {
-				return <Thread url={url} key={"___thread" + t.Id} thread={t} comments={c} reload={this.reload} updateComment={this.updateComment} showHardDelete={this.state.showDeleted} />
+				return <Thread url={getUrl(this.state, window)} key={"___thread" + t.Id} thread={t} comments={c} reload={this.reload} updateComment={this.updateComment}/>
 			}
 			return null;
 		})

@@ -93,6 +93,7 @@ export default class Thread extends Component {
 						<div class={style.mouthful_reply_button} onClick={() => this.props.updateComment(comment.Id, comment.Body, comment.Author, comment.Confirmed)}>Update</div>
 						{comment.DeletedAt == null ? <div class={style.mouthful_reply_button} onClick={() => this.deleteComment(comment.Id)}>Delete</div> : <div class={style.mouthful_reply_button} onClick={() => this.undoDelete(comment.Id)}>Undo delete</div>}
 						{comment.Confirmed ? "" : <div class={style.mouthful_reply_button} onClick={() => this.props.updateComment(comment.Id, null, null, true)}>Confirm</div>}
+						{comment.DeletedAt != null ? <div class={style.mouthful_reply_button} onClick={() => this.deleteComment(comment.Id, true)}>Hard delete</div> : null}						
 					</div>
 				</div>;
 			})
@@ -128,7 +129,6 @@ export default class Thread extends Component {
 						<div class={style.mouthful_reply_button} onClick={() => this.props.updateComment(comment.Id, comment.Body, comment.Author, comment.Confirmed)}>Update</div>
 						{comment.DeletedAt == null ? <div class={style.mouthful_reply_button} onClick={() => this.deleteComment(comment.Id, false)}>Delete</div> : <div class={style.mouthful_reply_button} onClick={() => this.undoDelete(comment.Id)}>Undo delete</div>}
 						{comment.Confirmed ? "" : <div class={style.mouthful_reply_button} onClick={() => this.props.updateComment(comment.Id, null, null, true)}>Confirm</div>}
-						{this.props.showHardDelete ? <div class={style.mouthful_reply_button} onClick={() => this.deleteComment(comment.Id, false)}>Hard delete</div> : null}
 					</div>
 					<div style="margin-left:30px">
 						{replies}
