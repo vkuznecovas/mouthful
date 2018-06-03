@@ -2,6 +2,7 @@
 package dynamodb
 
 import (
+	"fmt"
 	"log"
 	"sort"
 	"strings"
@@ -289,7 +290,10 @@ func (db *Database) RestoreDeletedComment(id uuid.UUID) error {
 // GetAllThreads gets all the threads found in the database
 func (db *Database) GetAllThreads() (threads []model.Thread, err error) {
 	var result dynamoModel.ThreadSlice
-	db.DB.Table(db.TablePrefix + global.DefaultDynamoDbThreadTableName).Scan().All(&result)
+	err = db.DB.Table(db.TablePrefix + global.DefaultDynamoDbThreadTableName).Scan().All(&result)
+	if err != nil {
+		return nil, err
+	}
 	sort.Sort(result)
 	threads = make([]model.Thread, len(result))
 	for i := range result {
@@ -301,7 +305,10 @@ func (db *Database) GetAllThreads() (threads []model.Thread, err error) {
 // GetAllComments gets all the comments found in the database
 func (db *Database) GetAllComments() (comments []model.Comment, err error) {
 	var result dynamoModel.CommentSlice
-	db.DB.Table(db.TablePrefix + global.DefaultDynamoDbCommentTableName).Scan().All(&result)
+	err = db.DB.Table(db.TablePrefix + global.DefaultDynamoDbCommentTableName).Scan().All(&result)
+	if err != nil {
+		return nil, err
+	}
 	sort.Sort(result)
 	comments = make([]model.Comment, len(result))
 	for i := range result {
@@ -322,6 +329,90 @@ func (db *Database) GetDatabaseDialect() string {
 // GetUnderlyingStruct returns the underlying database struct for the driver
 func (db *Database) GetUnderlyingStruct() interface{} {
 	return db
+}
+
+// CleanUpStaleData removes the stale data from the database
+func (db *Database) CleanUpStaleData(target global.CleanupType, timeout int64) error {
+	timeoutDuration := time.Duration(int64(time.Second) * timeout)
+	deleteFrom := time.Now().Add(-timeoutDuration).UTC()
+	if target == global.Deleted {
+		return db.CleanupDeleted(deleteFrom)
+	} else if target == global.Unconfirmed {
+		return db.CleanupUnconfirmed(deleteFrom)
+	}
+	return fmt.Errorf("Unknown cleanup type %v", target)
+}
+
+// HardDeleteComment permanently deletes the comment from a database.
+func (db *Database) HardDeleteComment(commentId uuid.UUID) error {
+	comment, err := db.GetComment(commentId)
+	if err != nil {
+		return err
+	}
+	err = db.DB.Table(db.TablePrefix+global.DefaultDynamoDbCommentTableName).Delete("ID", commentId).Run()
+	if err != nil {
+		return err
+	}
+
+	var result dynamoModel.CommentSlice
+	err = db.DB.Table(db.TablePrefix+global.DefaultDynamoDbCommentTableName).Scan().Filter("'ThreadId' = ?", comment.ThreadId).All(&result)
+	if err != nil {
+		return err
+	}
+	for i := range result {
+		if result[i].ReplyTo != nil {
+			cid, err := global.ParseUUIDFromString(*result[i].ReplyTo)
+			if err != nil {
+				return err
+			}
+			if uuid.Equal(*cid, comment.Id) {
+				err = db.DB.Table(db.TablePrefix+global.DefaultDynamoDbCommentTableName).Delete("ID", result[i].Id).Run()
+				if err != nil {
+					return err
+				}
+			}
+		}
+	}
+	return nil
+}
+
+// CleanupUnconfirmed removes the unconfirmed comments that are older than the given time
+func (db *Database) CleanupUnconfirmed(olderThan time.Time) error {
+	var commentSlice dynamoModel.CommentSlice
+	err := db.DB.Table(db.TablePrefix+global.DefaultDynamoDbCommentTableName).Scan().Filter("'Confirmed' = ?", false).All(&commentSlice)
+	if err != nil {
+		return err
+	}
+	for _, v := range commentSlice {
+		if v.DeletedAt == nil && v.CreatedAt.Before(olderThan) {
+			err = db.HardDeleteComment(v.Id)
+			if err != nil {
+				return err
+			}
+		}
+	}
+	return nil
+}
+
+// CleanupDeleted removes the deleted comments that are older than the given time
+func (db *Database) CleanupDeleted(olderThan time.Time) error {
+	var commentSlice dynamoModel.CommentSlice
+	err := db.DB.Table(db.TablePrefix + global.DefaultDynamoDbCommentTableName).Scan().All(&commentSlice)
+	if err != nil {
+		return err
+	}
+	for _, v := range commentSlice {
+		if v.DeletedAt == nil {
+			continue
+		}
+		if global.NanoToTime(*v.DeletedAt).Before(olderThan) {
+			err = db.HardDeleteComment(v.Id)
+			if err != nil {
+				return err
+			}
+		}
+	}
+	return nil
 }
 
 // ImportData performs the data import for the given driver

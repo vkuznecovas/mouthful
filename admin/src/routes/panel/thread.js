@@ -31,7 +31,7 @@ export default class Thread extends Component {
 	reload() {
 		this.props.reload()
 	}
-	deleteComment(commentId) {
+	deleteComment(commentId, hard) {
 		if (typeof window == "undefined") { return }
 		var http = new XMLHttpRequest();
 		var url = this.props.url + "v1/admin/comments";
@@ -48,7 +48,11 @@ export default class Thread extends Component {
 				context.reload()
 			}
 		}
-		http.send(JSON.stringify({ CommentId: commentId }))
+		if (hard === true) {
+			http.send(JSON.stringify({ CommentId: commentId, Hard: true }))
+		} else {
+			http.send(JSON.stringify({ CommentId: commentId }))
+		}
 	}
 	undoDelete(commentId) {
 		if (typeof window == "undefined") { return }
@@ -89,6 +93,7 @@ export default class Thread extends Component {
 						<div class={style.mouthful_reply_button} onClick={() => this.props.updateComment(comment.Id, comment.Body, comment.Author, comment.Confirmed)}>Update</div>
 						{comment.DeletedAt == null ? <div class={style.mouthful_reply_button} onClick={() => this.deleteComment(comment.Id)}>Delete</div> : <div class={style.mouthful_reply_button} onClick={() => this.undoDelete(comment.Id)}>Undo delete</div>}
 						{comment.Confirmed ? "" : <div class={style.mouthful_reply_button} onClick={() => this.props.updateComment(comment.Id, null, null, true)}>Confirm</div>}
+						{comment.DeletedAt != null ? <div class={style.mouthful_reply_button} onClick={() => this.deleteComment(comment.Id, true)}>Hard delete</div> : null}						
 					</div>
 				</div>;
 			})
@@ -122,7 +127,7 @@ export default class Thread extends Component {
 					}}></textarea></div>
 					<div >
 						<div class={style.mouthful_reply_button} onClick={() => this.props.updateComment(comment.Id, comment.Body, comment.Author, comment.Confirmed)}>Update</div>
-						{comment.DeletedAt == null ? <div class={style.mouthful_reply_button} onClick={() => this.deleteComment(comment.Id)}>Delete</div> : <div class={style.mouthful_reply_button} onClick={() => this.undoDelete(comment.Id)}>Undo delete</div>}
+						{comment.DeletedAt == null ? <div class={style.mouthful_reply_button} onClick={() => this.deleteComment(comment.Id, false)}>Delete</div> : <div class={style.mouthful_reply_button} onClick={() => this.undoDelete(comment.Id)}>Undo delete</div>}
 						{comment.Confirmed ? "" : <div class={style.mouthful_reply_button} onClick={() => this.props.updateComment(comment.Id, null, null, true)}>Confirm</div>}
 					</div>
 					<div style="margin-left:30px">

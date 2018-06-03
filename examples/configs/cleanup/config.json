@@ -1,0 +1,55 @@
+{
+    "honeypot": true,
+    "moderation": {
+        "enabled": true,
+        "adminPassword": "somepassword",
+        "sessionDurationSeconds": 21600,
+        "maxCommentLength": 10000,
+        "maxAuthorLength": 35,
+        "periodicCleanup": {
+            "enabled": true,
+            "removeDeleted": true,
+            "removeUnconfirmed": true,
+            "unconfirmedTimeoutSeconds": 5184000,
+            "deletedTimeoutSeconds": 5184000,
+            "removeDeletedPeriodSeconds": 86400,
+            "removeUnconfirmedPeriodSeconds": 604800
+        }
+    },
+    "database": {
+        "dialect": "dynamodb",
+        "dynamoDBThreadReadUnits": 2,
+        "dynamoDBCommentReadUnits": 4,
+        "dynamoDBThreadWriteUnits": 1,
+        "dynamoDBCommentWriteUnits": 2,
+        "dynamoDBIndexWriteUnits": 1,
+        "dynamoDBIndexReadUnits": 3,
+        "awsRegion": "eu-west-1",
+        "awsAccessKeyID": "yourAWSAccessKeyID",
+        "awsSecretAccessKey": "yourAwsSecretAccessKey"
+    },
+    "api": {
+        "port": 8080,
+        "debug": false,
+        "logging": true,
+        "cache": {
+            "enabled": true,
+            "intervalInSeconds": 10,
+            "expiryInSeconds": 300
+        },
+        "rateLimiting": {
+            "enabled": true,
+            "postsHour": 50
+        },
+        "cors": {
+            "enabled": true,
+            "allowedOrigins": [
+                "https://dizzy.zone"
+            ]
+        }
+    },
+    "client": {
+        "useDefaultStyle": true,
+        "pageSize": 10
+    }
+}

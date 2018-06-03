@@ -16,6 +16,7 @@ import (
 	"github.com/vkuznecovas/mouthful/api"
 	"github.com/vkuznecovas/mouthful/config"
 	"github.com/vkuznecovas/mouthful/db"
+	"github.com/vkuznecovas/mouthful/job"
 )
 
 func main() {
@@ -65,6 +66,12 @@ func main() {
 
 	// set up db according to config
 	database, err := db.GetDBInstance(config.Database)
+	if err != nil {
+		panic(err)
+	}
+
+	// startup cleanup, if enabled
+	err = job.StartCleanupJobs(database, config.Moderation.PeriodicCleanUp)
 	if err != nil {
 		panic(err)
 	}
