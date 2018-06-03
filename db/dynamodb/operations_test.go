@@ -33,3 +33,35 @@ func TestDynamoDb(t *testing.T) {
 		assert.Nil(t, err)
 	}
 }
+
+func TestDynamoDatawipe(t *testing.T) {
+	testDb := setupDynamoTestDb()
+	driver := testDb.GetUnderlyingStruct()
+	driverCasted := driver.(*dynamodb.Database)
+	body := "body"
+	author := "author"
+	path := "/"
+	_, err := testDb.CreateComment(body, author, path, true, nil)
+	assert.Nil(t, err)
+	_, err = testDb.CreateComment(body, author, path, true, nil)
+	assert.Nil(t, err)
+	_, err = testDb.CreateThread("/t")
+	assert.Nil(t, err)
+
+	c, err := testDb.GetAllComments()
+	assert.Nil(t, err)
+	assert.Len(t, c, 2)
+	th, err := testDb.GetAllThreads()
+	assert.Nil(t, err)
+	assert.Len(t, th, 2)
+	err = driverCasted.WipeOutData()
+	assert.Nil(t, err)
+
+	c, err = testDb.GetAllComments()
+	assert.Nil(t, err)
+	assert.Len(t, c, 0)
+
+	th, err = testDb.GetAllThreads()
+	assert.Nil(t, err)
+	assert.Len(t, th, 0)
+}
