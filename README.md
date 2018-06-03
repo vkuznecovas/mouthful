@@ -24,6 +24,7 @@ There's a demo hosted at [mouthful.dizzy.zone](https://mouthful.dizzy.zone). Che
     * [Multiple domains](#multiple-domains)
     * [Config file from Docker image](#config-file-from-docker)
     * [Nginx configuration](#nginx-config)
+    * [Periodic cleanup](#periodic-cleanup)
 * [Migrations](#migrations)
 * [Backups and import](#backups-and-import)
 * [Contributing](#contributing)
@@ -240,6 +241,10 @@ Take note, that if you're running mouthful with moderation on and run it under a
 * Specify the path variable in config inside the moderation section. `"path":"/mouthful-demo/"` for  for the example above.
 
 This is caused by mouthful using static assets and not serving any HTML itself. *I would strongly suggest using the first option.*
+
+## Periodic cleanup
+
+Mouthful allows for periodic cleanup of non-confirmed and soft-deleted comments. It's fully configurable under the moderation section of the config. For more on that, head to the [config documentation](./examples/configs/README.md#oauth-providers).
 
 # Migrations
 

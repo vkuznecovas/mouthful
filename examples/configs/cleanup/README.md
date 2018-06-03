@@ -1,0 +1,1 @@
+The config.json in this folder means that we'll periodically remove both the unconfirmed comments and the soft deleted comments. The unconfirmed comment deletion will happen once a week and delete comments older than 60 days that are still unconfirmed. The deleted comment job will run once a week, deleting comments that are older than 60 days.
