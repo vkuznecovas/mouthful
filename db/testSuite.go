@@ -1,7 +1,10 @@
 package db
 
 import (
+	"encoding/json"
+	"os"
 	"reflect"
+	"strings"
 	"testing"
 	"time"
 
@@ -10,12 +13,13 @@ import (
 
 	"github.com/stretchr/testify/assert"
 	"github.com/vkuznecovas/mouthful/db/abstraction"
+	"github.com/vkuznecovas/mouthful/db/model"
 )
 
 // TestFunctions is a list of database test functions used to test the drivers.
 // If you want to add a test method, just follow this signature
 // func (ts TestSuite) SomeName(t *testing.T, database abstraction.Database)
-// It will then get automagically added to the test functions by init method.
+// It will then get automagically added to the tests functions by init method.
 var TestFunctions []reflect.Value
 
 func init() {
@@ -482,4 +486,103 @@ func (ts TestSuite) CleanupStaleDataDeletesUnconfirmed(t *testing.T, database ab
 	assert.Len(t, comments, 2)
 	assert.Nil(t, comments[0].DeletedAt)
 	assert.Nil(t, comments[1].DeletedAt)
+}
+
+// TestDataImport tests the data import functionality for the database
+func (ts TestSuite) TestDataImport(t *testing.T, database abstraction.Database) {
+	result := make([]string, 0)
+	threads := []model.Thread{
+		model.Thread{
+			Id:        global.GetUUID(),
+			Path:      "/",
+			CreatedAt: time.Now().UTC(),
+		},
+		model.Thread{
+			Id:        global.GetUUID(),
+			Path:      "/test",
+			CreatedAt: time.Now().UTC().Add(time.Second),
+		},
+	}
+	ca := time.Now().UTC()
+	da := time.Now().UTC()
+	comments := []model.Comment{
+		model.Comment{
+			Id:        global.GetUUID(),
+			ThreadId:  threads[0].Id,
+			Body:      "something something",
+			Author:    "Author1",
+			Confirmed: true,
+			CreatedAt: ca,
+			DeletedAt: &da,
+			ReplyTo:   nil,
+		},
+		model.Comment{
+			Id:        global.GetUUID(),
+			ThreadId:  threads[1].Id,
+			Body:      "something something1",
+			Author:    "Author1",
+			Confirmed: false,
+			CreatedAt: ca.Add(time.Second),
+			DeletedAt: nil,
+			ReplyTo:   nil,
+		},
+	}
+	dataDump := model.DataDump{
+		ThreadCount:  len(threads),
+		CommentCount: len(comments),
+	}
+	res, err := json.Marshal(dataDump)
+	assert.Nil(t, err)
+	result = append(result, string(res))
+
+	for _, v := range threads {
+		res, err = json.Marshal(v)
+		assert.Nil(t, err)
+		result = append(result, string(res))
+	}
+
+	for _, v := range comments {
+		res, err = json.Marshal(v)
+		assert.Nil(t, err)
+		result = append(result, string(res))
+	}
+	joined := strings.Join(result, "\n")
+	dumpFileName := "./mouthful_testsuite.dmp"
+	f, err := os.Create(dumpFileName)
+	assert.Nil(t, err)
+	defer f.Close()
+	defer func() {
+		err := os.Remove(dumpFileName)
+		assert.Nil(t, err)
+	}()
+	_, err = f.WriteString(joined)
+	assert.Nil(t, err)
+	err = database.ImportData(dumpFileName)
+	assert.Nil(t, err)
+	dbThreads, err := database.GetAllThreads()
+	assert.Nil(t, err)
+	for i := range dbThreads {
+		assert.Equal(t, threads[i].CreatedAt.Unix(), dbThreads[i].CreatedAt.Unix())
+		assert.Equal(t, threads[i].Path, dbThreads[i].Path)
+		assert.True(t, uuid.Equal(threads[i].Id, dbThreads[i].Id))
+	}
+	dbComments, err := database.GetAllComments()
+	assert.Nil(t, err)
+	for i := range dbComments {
+		// unix should be good enough
+		assert.Equal(t, comments[i].CreatedAt.Unix(), dbComments[i].CreatedAt.Unix())
+		assert.Equal(t, comments[i].Author, dbComments[i].Author)
+		assert.Equal(t, comments[i].Body, dbComments[i].Body)
+		// we need a workaround here for mysql and posgres do to their date saving limitations
+		if dbComments[i].DeletedAt != nil {
+			assert.Equal(t, comments[i].DeletedAt.Unix(), dbComments[i].DeletedAt.Unix())
+		} else {
+			assert.Nil(t, comments[i].DeletedAt)
+			assert.Nil(t, dbComments[i].DeletedAt)
+		}
+		assert.Equal(t, comments[i].Confirmed, dbComments[i].Confirmed)
+		assert.Equal(t, comments[i].ReplyTo, dbComments[i].ReplyTo)
+		assert.True(t, uuid.Equal(comments[i].Id, dbComments[i].Id))
+		assert.True(t, uuid.Equal(comments[i].ThreadId, dbComments[i].ThreadId))
+	}
 }

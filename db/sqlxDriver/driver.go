@@ -11,6 +11,8 @@ import (
 	_ "github.com/mattn/go-sqlite3"
 	"github.com/satori/go.uuid"
 	"github.com/vkuznecovas/mouthful/db/model"
+	tool "github.com/vkuznecovas/mouthful/db/tool"
+
 	"github.com/vkuznecovas/mouthful/global"
 )
 
@@ -338,4 +340,24 @@ func (db *Database) WipeOutData() error {
 		return err
 	}
 	return nil
+}
+
+// ImportData performs the data import for the given driver
+func (db *Database) ImportData(pathToDump string) error {
+	importThread := func(t model.Thread) error {
+		_, err := db.DB.Exec(db.DB.Rebind("INSERT INTO Thread(Id,Path,CreatedAt) VALUES(?, ?, ?)"), t.Id, t.Path, t.CreatedAt)
+		if err != nil {
+			return err
+		}
+		return nil
+	}
+	importComment := func(c model.Comment) error {
+		_, err := db.DB.Exec(db.DB.Rebind("INSERT INTO Comment(Id, ThreadId, Body, Author, Confirmed, CreatedAt, ReplyTo, DeletedAt) VALUES(?,?,?,?,?,?,?,?)"), c.Id, c.ThreadId, c.Body, c.Author, c.Confirmed, c.CreatedAt, c.ReplyTo, c.DeletedAt)
+		if err != nil {
+			return err
+		}
+		return nil
+	}
+	err := tool.ImportData(pathToDump, importThread, importComment)
+	return err
 }

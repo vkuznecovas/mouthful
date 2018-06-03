@@ -24,4 +24,5 @@ type Database interface {
 	GetUnderlyingStruct() interface{}
 	CleanUpStaleData(target global.CleanupType, timeout int64) error
 	HardDeleteComment(commentId uuid.UUID) error
+	ImportData(pathToDump string) error
 }

@@ -13,6 +13,7 @@ import (
 	"github.com/satori/go.uuid"
 	dynamoModel "github.com/vkuznecovas/mouthful/db/dynamodb/model"
 	"github.com/vkuznecovas/mouthful/db/model"
+	"github.com/vkuznecovas/mouthful/db/tool"
 	"github.com/vkuznecovas/mouthful/global"
 )
 
@@ -412,4 +413,30 @@ func (db *Database) CleanupDeleted(olderThan time.Time) error {
 		}
 	}
 	return nil
+}
+
+// ImportData performs the data import for the given driver
+func (db *Database) ImportData(pathToDump string) error {
+	importThread := func(t model.Thread) error {
+		err := db.DB.Table(db.TablePrefix + global.DefaultDynamoDbThreadTableName).Put(dynamoModel.Thread{
+			Id:        t.Id,
+			Path:      t.Path,
+			CreatedAt: t.CreatedAt,
+		}).Run()
+		if err != nil {
+			return err
+		}
+		return nil
+	}
+	importComment := func(c model.Comment) error {
+		comment := dynamoModel.Comment{}
+		comment.FromComment(c)
+		err := db.DB.Table(db.TablePrefix + global.DefaultDynamoDbCommentTableName).Put(comment).Run()
+		if err != nil {
+			return err
+		}
+		return nil
+	}
+	err := tool.ImportData(pathToDump, importThread, importComment)
+	return err
 }

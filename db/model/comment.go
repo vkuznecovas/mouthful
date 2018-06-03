@@ -9,14 +9,14 @@ import (
 
 // Comment represents a comment in a thread
 type Comment struct {
-	Id        uuid.UUID  `db:"Id"`
-	ThreadId  uuid.UUID  `db:"ThreadId"`
-	Body      string     `db:"Body"`
-	Author    string     `db:"Author"`
-	Confirmed bool       `db:"Confirmed"`
-	CreatedAt time.Time  `db:"CreatedAt"`
-	DeletedAt *time.Time `db:"DeletedAt"`
-	ReplyTo   *uuid.UUID `db:"ReplyTo"`
+	Id        uuid.UUID  `db:"Id" json:"id"`
+	ThreadId  uuid.UUID  `db:"ThreadId" json:"threadid"`
+	Body      string     `db:"Body" json:"body"`
+	Author    string     `db:"Author" json:"author"`
+	Confirmed bool       `db:"Confirmed" json:"confirmed"`
+	CreatedAt time.Time  `db:"CreatedAt" json:"createdAt"`
+	DeletedAt *time.Time `db:"DeletedAt" json:"deletedAt,omitempty"`
+	ReplyTo   *uuid.UUID `db:"ReplyTo" json:"replyTo,omitempty"`
 }
 
 // CommentSlice represents a collection of comments
