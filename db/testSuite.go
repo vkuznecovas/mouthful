@@ -479,13 +479,12 @@ func (ts TestSuite) CleanupStaleDataDeletesUnconfirmed(t *testing.T, database ab
 	assert.NotNil(t, comments[2].DeletedAt)
 
 	// This should delete everything but one comment
-	err = database.CleanUpStaleData(global.Deleted, -100)
+	err = database.CleanUpStaleData(global.Unconfirmed, -100)
 	assert.Nil(t, err)
 	comments, err = database.GetAllComments()
 	assert.Nil(t, err)
-	assert.Len(t, comments, 2)
-	assert.Nil(t, comments[0].DeletedAt)
-	assert.Nil(t, comments[1].DeletedAt)
+	assert.Len(t, comments, 1)
+	assert.NotNil(t, comments[0].DeletedAt)
 }
 
 // TestDataImport tests the data import functionality for the database
