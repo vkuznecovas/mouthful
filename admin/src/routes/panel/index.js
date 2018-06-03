@@ -169,7 +169,7 @@ export default class Panel extends Component {
 
 			c = c.filter(filter)
 			if (c.length != 0) {
-				return <Thread url={url} key={"___thread" + t.Id} thread={t} comments={c} reload={this.reload} updateComment={this.updateComment} />
+				return <Thread url={url} key={"___thread" + t.Id} thread={t} comments={c} reload={this.reload} updateComment={this.updateComment} showHardDelete={this.state.showDeleted} />
 			}
 			return null;
 		})
