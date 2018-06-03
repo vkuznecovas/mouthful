@@ -384,7 +384,7 @@ func (db *Database) CleanupUnconfirmed(olderThan time.Time) error {
 		return err
 	}
 	for _, v := range commentSlice {
-		if v.CreatedAt.Before(olderThan) {
+		if v.DeletedAt == nil && v.CreatedAt.Before(olderThan) {
 			err = db.HardDeleteComment(v.Id)
 			if err != nil {
 				return err
