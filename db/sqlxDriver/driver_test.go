@@ -26,6 +26,18 @@ func TestSqliteDb(t *testing.T) {
 		in := []reflect.Value{suiteReflected, tReflected, sqliteReflected}
 		f.Call(in)
 	}
+
+}
+
+func TestDialects(t *testing.T) {
+	sqlitedb := setupSqliteTestDb()
+	assert.Equal(t, "sqlite3", sqlitedb.GetDatabaseDialect())
+
+	postgresDb := postgres.CreateTestDatabase()
+	assert.Equal(t, "postgres", postgresDb.GetDatabaseDialect())
+
+	mysqldb := mysql.CreateTestDatabase()
+	assert.Equal(t, "mysql", mysqldb.GetDatabaseDialect())
 }
 
 func TestPostgresDB(t *testing.T) {

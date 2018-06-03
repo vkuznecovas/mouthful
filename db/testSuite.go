@@ -9,17 +9,17 @@ import (
 	"time"
 
 	uuid "github.com/satori/go.uuid"
+	"github.com/vkuznecovas/mouthful/global"
+
 	"github.com/stretchr/testify/assert"
 	"github.com/vkuznecovas/mouthful/db/abstraction"
 	"github.com/vkuznecovas/mouthful/db/model"
-
-	"github.com/vkuznecovas/mouthful/global"
 )
 
 // TestFunctions is a list of database test functions used to test the drivers.
 // If you want to add a test method, just follow this signature
 // func (ts TestSuite) SomeName(t *testing.T, database abstraction.Database)
-// It will then get automagically added to the test functions by init method.
+// It will then get automagically added to the tests functions by init method.
 var TestFunctions []reflect.Value
 
 func init() {
@@ -359,6 +359,139 @@ func (ts TestSuite) DeleteCommentDeletesReplies(t *testing.T, database abstracti
 	assert.Len(t, comments, 2)
 	assert.NotNil(t, comments[0].DeletedAt)
 	assert.NotNil(t, comments[1].DeletedAt)
+}
+
+// HardDeleteNoSuchComment tests if hard delete returns an error on a comment that does not exist
+func (ts TestSuite) HardDeleteNoSuchComment(t *testing.T, database abstraction.Database) {
+	err := database.HardDeleteComment(global.GetUUID())
+	assert.NotNil(t, err)
+	assert.Equal(t, global.ErrCommentNotFound, err)
+}
+
+// HardDeleteDeletesComment asserts that the comment is deleted correctly
+func (ts TestSuite) HardDeleteDeletesComment(t *testing.T, database abstraction.Database) {
+	author := "author"
+	body := "body"
+	path := "/test"
+	uid, err := database.CreateComment(body, author, path, true, nil)
+	assert.Nil(t, err)
+	_, err = database.GetComment(*uid)
+	assert.Nil(t, err)
+	err = database.HardDeleteComment(*uid)
+	assert.Nil(t, err)
+	_, err = database.GetComment(*uid)
+	assert.NotNil(t, err)
+	assert.Equal(t, global.ErrCommentNotFound, err)
+}
+
+// HardDeleteDeletesReplies checks if the replies get also hard deleted
+func (ts TestSuite) HardDeleteDeletesReplies(t *testing.T, database abstraction.Database) {
+	author := "author"
+	body := "body"
+	path := "/test"
+	uid, err := database.CreateComment(body, author, path, true, nil)
+	assert.Nil(t, err)
+	_, err = database.CreateComment(body, author, path, true, uid)
+	comments, err := database.GetCommentsByThread(path)
+	assert.Nil(t, err)
+	assert.Len(t, comments, 2)
+	err = database.HardDeleteComment(*uid)
+	assert.Nil(t, err)
+	comments, err = database.GetCommentsByThread(path)
+	assert.Nil(t, err)
+	assert.Len(t, comments, 0)
+}
+
+// CleanupStaleDataDeletesDeleted checks if deleted comments get deleted according to timeout
+func (ts TestSuite) CleanupStaleDataDeletesDeleted(t *testing.T, database abstraction.Database) {
+	author := "author"
+	body := "body"
+	path := "/test"
+	uid, err := database.CreateComment(body, author, path, true, nil)
+	assert.Nil(t, err)
+
+	err = database.DeleteComment(*uid)
+	assert.Nil(t, err)
+
+	uid, err = database.CreateComment(body, author, path, true, nil)
+	assert.Nil(t, err)
+
+	uid, err = database.CreateComment(body, author, path, true, nil)
+	assert.Nil(t, err)
+
+	err = database.DeleteComment(*uid)
+	assert.Nil(t, err)
+
+	comments, err := database.GetAllComments()
+	assert.Nil(t, err)
+	assert.Len(t, comments, 3)
+	assert.NotNil(t, comments[0].DeletedAt)
+	assert.Nil(t, comments[1].DeletedAt)
+	assert.NotNil(t, comments[2].DeletedAt)
+
+	// This should not delete anything really, since we're 100 secs ahead
+	err = database.CleanUpStaleData(global.Deleted, 100)
+	assert.Nil(t, err)
+	comments, err = database.GetAllComments()
+	assert.Nil(t, err)
+	assert.Len(t, comments, 3)
+	assert.NotNil(t, comments[0].DeletedAt)
+	assert.Nil(t, comments[1].DeletedAt)
+	assert.NotNil(t, comments[2].DeletedAt)
+
+	// This should delete everything but one comment
+	err = database.CleanUpStaleData(global.Deleted, -100)
+	assert.Nil(t, err)
+	comments, err = database.GetAllComments()
+	assert.Nil(t, err)
+	assert.Len(t, comments, 1)
+	assert.Nil(t, comments[0].DeletedAt)
+}
+
+// CleanupStaleDataDeletesUnconfirmed checks if unconfirmed comments get deleted according to timeout
+func (ts TestSuite) CleanupStaleDataDeletesUnconfirmed(t *testing.T, database abstraction.Database) {
+	author := "author"
+	body := "body"
+	path := "/test"
+	uid, err := database.CreateComment(body, author, path, false, nil)
+	assert.Nil(t, err)
+	uid, err = database.CreateComment(body, author, path, false, nil)
+	assert.Nil(t, err)
+
+	uid, err = database.CreateComment(body, author, path, false, nil)
+	assert.Nil(t, err)
+
+	err = database.DeleteComment(*uid)
+	assert.Nil(t, err)
+
+	comments, err := database.GetAllComments()
+	assert.Nil(t, err)
+	assert.Len(t, comments, 3)
+
+	// This should not delete anything really, since we're 100 secs ahead
+	err = database.CleanUpStaleData(global.Unconfirmed, 100)
+	assert.Nil(t, err)
+	comments, err = database.GetAllComments()
+	assert.Nil(t, err)
+	assert.Len(t, comments, 3)
+	assert.Nil(t, comments[0].DeletedAt)
+	assert.Nil(t, comments[1].DeletedAt)
+	assert.NotNil(t, comments[2].DeletedAt)
+
+	// This should delete everything but one comment
+	err = database.CleanUpStaleData(global.Unconfirmed, -100)
+	assert.Nil(t, err)
+	comments, err = database.GetAllComments()
+	assert.Nil(t, err)
+	assert.Len(t, comments, 1)
+	assert.NotNil(t, comments[0].DeletedAt)
+}
+
+// CleanupStaleDataReturnsErrorOnInvalidType asserts that invalid cleanup typ checking does exist
+func (ts TestSuite) CleanupStaleDataReturnsErrorOnInvalidType(t *testing.T, database abstraction.Database) {
+	err := database.CleanUpStaleData(global.CleanupType(1414141414), -100)
+	assert.NotNil(t, err)
+	assert.Equal(t, "Unknown cleanup type CleanupType(1414141414)", err.Error())
 }
 
 // TestDataImport tests the data import functionality for the database

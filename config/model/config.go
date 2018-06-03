@@ -32,6 +32,7 @@ type Moderation struct {
 	Path                   *string          `json:"path,omitempty"`
 	OAauthProviders        *[]OauthProvider `json:"oauthProviders,omitempty"`
 	OAuthCallbackOrigin    *string          `json:"oauthCallbackOrigin,omitempty"`
+	PeriodicCleanUp        *PeriodicCleanUp `json:"periodicCleanup,omitempty"`
 }
 
 // Config - root of our config
@@ -86,4 +87,15 @@ type OauthProvider struct {
 	Secret       *string   `json:"secret,omitempty"`
 	Key          *string   `json:"key,omitempty"`
 	AdminUserIds *[]string `json:"adminUserIds,omitempty"`
+}
+
+// PeriodicCleanUp represents the settings for periodic cleanup of stale comments
+type PeriodicCleanUp struct {
+	Enabled                        bool  `json:"enabled"`
+	RemoveDeleted                  bool  `json:"removeDeleted"`
+	RemoveUnconfirmed              bool  `json:"removeUnconfirmed"`
+	UnconfirmedTimeoutSeconds      int64 `json:"unconfirmedTimeoutSeconds"`
+	DeletedTimeoutSeconds          int64 `json:"deletedTimeoutSeconds"`
+	RemoveDeletedPeriodSeconds     int64 `josn:"removeDeletedPeriodSeconds"`
+	RemoveUnconfirmedPeriodSeconds int64 `josn:"removeUnconfirmedPeriodSeconds"`
 }

@@ -40,7 +40,7 @@ Moderation section is responsible for editing the moderation functionality.
 | oauthCallbackOrigin | the base url of your API | string | true if using oauth | "" | fully fledged url of your admin panel |
 | disablePasswordLogin | disables the passsword authentication for admin panel if set to true | bool | false | false | true if using oauth, false otherwise | 
 | oauthProviders | determines which oauth providers will be used for mouthful admin panel, [see below](#oauth-providers)| array | false | none | your preference |
-
+| periodicCleanup | determines if periodic cleanup is used and all its preferences, [see below](#periodic-cleanup)| object | false | none | your preference |
 
 #### Oauth providers
 
@@ -53,6 +53,22 @@ The oauth providers is responsible for setting up your mouthful installation for
 | secret | Secret of the oauth provider. You'll have to head to the providers page to figure it out. | string | true | none | up to you |
 | key | Key or id of the oauth provider. You'll have to head to the providers page to figure it out. | string | true | none | up to you |
 | adminUserIds | Ids of the users that will be assigned admin status. | array of strings | true | none | up to you |
+
+#### Periodic cleanup
+
+Periodic cleanup enables mouthful to run background jobs cleaning  old deleted comments as well as unconfirmed comments that have not been confirmed for a predetermined amount of seconds. 
+| Variables     | Use           | Type | Required  | Default value | Recommended setting |
+| ------------- |:-------------:| :---:| :-------: |  :----------: |  :----------------: |
+| enabled     | determines if the cleanup functionality is used or not | bool | true | false | up to you |
+| removeDeleted | determines if the cleanup job will clean soft deleted comments | bool | true | false | up to you |
+| removeUnconfirmed | determines if the cleanup job will clean unconfirmed comments | bool | true | false | up to you |
+| unconfirmedTimeoutSeconds | the amount of seconds that it takes for an unconfirmed comment to be marked for deletion | int | true | none | up to you |
+| deletedTimeoutSeconds | the amount of seconds that it takes for a deleted comment to be marked for deletion | int | true | none | up to you |
+| removeDeletedPeriodSeconds | determines how often the deletion job for soft-deleted comments is run | int | false | 86400 | up to you |
+| removeUnconfirmedPeriodSeconds | determines how often the deletion job for unconfirmed comments is run | int | false | 86400 | up to you |
+
+If this all seems confusing, [see the example](./cleanup/config.json) and [its readme](./cleanup/README.md).
+
 
 ##### Supported Oauth providers
 

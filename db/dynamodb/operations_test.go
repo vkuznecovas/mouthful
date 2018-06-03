@@ -33,3 +33,8 @@ func TestDynamoDb(t *testing.T) {
 		assert.Nil(t, err)
 	}
 }
+
+func TestDynamoDialect(t *testing.T) {
+	testDb := setupDynamoTestDb()
+	assert.Equal(t, "dynamodb", testDb.GetDatabaseDialect())
+}
