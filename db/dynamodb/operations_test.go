@@ -64,6 +64,8 @@ func TestDynamoDatawipe(t *testing.T) {
 	th, err = testDb.GetAllThreads()
 	assert.Nil(t, err)
 	assert.Len(t, th, 0)
+}
+
 func TestDynamoDialect(t *testing.T) {
 	testDb := setupDynamoTestDb()
 	assert.Equal(t, "dynamodb", testDb.GetDatabaseDialect())
