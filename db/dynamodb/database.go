@@ -81,7 +81,12 @@ func CreateDatabase(databaseConfig model.Database) (abstraction.Database, error)
 	if err != nil {
 		return nil, err
 	}
-	db := dynamo.New(session.New(), &aws.Config{Region: aws.String(*databaseConfig.AwsRegion)})
+	cfg := &aws.Config{Region: aws.String(*databaseConfig.AwsRegion)}
+	if databaseConfig.DynamoDBEndpoint != nil {
+		cfg.Endpoint = aws.String(*databaseConfig.DynamoDBEndpoint)
+	}
+
+	db := dynamo.New(session.New(), cfg)
 	prefix := ""
 	if databaseConfig.TablePrefix != nil {
 		prefix = *databaseConfig.TablePrefix
