@@ -1,25 +1,22 @@
-package main
+package command
 
 import (
 	"encoding/xml"
-	"errors"
 	"fmt"
 	"io/ioutil"
 	"net/url"
-	"os"
 	"time"
 
-	"github.com/vkuznecovas/mouthful/global"
-
 	uuid "github.com/satori/go.uuid"
-	"github.com/vkuznecovas/mouthful/api"
+	"github.com/urfave/cli"
 	configModel "github.com/vkuznecovas/mouthful/config/model"
-	"github.com/vkuznecovas/mouthful/db"
 	dbModel "github.com/vkuznecovas/mouthful/db/model"
 
+	"github.com/vkuznecovas/mouthful/api"
+	"github.com/vkuznecovas/mouthful/cmd/spoon/command/model"
+	"github.com/vkuznecovas/mouthful/db"
 	"github.com/vkuznecovas/mouthful/db/sqlxDriver"
-
-	"github.com/vkuznecovas/mouthful/cmd/migration/disqus/model"
+	"github.com/vkuznecovas/mouthful/global"
 )
 
 type cpm struct {
@@ -118,13 +115,10 @@ func insertComment(comment *model.Cpost, comments *[]*model.Cpost, threads *[]*m
 	return nil
 }
 
-func main() {
-	argsWithoutProg := os.Args[1:]
-	if len(argsWithoutProg) == 0 {
-		panic(errors.New("Please provide a source database filename"))
-	}
+// DisqusMigrationRun migrates the provided disqus dump to a sqlite instance of mouthful
+func DisqusMigrationRun(disqusDumpPath string) error {
 	// read disqus.xml
-	contents, err := ioutil.ReadFile(argsWithoutProg[0])
+	contents, err := ioutil.ReadFile(disqusDumpPath)
 	if err != nil {
 		panic(err)
 	}
@@ -135,17 +129,17 @@ func main() {
 		Database: &dbFile,
 		Dialect:  "sqlite3",
 	})
+	if err != nil {
+		return cli.NewExitError(fmt.Sprintf("Couldn't create a new database %v", err.Error()), 1)
+	}
+
 	st := mouthfulDB.GetUnderlyingStruct()
 	driverCasted := st.(*sqlxDriver.Database)
-
-	if err != nil {
-		panic(err)
-	}
 
 	var dis model.Cdisqus
 	err = xml.Unmarshal([]byte(contents), &dis)
 	if err != nil {
-		panic(err)
+		return cli.NewExitError(fmt.Sprintf("Couldn't unmarshal disqus dump %v", err.Error()), 1)
 	}
 
 	// first we form a map for comments, we'll need this to get their parent
@@ -164,14 +158,16 @@ func main() {
 	for _, v := range dis.Cpost {
 		err = insertComment(v, &dis.Cpost, &dis.Cthread, *driverCasted)
 		if err != nil {
-			panic(err)
+			return cli.NewExitError(fmt.Sprintf("Couldn't insert disqus comment id: %v \n, Error: %v", *v.Cid, err.Error()), 1)
 		}
 	}
 
 	for _, v := range toDelete {
 		err = driverCasted.DeleteComment(v)
 		if err != nil {
-			panic(err)
+			return cli.NewExitError(fmt.Sprintf("Couldn't delete comment with id: %v \n, Error: %v", v, err.Error()), 1)
 		}
 	}
+
+	return nil
 }

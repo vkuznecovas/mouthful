@@ -19,8 +19,23 @@ builds:
       - windows
     goarch:
       - amd64
+  - main: ./cmd/spoon/main.go
+    binary: spoon
+    goos:
+      - linux
+    goarch:
+      - amd64
     hooks:
       pre: ./goreleaser-pre.sh
+  - main: ./cmd/spoon/main.go
+    env:
+      - CGO_ENABLED=1
+      - CC=x86_64-w64-mingw32-gcc
+    binary: spoon
+    goos:
+      - windows
+    goarch:
+      - amd64
 # Archive customization
 archive:
   format: tar.gz

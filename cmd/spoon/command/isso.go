@@ -1,66 +1,57 @@
-// This is the entry point for isso to mouthful migration
-//
-// Upon providing an isso database file the command will spit out a mouthful equivalent.
-package main
+package command
 
 import (
-	"errors"
+	"fmt"
 	"log"
 	"math"
-	"os"
 	"time"
 
-	"github.com/satori/go.uuid"
-
-	"github.com/vkuznecovas/mouthful/api"
-	"github.com/vkuznecovas/mouthful/global"
-
 	"github.com/jmoiron/sqlx"
-	_ "github.com/mattn/go-sqlite3"
-	"github.com/vkuznecovas/mouthful/cmd/migration/isso/model"
+	uuid "github.com/satori/go.uuid"
+	"github.com/urfave/cli"
+	"github.com/vkuznecovas/mouthful/api"
+	"github.com/vkuznecovas/mouthful/cmd/spoon/command/model"
 	"github.com/vkuznecovas/mouthful/db/sqlxDriver/sqlite"
+	"github.com/vkuznecovas/mouthful/global"
 )
 
-type commentParentMap struct {
+type commentParentMapIsso struct {
 	Id     int
 	Uid    uuid.UUID
 	Parent *int
 }
 
-func main() {
-	argsWithoutProg := os.Args[1:]
-	if len(argsWithoutProg) == 0 {
-		panic(errors.New("Please provide a source database filename"))
-	}
-	issoDB, err := sqlx.Connect("sqlite3", argsWithoutProg[0])
+// IssoCommandRun takes the issoDbPath connects to it and mmigrates all the comments to a new mouthful sqlite instance
+func IssoCommandRun(issoDbPath string) error {
+	issoDB, err := sqlx.Connect("sqlite3", issoDbPath)
 	if err != nil {
-		panic(err)
+		return cli.NewExitError(fmt.Sprintf("Couldn't connect to isso db %v \n Error: %v", issoDbPath, err.Error()), 1)
 	}
 	mouthDB, err := sqlx.Connect("sqlite3", "./mouthful.db")
 	if err != nil {
-		panic(err)
+		return cli.NewExitError(fmt.Sprintf("Couldn't connect to mouthful db %v \n Error: %v", "./mouthful.db", err.Error()), 1)
 	}
 	for _, v := range sqlite.SqliteQueries {
 		mouthDB.MustExec(v)
 	}
 	threads, err := issoDB.Queryx(issoDB.Rebind("select * from threads"))
 	if err != nil {
-		panic(err)
+		return cli.NewExitError(fmt.Sprintf("Couldn't select threads from isso DB %v \n Error: %v", issoDbPath, err.Error()), 1)
 	}
 	log.Println("Migration started")
-	commentMap := make(map[int]commentParentMap)
+	commentMap := make(map[int]commentParentMapIsso)
 	for threads.Next() {
 		var t model.Thread
 		err = threads.StructScan(&t)
 		if err != nil {
-			panic(err)
+			return cli.NewExitError(fmt.Sprintf("Couldn't select thread from isso DB %v", err.Error()), 1)
 		}
 		uri := api.NormalizePath(*t.Uri)
 		log.Println("Migrating thread " + uri)
 		tuid := global.GetUUID()
 		_, err = mouthDB.Exec(mouthDB.Rebind("INSERT INTO Thread(Id,Path) VALUES(?, ?)"), tuid, uri)
 		if err != nil {
-			panic(err)
+			return cli.NewExitError(fmt.Sprintf("Couldn't insert thread into mouthful DB %v, Error: %v", t, err.Error()), 1)
 		}
 		comments, err := issoDB.Queryx(issoDB.Rebind("select * from comments where tid = ? order by created asc"), t.Id)
 		for comments.Next() {
@@ -68,11 +59,11 @@ func main() {
 			var c model.Comment
 			err = comments.StructScan(&c)
 			if err != nil {
-				panic(err)
+				return cli.NewExitError(fmt.Sprintf("Couldn't select comment from isso DB %v", err.Error()), 1)
 			}
 			log.Printf("Migrating comment %v\n", c.Id)
 			commentId := global.GetUUID()
-			commentMap[c.Id] = commentParentMap{
+			commentMap[c.Id] = commentParentMapIsso{
 				Id:     c.Id,
 				Parent: c.Parent,
 				Uid:    commentId,
@@ -109,10 +100,10 @@ func main() {
 			body := global.ParseAndSaniziteMarkdown(*c.Text)
 			_, err = mouthDB.Exec(mouthDB.Rebind("INSERT INTO comment(id, threadId, body, author, confirmed, createdAt, replyTo, deletedAt) VALUES(?,?,?,?,?,?,?,?)"), commentId, tuid, body, *c.Author, confirmed, createdTime, replyTo, deletedAt)
 			if err != nil {
-				panic(err)
+				return cli.NewExitError(fmt.Sprintf("Couldn't insert comment into mouthful DB %v, Error: %v", c, err.Error()), 1)
 			}
 		}
 
 	}
-
+	return nil
 }

@@ -232,6 +232,9 @@ Currently supported databases are:
 |awsRegion | determines the aws region we'll connect to | string | true |  | |
 |awsAccessKeyID | your aws access key id. Can be overriden by env variable `AWS_ACCESS_KEY_ID` | string | true |  |  |
 |awsSecretAccessKey | your secret aws access key. Can be overriden by env variable `AWS_SECRET_ACCESS_KEY` | string | true |  |  |
+| dynamoDBEndpoint | endpoint of the aws dynamodb. Mostly used for testing. | string | false | none | none |
+
+
 
 You can find suggested provision ratios for dynamodb in the [example dynamodb config file](./dynamodb/config.json). They are experimental atm. Will be updated once more data on usage is collected.
 

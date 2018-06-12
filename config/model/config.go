@@ -15,6 +15,7 @@ type Database struct {
 	DynamoDBCommentWriteUnits *int64  `json:"dynamoDBCommentWriteUnits,omitempty"`
 	DynamoDBIndexWriteUnits   *int64  `json:"dynamoDBIndexWriteUnits,omitempty"`
 	DynamoDBIndexReadUnits    *int64  `json:"dynamoDBIndexReadUnits,omitempty"`
+	DynamoDBEndpoint          *string `json:"dynamoDBEndpoint,omitempty"`
 	AwsAccessKeyID            *string `json:"awsAccessKeyID,omitempty"`
 	AwsSecretAccessKey        *string `json:"awsSecretAccessKey,omitempty"`
 	AwsRegion                 *string `json:"awsRegion,omitempty"`

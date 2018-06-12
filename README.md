@@ -25,8 +25,9 @@ There's a demo hosted at [mouthful.dizzy.zone](https://mouthful.dizzy.zone). Che
     * [Config file from Docker image](#config-file-from-docker)
     * [Nginx configuration](#nginx-config)
     * [Periodic cleanup](#periodic-cleanup)
-* [Migrations](#migrations)
-* [Backups and import](#backups-and-import)
+* [Spoon](#spoon)
+    * [Migrations](#migrations)
+    * [Backups and import](#backups-and-import)
 * [Contributing](#contributing)
 * [Wish list](#wish-list)
 * [Get in touch](#get-in-touch)
@@ -246,18 +247,21 @@ This is caused by mouthful using static assets and not serving any HTML itself. 
 
 Mouthful allows for periodic cleanup of non-confirmed and soft-deleted comments. It's fully configurable under the moderation section of the config. For more on that, head to the [config documentation](./examples/configs/README.md#oauth-providers).
 
-# Migrations
+# Spoon
 
-Mouthful supports migrating existing data from the following commenting engines:
-* [Isso](./cmd/migration/isso/README.md)
-* [Disqus](./cmd/migration/disqus/README.md)
+Mouthful comes with a helper cli tool, called spoon. Spoon allows for data export and import, as well as migrations between databases and even different comment providers. [Head over to spoon documentation for examples.](./cmd/spoon/README.md)
 
-Click on them to read the documentation on how that is done.
+## Migrations
 
-# Backups and import
+Spoon supports migrating existing data from the following commenting engines:
+* Isso
+* Disqus
 
-Mouthful allows for easy comment dumping and import of existing dumps. There's an [import tool]((./cmd/backup/import/README.md)) and an [export tool]((./cmd/backup/export/README.md)) you can use to do that. (They will be merged under one roof, some day.) 
+[Head over to spoon documentation for examples.](./cmd/spoon/README.md)
 
+## Backups and import
+
+Spoon allows for easy comment dumping and import of existing dumps. [Head over to spoon documentation for examples.](./cmd/spoon/README.md)
 
 # Contributing
 

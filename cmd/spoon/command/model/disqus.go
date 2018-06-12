@@ -1,4 +1,4 @@
-// package model contains all the required
+// package model contains all the required models for commands
 package model
 
 import "encoding/xml"
