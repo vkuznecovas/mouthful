@@ -19,11 +19,7 @@ func OverrideScriptRootInAdminHTML(prefix, filepath string) error {
 	if err != nil {
 		return err
 	}
-	r, err := regexp.Compile(scriptOverridePattern)
-	if err != nil {
-		return err
-	}
-
+	r := regexp.MustCompile(scriptOverridePattern)
 	newHTML := string(b)
 	res := r.FindAllSubmatch(b, -1)
 	for _, v := range res {
@@ -52,10 +48,7 @@ func OverrideScriptPathInBundle(prefix, filepath string) error {
 		prefix += "/"
 	}
 
-	r, err := regexp.Compile(budleOverridePattern)
-	if err != nil {
-		return err
-	}
+	r := regexp.MustCompile(budleOverridePattern)
 	newHTML := string(b)
 	splits := r.FindStringSubmatchIndex(newHTML)
 	if len(splits) != 4 {

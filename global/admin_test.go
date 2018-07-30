@@ -107,6 +107,16 @@ func TestOverrideScriptPathInBundle(t *testing.T) {
 	assert.Nil(t, err)
 }
 
+func TestOverrideScriptPathInBundle_Errors_On_No_File(t *testing.T) {
+	err := global.OverrideScriptPathInBundle("/", "this does not exist")
+	assert.Error(t, err)
+}
+
+func TestOverrideScriptPathInAdminHTML_Errors_On_No_File(t *testing.T) {
+	err := global.OverrideScriptRootInAdminHTML("/", "this does not exist")
+	assert.Error(t, err)
+}
+
 func TestOverrideScriptPathInBundleReturnsErrorOnWrongSliceLength(t *testing.T) {
 	filepath := "./t.js"
 
@@ -144,4 +154,93 @@ func TestFindAdminPanelChunkFilename(t *testing.T) {
 	assert.Equal(t, name, parsedName)
 	err = os.Remove(filepath)
 	assert.Nil(t, err)
+}
+
+func TestRewriteAdminPanelScripts_CouldNotOverrideRoot(t *testing.T) {
+	err := global.RewriteAdminPanelScripts("filepath")
+	assert.NotNil(t, err)
+	assert.Equal(t, "Couldn't override the static admin html root. Please check if the file index file(./static/index.html) is available and the mouthful user has the permissions to access it", err.Error())
+}
+
+func TestRewriteAdminPanelScripts_CouldNotFindBundle(t *testing.T) {
+	filepath := "./static/index.html"
+
+	var _, err = os.Stat(filepath)
+	// create file if not exists
+	if os.IsNotExist(err) {
+		err := os.Mkdir("./static", 0777)
+		assert.Nil(t, err)
+
+		assert.Nil(t, err)
+		file, err := os.Create(filepath)
+		assert.Nil(t, err)
+		defer file.Close()
+		defer os.RemoveAll(filepath)
+		defer os.RemoveAll("./static")
+		_, err = file.WriteString(input)
+		assert.Nil(t, err)
+
+		file.Close()
+	}
+	err = global.RewriteAdminPanelScripts("/test")
+	assert.NotNil(t, err)
+	assert.Equal(t, "Couldn't find the admin panel chunk file. Please check if the budle file is available and the mouthful user has permissions to access it in the directory ./static", err.Error())
+}
+
+func TestRewriteAdminPanelScripts_CouldNotOverrideBundle(t *testing.T) {
+	filepath := "./static/index.html"
+	bundlePath := "./static/bundle.2aa25.js"
+	var _, err = os.Stat(filepath)
+	// create file if not exists
+	if os.IsNotExist(err) {
+		err := os.Mkdir("./static", 0777)
+		assert.Nil(t, err)
+		file, err := os.Create(bundlePath)
+		defer os.RemoveAll(bundlePath)
+		assert.Nil(t, err)
+		file, err = os.Create(filepath)
+		assert.Nil(t, err)
+		defer file.Close()
+		defer os.RemoveAll(filepath)
+		defer os.RemoveAll("./static")
+		_, err = file.WriteString(input)
+		assert.Nil(t, err)
+		file.Close()
+	}
+	err = global.RewriteAdminPanelScripts("/test")
+	assert.NotNil(t, err)
+	assert.Equal(t, "Couldn't override the static admin script path. Please check if the script file(./static/bundle.2aa25.js) is available and the mouthful user has the permissions to access it", err.Error())
+}
+
+func TestRewriteAdminPanelScripts_OK(t *testing.T) {
+	filepath := "./static/index.html"
+	bundlePath := "./static/bundle.2aa25.js"
+	var _, err = os.Stat(filepath)
+	// create file if not exists
+	if os.IsNotExist(err) {
+		err := os.Mkdir("./static", 0777)
+		assert.Nil(t, err)
+		bundleFile, err := os.Create(bundlePath)
+		defer os.RemoveAll(bundlePath)
+		assert.Nil(t, err)
+		_, err = bundleFile.WriteString(scriptInput)
+		assert.Nil(t, err)
+		bundleFile.Close()
+		file, err := os.Create(filepath)
+		assert.Nil(t, err)
+		defer file.Close()
+		defer os.RemoveAll(filepath)
+		defer os.RemoveAll("./static")
+		_, err = file.WriteString(input)
+		assert.Nil(t, err)
+		file.Close()
+	}
+	err = global.RewriteAdminPanelScripts("/test")
+	assert.Nil(t, err)
+}
+
+func TestFindAdminPanelChunkFilename_Errors_On_No_file(t *testing.T) {
+	parsedName, err := global.FindAdminPanelChunkFilename("./")
+	assert.Equal(t, "", parsedName)
+	assert.Error(t, err)
 }
