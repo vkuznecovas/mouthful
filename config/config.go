@@ -32,7 +32,7 @@ func TransformConfigToClientConfig(input *model.Config) (conf *model.ClientConfi
 		conf.MaxCommentLength = &length
 	}
 	conf.PageSize = input.Client.PageSize
-	if input.Moderation.MaxCommentLength != nil {
+	if input.Moderation.MaxAuthorLength != nil {
 		conf.MaxAuthorLength = input.Moderation.MaxAuthorLength
 	} else {
 		length := global.DefaultAuthorLengthLimit
