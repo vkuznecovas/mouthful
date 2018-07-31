@@ -138,8 +138,8 @@
 [[projects]]
   name = "github.com/gofrs/uuid"
   packages = ["."]
-  revision = "f58768cc1a7a7e77a3bd49e98cdd21419399b6a3"
-  version = "v1.2.0"
+  revision = "3a54a6416087bae7aa0ac32dd79fe1bf87bc99e4"
+  version = "v2.1.0"
 
 [[projects]]
   name = "github.com/golang/protobuf"
@@ -443,6 +443,6 @@
 [solve-meta]
   analyzer-name = "dep"
   analyzer-version = 1
-  inputs-digest = "76f3ac8d995875e6f2d81623488462e4b83215caeeed2f4b5b11973014e515c0"
+  inputs-digest = "7eaba16a87e2f03ae5a341f9c3fe81b1370bfaefbb6e30da73331c2e06d8c03c"
   solver-name = "gps-cdcl"
   solver-version = 1
