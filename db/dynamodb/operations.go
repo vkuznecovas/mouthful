@@ -10,7 +10,7 @@ import (
 
 	"github.com/guregu/dynamo"
 
-	"github.com/satori/go.uuid"
+	"github.com/gofrs/uuid"
 	dynamoModel "github.com/vkuznecovas/mouthful/db/dynamodb/model"
 	"github.com/vkuznecovas/mouthful/db/model"
 	"github.com/vkuznecovas/mouthful/db/tool"

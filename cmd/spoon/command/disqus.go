@@ -7,7 +7,7 @@ import (
 	"net/url"
 	"time"
 
-	uuid "github.com/satori/go.uuid"
+	uuid "github.com/gofrs/uuid"
 	"github.com/urfave/cli"
 	configModel "github.com/vkuznecovas/mouthful/config/model"
 	dbModel "github.com/vkuznecovas/mouthful/db/model"

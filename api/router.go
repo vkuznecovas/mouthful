@@ -7,9 +7,9 @@ import (
 
 	"github.com/gin-contrib/sessions"
 	"github.com/gin-gonic/gin"
+	"github.com/gofrs/uuid"
 	"github.com/markbates/goth/gothic"
 	"github.com/patrickmn/go-cache"
-	"github.com/satori/go.uuid"
 
 	"github.com/vkuznecovas/mouthful/api/model"
 	cfg "github.com/vkuznecovas/mouthful/config"

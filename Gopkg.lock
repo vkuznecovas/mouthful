@@ -136,6 +136,12 @@
   version = "v1.3"
 
 [[projects]]
+  name = "github.com/gofrs/uuid"
+  packages = ["."]
+  revision = "f58768cc1a7a7e77a3bd49e98cdd21419399b6a3"
+  version = "v1.2.0"
+
+[[projects]]
   name = "github.com/golang/protobuf"
   packages = ["proto"]
   revision = "925541529c1fa6821df4e44ce2723319eb2be768"
@@ -305,12 +311,6 @@
   version = "v1.0.0"
 
 [[projects]]
-  name = "github.com/satori/go.uuid"
-  packages = ["."]
-  revision = "f58768cc1a7a7e77a3bd49e98cdd21419399b6a3"
-  version = "v1.2.0"
-
-[[projects]]
   branch = "master"
   name = "github.com/shurcooL/sanitized_anchor_name"
   packages = ["."]
@@ -350,6 +350,12 @@
   ]
   revision = "f0ff82677fc4826ddae9ac45f2e11462fa245dad"
   version = "v2.2.0"
+
+[[projects]]
+  name = "github.com/urfave/cli"
+  packages = ["."]
+  revision = "cfb38830724cc34fedffe9a2a29fb54fa9169cd1"
+  version = "v1.20.0"
 
 [[projects]]
   branch = "master"
@@ -437,6 +443,6 @@
 [solve-meta]
   analyzer-name = "dep"
   analyzer-version = 1
-  inputs-digest = "828efc0eda51e9a4f2090a48c180d951ef378f4c8d19a1bfedd3436c7e6f96ce"
+  inputs-digest = "76f3ac8d995875e6f2d81623488462e4b83215caeeed2f4b5b11973014e515c0"
   solver-name = "gps-cdcl"
   solver-version = 1

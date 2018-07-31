@@ -2,7 +2,7 @@
 package abstraction
 
 import (
-	"github.com/satori/go.uuid"
+	"github.com/gofrs/uuid"
 	"github.com/vkuznecovas/mouthful/db/model"
 	"github.com/vkuznecovas/mouthful/global"
 )

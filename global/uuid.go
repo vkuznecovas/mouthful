@@ -1,7 +1,7 @@
 package global
 
 import (
-	"github.com/satori/go.uuid"
+	"github.com/gofrs/uuid"
 )
 
 // GetUUID returns a new random UUID
