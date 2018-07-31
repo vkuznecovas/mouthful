@@ -6,7 +6,7 @@ import (
 
 // GetUUID returns a new random UUID
 func GetUUID() uuid.UUID {
-	return uuid.NewV4()
+	return uuid.Must(uuid.NewV4())
 }
 
 // ParseUUIDFromString tries to parse a string as uuid, if fails returns an error. Otherwise a pointer to uuid.UUID
