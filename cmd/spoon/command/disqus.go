@@ -88,7 +88,7 @@ func insertComment(comment *model.Cpost, comments *[]*model.Cpost, threads *[]*m
 					}
 				}
 			}
-			uid := uuid.NewV4()
+			uid := uuid.Must(uuid.NewV4())
 			createdAt, err := time.Parse(time.RFC3339, comment.CcreatedAt.SValue)
 			if err != nil {
 				panic(err)
@@ -145,7 +145,7 @@ func DisqusMigrationRun(disqusDumpPath string) error {
 	// first we form a map for comments, we'll need this to get their parent
 	for _, v := range dis.Cpost {
 		m := cpm{
-			Uid: uuid.NewV4(),
+			Uid: uuid.Must(uuid.NewV4()),
 		}
 		if v.Cparent != nil {
 			m.Parent = &v.Cparent.AttrDsqSpaceid
