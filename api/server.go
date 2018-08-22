@@ -6,6 +6,7 @@ import (
 	"time"
 
 	"github.com/gin-contrib/cors"
+	"github.com/gin-contrib/pprof"
 	"github.com/gin-contrib/sessions"
 	"github.com/gin-contrib/static"
 	"github.com/gin-gonic/gin"
@@ -79,9 +80,8 @@ func GetServer(db *abstraction.Database, config *model.Config) (*gin.Engine, err
 	if config.API.Logging {
 		r.Use(gin.Logger())
 	}
-
 	r.ForwardedByClientIP = true
-
+	pprof.Register(r, &pprof.Options{RoutePrefix: "debug/pprof"})
 	if config.API.Cors.Enabled {
 		corsConfig := cors.DefaultConfig()
 		corsConfig.AllowOrigins = *config.API.Cors.AllowedOrigins
