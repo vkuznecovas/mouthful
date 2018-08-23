@@ -172,7 +172,11 @@ export default class Panel extends Component {
 				return <Thread url={getUrl(this.state, window)} key={"___thread" + t.Id} thread={t} comments={c} reload={this.reload} updateComment={this.updateComment}/>
 			}
 			return null;
-		})
+		}).sort(function(a, b) {
+			a = new Date(a.CreatedAt);
+			b = new Date(b.CreatedAt);
+			return a>b ? -1 : a<b ? 1 : 0;
+		});
 		var resultDiv = threads.filter(x => x != null).length > 0 ? threads : <div class={style.nothing}>Nothing to display</div>
 		return (
 			<div class={style.mouthful_container}>
