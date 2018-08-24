@@ -79,9 +79,7 @@ func GetServer(db *abstraction.Database, config *model.Config) (*gin.Engine, err
 	if config.API.Logging {
 		r.Use(gin.Logger())
 	}
-
 	r.ForwardedByClientIP = true
-
 	if config.API.Cors.Enabled {
 		corsConfig := cors.DefaultConfig()
 		corsConfig.AllowOrigins = *config.API.Cors.AllowedOrigins
