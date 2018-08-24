@@ -10,7 +10,7 @@ import (
 	"strings"
 	"testing"
 
-	"github.com/satori/go.uuid"
+	"github.com/gofrs/uuid"
 	"github.com/vkuznecovas/mouthful/global"
 
 	"github.com/vkuznecovas/mouthful/db/abstraction"

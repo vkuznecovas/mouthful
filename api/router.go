@@ -2,14 +2,15 @@
 package api
 
 import (
+	"encoding/json"
 	"log"
 	"net/http"
 
 	"github.com/gin-contrib/sessions"
 	"github.com/gin-gonic/gin"
+	"github.com/gofrs/uuid"
 	"github.com/markbates/goth/gothic"
 	"github.com/patrickmn/go-cache"
-	"github.com/satori/go.uuid"
 
 	"github.com/vkuznecovas/mouthful/api/model"
 	cfg "github.com/vkuznecovas/mouthful/config"
@@ -99,9 +100,9 @@ func (r *Router) GetComments(c *gin.Context) {
 	path = NormalizePath(path)
 	if r.cache != nil {
 		if cacheHit, found := r.cache.Get(path); found {
-			comments := cacheHit.(*[]dbModel.Comment)
+			jsonString := cacheHit.(*[]byte)
 			c.Writer.Header().Set("X-Cache", "HIT")
-			c.JSON(200, *comments)
+			c.Data(200, "application/json; charset=utf-8", *jsonString)
 			return
 		}
 	}
@@ -118,12 +119,17 @@ func (r *Router) GetComments(c *gin.Context) {
 		return
 	}
 	if comments != nil {
+		js, err := json.Marshal(comments)
+		if err != nil {
+			c.JSON(500, global.ErrInternalServerError.Error())
+			return
+		}
 		if r.cache != nil {
-			r.cache.Set(path, &comments, cache.DefaultExpiration)
+			r.cache.Set(path, &js, cache.DefaultExpiration)
 			c.Writer.Header().Set("X-Cache", "MISS")
 		}
 		if len(comments) > 0 {
-			c.JSON(200, comments)
+			c.Data(200, "application/json; charset=utf-8", js)
 		} else {
 			c.JSON(404, global.ErrThreadNotFound.Error())
 		}

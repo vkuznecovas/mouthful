@@ -25,7 +25,7 @@ cd ..
 dep ensure
 
 # build binary
-go build -a -ldflags="-s -w" -installsuffix cgo -o dist/mouthful main.go
+go build -tags=jsoniter -a -ldflags="-s -w" -installsuffix cgo -o dist/mouthful main.go
 chmod +x dist/mouthful
 
 # copy over config
