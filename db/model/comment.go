@@ -4,7 +4,7 @@ package model
 import (
 	"time"
 
-	"github.com/satori/go.uuid"
+	"github.com/gofrs/uuid"
 )
 
 // Comment represents a comment in a thread

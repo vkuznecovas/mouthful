@@ -8,7 +8,7 @@ import (
 	"testing"
 	"time"
 
-	uuid "github.com/satori/go.uuid"
+	uuid "github.com/gofrs/uuid"
 	"github.com/vkuznecovas/mouthful/global"
 
 	"github.com/stretchr/testify/assert"

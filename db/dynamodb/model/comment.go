@@ -7,7 +7,7 @@ import (
 
 	"github.com/vkuznecovas/mouthful/db/model"
 
-	"github.com/satori/go.uuid"
+	"github.com/gofrs/uuid"
 )
 
 // Comment represents a comment in a thread

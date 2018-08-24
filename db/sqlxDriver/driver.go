@@ -8,8 +8,8 @@ import (
 
 	"github.com/jmoiron/sqlx"
 	// We absolutely need the sqlite driver here, this whole package depends on it
+	"github.com/gofrs/uuid"
 	_ "github.com/mattn/go-sqlite3"
-	"github.com/satori/go.uuid"
 	"github.com/vkuznecovas/mouthful/db/model"
 	tool "github.com/vkuznecovas/mouthful/db/tool"
 
