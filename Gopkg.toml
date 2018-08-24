@@ -38,5 +38,9 @@
   name = "github.com/gin-contrib/sessions"
 
 [[constraint]]
+  name = "github.com/gin-gonic/gin"
+  version = "v1.3.0"
+
+[[constraint]]
   name = "github.com/gofrs/uuid"
   version = "2.1.0"

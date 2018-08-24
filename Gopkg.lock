@@ -118,10 +118,11 @@
   packages = [
     ".",
     "binding",
+    "json",
     "render"
   ]
-  revision = "d459835d2b077e44f7c9b453505ee29881d5d12d"
-  version = "v1.2"
+  revision = "b869fe1415e4b9eb52f247441830d502aece2d4d"
+  version = "v1.3.0"
 
 [[projects]]
   name = "github.com/go-ini/ini"
@@ -193,6 +194,12 @@
     "reflectx"
   ]
   revision = "05cef0741ade10ca668982355b3f3f0bcf0ff0a8"
+
+[[projects]]
+  name = "github.com/json-iterator/go"
+  packages = ["."]
+  revision = "1624edc4454b8682399def8740d46db5e4362ba4"
+  version = "1.1.5"
 
 [[projects]]
   branch = "master"
@@ -285,6 +292,18 @@
   name = "github.com/microcosm-cc/bluemonday"
   packages = ["."]
   revision = "542fd4642604d0d0c26112396ce5b1a9d01eee0b"
+
+[[projects]]
+  name = "github.com/modern-go/concurrent"
+  packages = ["."]
+  revision = "bacd9c7ef1dd9b15be4a9909b8ac7a4e313eec94"
+  version = "1.0.3"
+
+[[projects]]
+  name = "github.com/modern-go/reflect2"
+  packages = ["."]
+  revision = "4b7aa43c6742a2c18fdef89dd197aaae7dac7ccd"
+  version = "1.0.1"
 
 [[projects]]
   branch = "master"
@@ -443,6 +462,6 @@
 [solve-meta]
   analyzer-name = "dep"
   analyzer-version = 1
-  inputs-digest = "5139275857e0ce2ffede1c3f927463d25c162bce10f23bd11726ac618246c1c0"
+  inputs-digest = "c163a5b623851666294bbe4601a8d372149b4e15eee0eda7e5c087b71c431abd"
   solver-name = "gps-cdcl"
   solver-version = 1
