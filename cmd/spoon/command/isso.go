@@ -6,8 +6,8 @@ import (
 	"math"
 	"time"
 
+	uuid "github.com/gofrs/uuid"
 	"github.com/jmoiron/sqlx"
-	uuid "github.com/satori/go.uuid"
 	"github.com/urfave/cli"
 	"github.com/vkuznecovas/mouthful/api"
 	"github.com/vkuznecovas/mouthful/cmd/spoon/command/model"
