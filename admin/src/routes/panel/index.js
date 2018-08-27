@@ -149,7 +149,11 @@ export default class Panel extends Component {
 		if (!(this.state.threads && this.state.comments && this.state.threads.length && this.state.comments.length)) {
 			return <div class={style.mouthful_container}><div class={style.mouthful_login}>No comments yet!</div></div>
 		}
-		var threads = this.state.threads.map(t => {
+		var threads = this.state.threads.sort((a, b) => {
+			a = new Date(a.CreatedAt);
+			b = new Date(b.CreatedAt);
+			return a>b ? -1 : a<b ? 1 : 0;
+		}).map(t => {
 			var comments = this.state.comments
 			const pendingFilter = x => {
 				return !x.Confirmed && x.DeletedAt == null
