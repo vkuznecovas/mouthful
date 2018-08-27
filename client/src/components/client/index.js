@@ -126,6 +126,7 @@ export default class App extends Component {
             toShow = totalComments * context.state.config.pageSize + leftOvers * context.state.config.pageSize;
           }
           var parsedResponse = JSON.parse(http.responseText)
+          
           cm.push({
             ThreadId: context.state.threadId,
             Id: parsedResponse.id,
@@ -160,12 +161,16 @@ export default class App extends Component {
     if (this.state.pathPrefix) {
       path = this.state.pathPrefix + window.location.pathname;
     }
-    http.send(JSON.stringify({
+    var bod = {
       Body: comment,
       Author: author,
       Path: path,
       ReplyTo: replyTo
-    }))
+    }
+    if (email != null) {
+      bod.Email = email
+    }
+    http.send(JSON.stringify(bod))
   }
   isFormVisible(id) {
     filtered = this.state.forms.filter(x=>x.id == id)

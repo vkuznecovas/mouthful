@@ -223,7 +223,14 @@ func (r *Router) CreateComment(c *gin.Context) {
 
 	createCommentBody.Path = NormalizePath(createCommentBody.Path)
 	if r.config.Honeypot && createCommentBody.Email != nil {
-		c.AbortWithStatusJSON(200, createCommentBody)
+		c.AbortWithStatusJSON(200, model.CreateCommentResponse{
+			Id:      uuid.Must(uuid.NewV4()).String(),
+			Path:    createCommentBody.Path,
+			Body:    createCommentBody.Body,
+			Author:  createCommentBody.Author,
+			Email:   createCommentBody.Email,
+			ReplyTo: createCommentBody.ReplyTo,
+		})
 		return
 	}
 
