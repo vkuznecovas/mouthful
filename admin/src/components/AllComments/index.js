@@ -1,5 +1,4 @@
 import { h, Component } from 'preact';
-import { route } from 'preact-router';
 import Thread from '../Thread';
 import Comment from '../Comment';
 
@@ -13,9 +12,9 @@ export default class AllComments extends Component {
       return a > b ? -1 : a < b ? 1 : 0;
     }).map(t => {
       const comments = this.props.comments.filter(c => c.ThreadId === t.Id)
-            .filter(c => c.DeletedAt === null);
+        .filter(c => c.DeletedAt === null);
 
-      const commentsComponent = comments.map(c => <Comment author={c.Author} body={c.Body} />);
+      const commentsComponent = comments.map(c => <Comment id={c.Id} author={c.Author} body={c.Body} updateCommentsState={this.props.updateCommentsState} />);
 
       return <Thread>{commentsComponent}</Thread>;
     });

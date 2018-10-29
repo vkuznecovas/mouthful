@@ -32,15 +32,17 @@ export default class Login extends Component {
       },
     };
 
-    await axios.post(url, JSON.stringify({ password: this.state.value }), config)
-      .then((res) => {
-        console.log(res);
-        if (res.status === 204) {
-          this.props.handleLogin();
-        }
-      })
-      .catch(err => console.error('Something went wrong', error));
- }
+    try {
+      const res = await axios.post(url, JSON.stringify({ password: this.state.value }), config);
+
+      if (res.status === 204) {
+        this.props.handleLogin();
+      }
+    } catch (err) {
+      console.log('Something went wrong', err);
+    }
+
+  }
 
   componentDidMount() {
     if (this.props.config.disablePasswordLogin) {
@@ -50,16 +52,16 @@ export default class Login extends Component {
 
   render() {
     const providersListItems = this.props.config.oauthProviders && this.props.config.oauthProviders.length > 0
-          ? this.props.config.oauthProviders.map( x => <li><a onClick={() => this.handleOauthClick(x)}>Log in with {x}</a></li>)
-          : null;
+      ? this.props.config.oauthProviders.map( x => <li><a onClick={() => this.handleOauthClick(x)}>Log in with {x}</a></li>)
+      : null;
 
     const oauthProviders = <div><ul>{providersListItems}</ul></div>;
 
     return (
       <div class={style.mouthful_login}>
         <form onSubmit={this.handleSubmit}>
-        <input type="password" value={this.state.value} onChange={this.handleChange} />
-        <input class={style.mouthful_submit} type="submit" value="Submit" />
+          <input type="password" value={this.state.value} onChange={this.handleChange} />
+          <input class={style.mouthful_submit} type="submit" value="Submit" />
         </form>
         {oauthProviders}
       </div>

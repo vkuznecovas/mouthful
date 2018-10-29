@@ -1,18 +1,10 @@
 import { h, Component } from 'preact';
-import { route } from 'preact-router';
 import Thread from '../Thread';
 import Comment from '../Comment';
 
 export default class DeletedComments extends Component {
-  constructor(props) {
-    super(props);
-    // this.state = {
-    //   comments: [],
-    // };
-  }
-
   render() {
-    // NOTE: this looks like shit. gonna rewrite it to make it more readible
+    // NOTE: this looks like shit. gonna rewrite it to make it more readable
 
     const threads = this.props.threads.sort((a, b) => {
       a = new Date(a.CreatedAt);
@@ -20,9 +12,9 @@ export default class DeletedComments extends Component {
       return a > b ? -1 : a < b ? 1 : 0;
     }).map(t => {
       const comments = this.props.comments.filter(c => c.ThreadId === t.Id)
-            .filter(c => c.DeletedAt !== null);
+        .filter(c => c.DeletedAt !== null);
 
-      const commentsComponent = comments.map(c => <Comment author={c.Author} body={c.Body} />);
+      const commentsComponent = comments.map(c => <Comment id={c.Id} author={c.Author} body={c.Body} updateCommentsState={this.props.updateCommentsState} hardDelete="true" undoDelete="true" />);
 
       return <Thread>{commentsComponent}</Thread>;
     });
