@@ -1,0 +1,19 @@
+{
+  "extends": "eslint-config-synacor",
+  "rules": {
+    "indent": ["error", 2],
+    "comma-dangle": ["error", "always-multiline"],
+    "react/sort-comp": ["error", {
+      order: {
+        "static-methods",
+        "everything-else",
+        "lifecycle",
+        "render",
+      }
+    }],
+    "brace-style": ["error", "1tbs", { "allowSingleLine": true}],
+  },
+  "globals": {
+    "window": true,
+  },
+}
