@@ -1,6 +1,7 @@
 import { Component } from 'preact';
 import axios from 'axios';
 import Button from '../Button';
+import { axiosConfig } from '../../utils'
 
 export default class Comment extends Component {
   constructor(props) {
@@ -33,7 +34,7 @@ export default class Comment extends Component {
         Body: this.props.body,
         Author: this.props.author
       };
-      const res = await axios.patch(`${window.location.origin}/v1/admin/comments`, data);
+      const res = await axios.patch('/v1/admin/comments', data, axiosConfig);
 
       if (res.status === 204) {
         // TODO: reload comments
@@ -52,7 +53,7 @@ export default class Comment extends Component {
         Author: this.props.author,
         Confirmed: true,
       };
-      const res = await axios.patch(`${window.location.origin}/v1/admin/comments`, data);
+      const res = await axios.patch('/v1/admin/comments', data, axiosConfig);
 
       if (res.status === 204) {
         // TODO: reload comments
@@ -79,7 +80,7 @@ export default class Comment extends Component {
           }
         };
 
-      const res = await axios.delete(`${window.location.origin}/v1/admin/comments`, config);
+      const res = await axios.delete('/v1/admin/comments', config, axiosConfig);
 
       if (res.status === 204) {
         const comments = this.props.comments.filter(c => c.Id !== this.props.id);
@@ -93,7 +94,7 @@ export default class Comment extends Component {
   async undoDeleteComment() {
     try {
       const data = { CommentId: this.props.id };
-      const res = await axios.post(`${window.location.origin}/v1/admin/comments/restore`, data);
+      const res = await axios.post('/v1/admin/comments/restore', data, axiosConfig);
 
       if (res.status === 204) {
         const comments = this.props.comments.filter(c => c.Id !== this.props.id);

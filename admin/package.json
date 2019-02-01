@@ -26,6 +26,7 @@
     "jest": "^21.2.1",
     "preact-cli": "^2.1.0",
     "preact-cli-plugin-async": "^2.0.0",
+    "preact-cli-plugin-env-vars": "^1.2.1",
     "preact-render-spy": "^1.2.1"
   },
   "dependencies": {

@@ -1,6 +1,7 @@
 import { Component } from 'preact';
 import axios from 'axios';
 import style from './style';
+import { axiosConfig } from '../../utils';
 
 export default class Login extends Component {
   constructor(props) {
@@ -25,15 +26,15 @@ export default class Login extends Component {
   async handleSubmit(event) {
     event.preventDefault();
 
-    const url = `${window.location.origin}/v1/admin/login`;
     const config = {
+      ...axiosConfig,
       headers: {
         'Content-Type': 'application/json',
       },
     };
 
     try {
-      const res = await axios.post(url, JSON.stringify({ password: this.state.value }), config);
+      const res = await axios.post('/v1/admin/login', JSON.stringify({ password: this.state.value }), config);
 
       if (res.status === 204) {
         this.props.handleLogin();

@@ -6,6 +6,7 @@ import AllComments from './AllComments';
 import PendingComments from './PendingComments';
 import DeletedComments from './DeletedComments';
 import Login from './Login';
+import { axiosConfig } from '../utils';
 
 if (module.hot) {
   require('preact/debug');
@@ -30,8 +31,7 @@ export default class App extends Component {
 
   async fetchConfig() {
     try {
-      // const res = await axios.get(`${root.window.location.origin}/v1/admin/config`);
-      const res = await axios.get(`${window.location.origin}/v1/admin/config`);
+      const res = await axios.get('/v1/admin/config', axiosConfig);
       const config = JSON.parse(res);
 
       this.setState({
@@ -45,7 +45,7 @@ export default class App extends Component {
         error: true,
       });
 
-      console.log('Error while fetching config', err);
+      console.error('Error while fetching config', err);
     }
   }
 
@@ -63,7 +63,7 @@ export default class App extends Component {
     // implemented, loading certain type of comments will be moved to their components
 
     try {
-      const comments = await axios.get(`${window.location.origin}/v1/admin/comments/all`);
+      const comments = await axios.get('/v1/admin/comments/all', axiosConfig);
       this.setState({ comments });
     } catch (err) {
       console.log('Error while loading comments', err);
@@ -72,7 +72,7 @@ export default class App extends Component {
 
   async loadThreads() {
     try {
-      const threads = await axios.get(`${window.location.origin}/v1/admin/threads`);
+      const threads = await axios.get('/v1/admin/threads', axiosConfig);
       this.setState({ threads });
     } catch (err) {
       console.log('Error while loading threads', err);
