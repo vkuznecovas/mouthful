@@ -33,8 +33,7 @@
     "npm-lifecycle": "^2.1.0",
     "preact": "^8.2.6",
     "preact-compat": "^3.17.0",
-    "preact-router": "^2.5.7",
-    "window-or-global": "^1.0.1"
+    "preact-router": "^2.5.7"
   },
   "jest": {
     "verbose": true,

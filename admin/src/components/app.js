@@ -1,8 +1,7 @@
-import { h, Component } from 'preact';
+import { Component } from 'preact';
 import Router, { route } from 'preact-router';
 import axios from 'axios';
-// import root from 'window-or-global';
-import Header from './header';
+import Header from './Header';
 import AllComments from './AllComments';
 import PendingComments from './PendingComments';
 import DeletedComments from './DeletedComments';

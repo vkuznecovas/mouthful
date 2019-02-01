@@ -1,10 +1,7 @@
-import { h, Component } from 'preact';
+const Button = ({ children, ...props }) => (
+  <div {...props}>
+    {children}
+  </div>
+);
 
-export default class Button extends Component {
-  render() {
-    return (<div
-      onClick={this.props.onClick} >
-      {this.props.children}
-    </div>);
-  }
-}
+export default Button;

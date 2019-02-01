@@ -1,4 +1,4 @@
-import { h, Component } from 'preact';
+import { Component } from 'preact';
 import axios from 'axios';
 import Button from '../Button';
 
@@ -45,12 +45,11 @@ export default class Comment extends Component {
   }
 
   async confirmComment() {
-    // NOTE: dunno what should I think about this
     try {
       const data = {
-        // CommentId: this.props.id,
-        // Body: this.props.body,
-        // Author: this.props.author,
+        CommentId: this.props.id,
+        Body: this.props.body,
+        Author: this.props.author,
         Confirmed: true,
       };
       const res = await axios.patch(`${window.location.origin}/v1/admin/comments`, data);
