@@ -38,11 +38,23 @@ type Moderation struct {
 
 // Config - root of our config
 type Config struct {
-	Database   Database   `json:"database"`
-	Honeypot   bool       `json:"honeypot"`
-	Moderation Moderation `json:"moderation"`
-	Client     Client     `json:"client"`
-	API        API        `json:"api"`
+	Database     Database     `json:"database"`
+	Honeypot     bool         `json:"honeypot"`
+	Moderation   Moderation   `json:"moderation"`
+	Client       Client       `json:"client"`
+	API          API          `json:"api"`
+	Notification Notification `json:"notification"`
+}
+
+// Notification - notification configuration part
+type Notification struct {
+	Webhook Webhook `json:"webhook"`
+}
+
+// Webhook represents the settings for notifications via webhook
+type Webhook struct {
+	Enabled bool    `json:"enabled"`
+	URL     *string `json:"url"`
 }
 
 // API - api configuration part

@@ -2,7 +2,9 @@
 package api
 
 import (
+	"bytes"
 	"encoding/json"
+	"fmt"
 	"log"
 	"net/http"
 
@@ -246,6 +248,23 @@ func (r *Router) CreateComment(c *gin.Context) {
 		c.AbortWithStatusJSON(500, global.ErrInternalServerError.Error())
 		return
 	}
+
+	if r.config.Notification.Webhook.Enabled {
+		url := *r.config.Notification.Webhook.URL
+
+		go func() {
+			_, err := http.Post(
+				url,
+				"application/json",
+				bytes.NewBufferString(fmt.Sprintf(`{"message":"%s"}`, "Comment received")),
+			)
+
+			if err != nil {
+				log.Println(err)
+			}
+		}()
+	}
+
 	c.AbortWithStatusJSON(200, model.CreateCommentResponse{
 		Id:      commentUID.String(),
 		Path:    createCommentBody.Path,
