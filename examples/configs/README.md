@@ -10,6 +10,7 @@ The config consists of the following sections:
 * Moderation
 * Api
 * Client
+* Notification
 * Database
 
 ### Root
@@ -22,6 +23,7 @@ The root section contains all the other sections as well as the honeypot variabl
 | moderation     | contains the moderation settings for mouthful  | object | true |  | [see below](#Moderation) |
 | api     | changes the api behaviour | object | true |  | [see below](#Api) |
 | client     | changes client behaviour | object | true |  | [see below](#Client) |
+| notification     | changes notification behaviour  | object | true |  |  [see below](#Notification)|
 | database     | allows for configuring the data store | object | true |  |  [see below](#Database)|
 
 
@@ -167,6 +169,14 @@ The client section is responsible for setting the client side behaviour.
 | useDefaultStyle     | determines if the default mouthful styling will be applied to the client | bool | false | false | false, if you'll override the styling |
 | pageSize     | a limit on how many posts/replies to show | int | true | | 10 |
 
+### Notification
+
+The notification section is responsible for setting notification behaviour for new comments.
+
+| Variables     | Use           | Type | Required  | Default value | Recommended setting |
+| ------------- |:-------------:| :---:| :-------: |  :----------: |  :----------------: |
+| enabled     | determines if notifications about new comments will be send | bool | false | false | up to you |
+| url     | url to send an http post request to when a new comment is received  | string | true | | up to you |
 
 ### Database
 

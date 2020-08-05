@@ -37,5 +37,11 @@
     "client": {
         "useDefaultStyle": true,
         "pageSize": 10
+    },
+    "notification": {
+        "webhook": {
+            "enabled": false,
+            "url": ""
+        }
     }
 }
