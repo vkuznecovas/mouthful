@@ -76,7 +76,7 @@ func CreateDatabase(databaseConfig model.Database) (abstraction.Database, error)
 			connectionString += "&sslmode=disable"
 		}
 	}
-	d, err := sqlx.Connect("mysql", connectionString)
+	d, err := sqlx.Connect("postgres", connectionString)
 	if err != nil {
 		return nil, err
 	}
