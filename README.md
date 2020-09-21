@@ -43,6 +43,7 @@ There's a demo hosted at [mouthful.dizzy.zone](https://mouthful.dizzy.zone). Che
 * Migrations from existing commenting engines(isso, disqus)
 * Configuration - most of the features can be turned on or off, as well as customized to your preferences.
 * Admin login through third parties such as facebook and twitter, and 35 more.
+* Notifications about new comments via webhook
 * Dumping comments out, and importing an old dump.
 
 # Installation
@@ -161,6 +162,10 @@ Mouthful can cache end results(full sets of comments for threads) for a given pe
 ## Rate limiting
 
 Mouthful can limit the amount of posts a person can post within the same hour.
+
+## Notification
+
+Mouthful can send notifications about new comments via webhook.
 
 ## Styling
 

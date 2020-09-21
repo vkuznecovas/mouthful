@@ -9,38 +9,7 @@
 
 [[projects]]
   name = "github.com/aws/aws-sdk-go"
-  packages = [
-    "aws",
-    "aws/awserr",
-    "aws/awsutil",
-    "aws/client",
-    "aws/client/metadata",
-    "aws/corehandlers",
-    "aws/credentials",
-    "aws/credentials/ec2rolecreds",
-    "aws/credentials/endpointcreds",
-    "aws/credentials/stscreds",
-    "aws/defaults",
-    "aws/ec2metadata",
-    "aws/endpoints",
-    "aws/request",
-    "aws/session",
-    "aws/signer/v4",
-    "internal/sdkio",
-    "internal/sdkrand",
-    "internal/shareddefaults",
-    "private/protocol",
-    "private/protocol/json/jsonutil",
-    "private/protocol/jsonrpc",
-    "private/protocol/query",
-    "private/protocol/query/queryutil",
-    "private/protocol/rest",
-    "private/protocol/xml/xmlutil",
-    "service/dynamodb",
-    "service/dynamodb/dynamodbattribute",
-    "service/dynamodb/dynamodbiface",
-    "service/sts"
-  ]
+  packages = ["aws","aws/awserr","aws/awsutil","aws/client","aws/client/metadata","aws/corehandlers","aws/credentials","aws/credentials/ec2rolecreds","aws/credentials/endpointcreds","aws/credentials/stscreds","aws/defaults","aws/ec2metadata","aws/endpoints","aws/request","aws/session","aws/signer/v4","internal/sdkio","internal/sdkrand","internal/shareddefaults","private/protocol","private/protocol/json/jsonutil","private/protocol/jsonrpc","private/protocol/query","private/protocol/query/queryutil","private/protocol/rest","private/protocol/xml/xmlutil","service/dynamodb","service/dynamodb/dynamodbattribute","service/dynamodb/dynamodbiface","service/sts"]
   revision = "c0ea8ae46aeed5902eeebe10d0d5cdf54b258526"
   version = "v1.13.19"
 
@@ -82,10 +51,7 @@
 
 [[projects]]
   name = "github.com/garyburd/redigo"
-  packages = [
-    "internal",
-    "redis"
-  ]
+  packages = ["internal","redis"]
   revision = "d1ed5c67e5794de818ea85e6b522fda02623a484"
   version = "v1.4.0"
 
@@ -115,12 +81,7 @@
 
 [[projects]]
   name = "github.com/gin-gonic/gin"
-  packages = [
-    ".",
-    "binding",
-    "json",
-    "render"
-  ]
+  packages = [".","binding","json","render"]
   revision = "b869fe1415e4b9eb52f247441830d502aece2d4d"
   version = "v1.3.0"
 
@@ -175,10 +136,7 @@
 [[projects]]
   branch = "master"
   name = "github.com/guregu/dynamo"
-  packages = [
-    ".",
-    "internal/exprs"
-  ]
+  packages = [".","internal/exprs"]
   revision = "e2df7c3a097aa64387027f95be4d0bed49a065cb"
 
 [[projects]]
@@ -189,10 +147,7 @@
 [[projects]]
   branch = "master"
   name = "github.com/jmoiron/sqlx"
-  packages = [
-    ".",
-    "reflectx"
-  ]
+  packages = [".","reflectx"]
   revision = "05cef0741ade10ca668982355b3f3f0bcf0ff0a8"
 
 [[projects]]
@@ -210,10 +165,7 @@
 [[projects]]
   branch = "master"
   name = "github.com/lib/pq"
-  packages = [
-    ".",
-    "oid"
-  ]
+  packages = [".","oid"]
   revision = "d34b9ff171c21ad295489235aec8b6626023cd04"
 
 [[projects]]
@@ -224,48 +176,7 @@
 
 [[projects]]
   name = "github.com/markbates/goth"
-  packages = [
-    ".",
-    "gothic",
-    "providers/amazon",
-    "providers/battlenet",
-    "providers/bitbucket",
-    "providers/box",
-    "providers/dailymotion",
-    "providers/deezer",
-    "providers/digitalocean",
-    "providers/discord",
-    "providers/dropbox",
-    "providers/eveonline",
-    "providers/facebook",
-    "providers/fitbit",
-    "providers/github",
-    "providers/gitlab",
-    "providers/gplus",
-    "providers/heroku",
-    "providers/influxcloud",
-    "providers/instagram",
-    "providers/intercom",
-    "providers/lastfm",
-    "providers/linkedin",
-    "providers/meetup",
-    "providers/microsoftonline",
-    "providers/naver",
-    "providers/onedrive",
-    "providers/salesforce",
-    "providers/slack",
-    "providers/soundcloud",
-    "providers/spotify",
-    "providers/stripe",
-    "providers/twitch",
-    "providers/twitter",
-    "providers/uber",
-    "providers/vk",
-    "providers/wepay",
-    "providers/xero",
-    "providers/yahoo",
-    "providers/yammer"
-  ]
+  packages = [".","gothic","providers/amazon","providers/battlenet","providers/bitbucket","providers/box","providers/dailymotion","providers/deezer","providers/digitalocean","providers/discord","providers/dropbox","providers/eveonline","providers/facebook","providers/fitbit","providers/github","providers/gitlab","providers/gplus","providers/heroku","providers/influxcloud","providers/instagram","providers/intercom","providers/lastfm","providers/linkedin","providers/meetup","providers/microsoftonline","providers/naver","providers/onedrive","providers/salesforce","providers/slack","providers/soundcloud","providers/spotify","providers/stripe","providers/twitch","providers/twitter","providers/uber","providers/vk","providers/wepay","providers/xero","providers/yahoo","providers/yammer"]
   revision = "aefb600c0c37063c4280d47c42b11984b63cece4"
   version = "v1.45.7"
 
@@ -337,19 +248,13 @@
 
 [[projects]]
   name = "github.com/spf13/afero"
-  packages = [
-    ".",
-    "mem"
-  ]
+  packages = [".","mem"]
   revision = "63644898a8da0bc22138abf860edaf5277b6102e"
   version = "v1.1.0"
 
 [[projects]]
   name = "github.com/stretchr/testify"
-  packages = [
-    "assert",
-    "require"
-  ]
+  packages = ["assert","require"]
   revision = "12b6f73e6084dad08a7c6e575284b177ecafbc71"
   version = "v1.2.1"
 
@@ -361,12 +266,7 @@
 
 [[projects]]
   name = "github.com/ulule/limiter"
-  packages = [
-    ".",
-    "drivers/middleware/gin",
-    "drivers/store/common",
-    "drivers/store/memory"
-  ]
+  packages = [".","drivers/middleware/gin","drivers/store/common","drivers/store/memory"]
   revision = "f0ff82677fc4826ddae9ac45f2e11462fa245dad"
   version = "v2.2.0"
 
@@ -379,21 +279,13 @@
 [[projects]]
   branch = "master"
   name = "golang.org/x/net"
-  packages = [
-    "context",
-    "context/ctxhttp",
-    "html",
-    "html/atom"
-  ]
+  packages = ["context","context/ctxhttp","html","html/atom"]
   revision = "92b859f39abd2d91a854c9f9c4621b2f5054a92d"
 
 [[projects]]
   branch = "master"
   name = "golang.org/x/oauth2"
-  packages = [
-    ".",
-    "internal"
-  ]
+  packages = [".","internal"]
   revision = "ec22f46f877b4505e0117eeaab541714644fdd28"
 
 [[projects]]
@@ -404,28 +296,13 @@
 
 [[projects]]
   name = "golang.org/x/text"
-  packages = [
-    "internal/gen",
-    "internal/triegen",
-    "internal/ucd",
-    "transform",
-    "unicode/cldr",
-    "unicode/norm"
-  ]
+  packages = ["internal/gen","internal/triegen","internal/ucd","transform","unicode/cldr","unicode/norm"]
   revision = "f21a4dfb5e38f5895301dc265a8def02365cc3d0"
   version = "v0.3.0"
 
 [[projects]]
   name = "google.golang.org/appengine"
-  packages = [
-    "internal",
-    "internal/base",
-    "internal/datastore",
-    "internal/log",
-    "internal/remote_api",
-    "internal/urlfetch",
-    "urlfetch"
-  ]
+  packages = ["internal","internal/base","internal/datastore","internal/log","internal/remote_api","internal/urlfetch","urlfetch"]
   revision = "150dc57a1b433e64154302bdc40b6bb8aefa313a"
   version = "v1.0.0"
 
@@ -438,13 +315,7 @@
 [[projects]]
   branch = "v2"
   name = "gopkg.in/mgo.v2"
-  packages = [
-    ".",
-    "bson",
-    "internal/json",
-    "internal/sasl",
-    "internal/scram"
-  ]
+  packages = [".","bson","internal/json","internal/sasl","internal/scram"]
   revision = "3f83fa5005286a7fe593b055f0d7771a7dce4655"
 
 [[projects]]
@@ -462,6 +333,6 @@
 [solve-meta]
   analyzer-name = "dep"
   analyzer-version = 1
-  inputs-digest = "c163a5b623851666294bbe4601a8d372149b4e15eee0eda7e5c087b71c431abd"
+  inputs-digest = "667d9cfb4fd420983ef779d6f87fbf3609e720c6cedfdf8548c3b9d4b94fce6e"
   solver-name = "gps-cdcl"
   solver-version = 1
