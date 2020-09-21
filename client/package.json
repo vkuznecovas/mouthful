@@ -29,7 +29,7 @@
     "preact-compat": "^3.17.0",
     "preact-habitat": "^3.1.0",
     "preact-router": "^2.5.7",
-    "showdown": "1.8.6"
+    "showdown": "1.9.1"
   },
   "jest": {
     "verbose": true,
