@@ -1,4 +1,4 @@
-FROM golang:1.10-alpine
+FROM golang:1.15.2-alpine
 ARG MOUTHFUL_VER
 ENV CGO_ENABLED=${CGO_ENABLED:-1} \
     GOOS=${GOOS:-linux} \
