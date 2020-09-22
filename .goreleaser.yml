@@ -37,11 +37,12 @@ builds:
     goarch:
       - amd64
 # Archive customization
-archive:
-  format: tar.gz
-  format_overrides:
-    - goos: windows
-      format: zip
-  files:
-    - ./static/*
-    - ./data/config.json
+archives:
+  -
+    format: tar.gz
+    format_overrides:
+      - goos: windows
+        format: zip
+    files:
+      - ./static/*
+      - ./data/config.json
