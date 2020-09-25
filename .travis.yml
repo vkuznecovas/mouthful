@@ -1,5 +1,6 @@
 language: go
-go: "1.15.2"
+go: 
+  - "1.15.2"
 services:
   - mysql
   - postgresql
