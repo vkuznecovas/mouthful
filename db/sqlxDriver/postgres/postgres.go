@@ -8,6 +8,7 @@ import (
 
 	"github.com/jmoiron/sqlx"
 	"github.com/jmoiron/sqlx/reflectx"
+
 	// We absolutely need the postgres driver here, this whole file depends on it
 	_ "github.com/lib/pq"
 	"github.com/vkuznecovas/mouthful/config/model"
@@ -81,7 +82,9 @@ func CreateDatabase(databaseConfig model.Database) (abstraction.Database, error)
 		return nil, err
 	}
 	db.Mapper = reflectx.NewMapperTagFunc("db",
-		nil,
+		func(s string) string {
+			return s
+		},
 		func(s string) string {
 			return strings.ToLower(s)
 		},
