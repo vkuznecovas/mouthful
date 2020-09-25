@@ -81,15 +81,13 @@ func CreateDatabase(databaseConfig model.Database) (abstraction.Database, error)
 	if err != nil {
 		return nil, err
 	}
+	db = d
 	db.Mapper = reflectx.NewMapperTagFunc("db",
-		func(s string) string {
-			return s
-		},
+		nil,
 		func(s string) string {
 			return strings.ToLower(s)
 		},
 	)
-	db = d
 	DB := sqlxDriver.Database{
 		DB:      db,
 		Queries: PostgresQueries,
