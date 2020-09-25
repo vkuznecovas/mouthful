@@ -20,7 +20,6 @@ before_install:
   - sudo service mysql start
   - sudo /etc/init.d/postgresql start
   - psql -c 'create database mouthful_test;' -U postgres
-  - go get -u github.com/golang/dep/cmd/dep
   - wget http://dynamodb-local.s3-website-us-west-2.amazonaws.com/dynamodb_local_latest.tar.gz -O /tmp/dynamodb_local_latest.tar.gz
   - tar -xzf /tmp/dynamodb_local_latest.tar.gz -C /tmp
   - java -Djava.library.path=/tmp/DynamoDBLocal_lib -jar /tmp/DynamoDBLocal.jar -inMemory &
@@ -28,8 +27,6 @@ before_install:
   - sudo apt-get -y install gcc-mingw-w64
   - (cd client && npm install)
   - (cd admin && npm install)
-install:
-  - dep ensure
 script: 
   - ./test.sh
   - go build main.go
