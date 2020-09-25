@@ -1,6 +1,7 @@
 package db
 
 import (
+	"bytes"
 	"encoding/json"
 	"os"
 	"reflect"
@@ -8,7 +9,6 @@ import (
 	"testing"
 	"time"
 
-	uuid "github.com/gofrs/uuid"
 	"github.com/vkuznecovas/mouthful/global"
 
 	"github.com/stretchr/testify/assert"
@@ -41,7 +41,7 @@ func (ts TestSuite) CreateThread(t *testing.T, database abstraction.Database) {
 	assert.NotNil(t, uid)
 	thread, err := database.GetThread("/test")
 	assert.Nil(t, err)
-	assert.True(t, uuid.Equal(*uid, thread.Id))
+	assert.True(t, bytes.Equal(uid.Bytes(), thread.Id.Bytes()))
 	assert.Equal(t, "/test", thread.Path)
 }
 
@@ -52,7 +52,7 @@ func (ts TestSuite) CreateThreadUniqueViolation(t *testing.T, database abstracti
 	assert.NotNil(t, uid)
 	uidNew, err := database.CreateThread("/test")
 	assert.Nil(t, err)
-	assert.True(t, uuid.Equal(*uid, *uidNew))
+	assert.True(t, bytes.Equal(uid.Bytes(), uidNew.Bytes()))
 }
 
 // GetThread checks if a created thread is gotten alright
@@ -62,7 +62,7 @@ func (ts TestSuite) GetThread(t *testing.T, database abstraction.Database) {
 	assert.NotNil(t, uid)
 	thread, err := database.GetThread("/test")
 	assert.Nil(t, err)
-	assert.True(t, uuid.Equal(*uid, thread.Id))
+	assert.True(t, bytes.Equal(uid.Bytes(), thread.Id.Bytes()))
 	assert.Equal(t, "/test", thread.Path)
 }
 
@@ -82,7 +82,7 @@ func (ts TestSuite) CreateComment(t *testing.T, database abstraction.Database) {
 	comment, err := database.GetComment(*uid)
 	assert.Nil(t, err)
 	assert.Nil(t, comment.DeletedAt)
-	assert.True(t, uuid.Equal(*uid, comment.Id))
+	assert.True(t, bytes.Equal(uid.Bytes(), comment.Id.Bytes()))
 	assert.Equal(t, "body", comment.Body)
 	assert.Equal(t, "author", comment.Author)
 	assert.Equal(t, true, comment.Confirmed)
@@ -128,7 +128,7 @@ func (ts TestSuite) CreateCommentReplyToAReply(t *testing.T, database abstractio
 	assert.Nil(t, err)
 	comment, err := database.GetComment(*uid3)
 	assert.Nil(t, err)
-	assert.True(t, uuid.Equal(*comment.ReplyTo, *uid1))
+	assert.True(t, bytes.Equal(comment.ReplyTo.Bytes(), uid1.Bytes()))
 }
 
 // CreateCommentWrongThread asserts that we return an error upon trying to reply to a comment from another thread
@@ -155,7 +155,7 @@ func (ts TestSuite) GetComment(t *testing.T, database abstraction.Database) {
 	assert.Nil(t, err)
 	comment, err := database.GetComment(*uid)
 	assert.Nil(t, err)
-	assert.True(t, uuid.Equal(*uid, comment.Id))
+	assert.True(t, bytes.Equal(uid.Bytes(), comment.Id.Bytes()))
 	assert.Equal(t, "body", comment.Body)
 	assert.Equal(t, true, comment.Confirmed)
 	assert.Equal(t, "author", comment.Author)
@@ -221,7 +221,7 @@ func (ts TestSuite) UpdateComment(t *testing.T, database abstraction.Database) {
 	assert.Nil(t, err)
 	comment, err := database.GetComment(*uid)
 	assert.Nil(t, err)
-	assert.True(t, uuid.Equal(*uid, comment.Id))
+	assert.True(t, bytes.Equal(uid.Bytes(), comment.Id.Bytes()))
 	assert.Equal(t, "t", comment.Body)
 	assert.Equal(t, false, comment.Confirmed)
 	assert.Equal(t, "t", comment.Author)
@@ -570,7 +570,7 @@ func (ts TestSuite) TestDataImport(t *testing.T, database abstraction.Database) 
 	for i := range dbThreads {
 		assert.Equal(t, threads[i].CreatedAt.Unix(), dbThreads[i].CreatedAt.Unix())
 		assert.Equal(t, threads[i].Path, dbThreads[i].Path)
-		assert.True(t, uuid.Equal(threads[i].Id, dbThreads[i].Id))
+		assert.True(t, bytes.Equal(threads[i].Id.Bytes(), dbThreads[i].Id.Bytes()))
 	}
 	dbComments, err := database.GetAllComments()
 	assert.Nil(t, err)
@@ -588,7 +588,7 @@ func (ts TestSuite) TestDataImport(t *testing.T, database abstraction.Database) 
 		}
 		assert.Equal(t, comments[i].Confirmed, dbComments[i].Confirmed)
 		assert.Equal(t, comments[i].ReplyTo, dbComments[i].ReplyTo)
-		assert.True(t, uuid.Equal(comments[i].Id, dbComments[i].Id))
-		assert.True(t, uuid.Equal(comments[i].ThreadId, dbComments[i].ThreadId))
+		assert.True(t, bytes.Equal(comments[i].Id.Bytes(), dbComments[i].Id.Bytes()))
+		assert.True(t, bytes.Equal(comments[i].ThreadId.Bytes(), dbComments[i].ThreadId.Bytes()))
 	}
 }

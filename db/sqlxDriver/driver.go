@@ -2,6 +2,7 @@
 package sqlxDriver
 
 import (
+	"bytes"
 	"fmt"
 	"sort"
 	"time"
@@ -97,7 +98,7 @@ func (db *Database) CreateComment(body string, author string, path string, confi
 			return nil, err
 		}
 		// Check if the comment you're replying to actually is a part of the thread
-		if !uuid.Equal(comment.ThreadId, thread.Id) {
+		if !bytes.Equal(comment.ThreadId.Bytes(), thread.Id.Bytes()) {
 			return nil, global.ErrWrongReplyTo
 		}
 		// We allow for only a single layer of nesting. (Maybe just for now? who knows.)

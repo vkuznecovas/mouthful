@@ -7,6 +7,7 @@ import (
 
 	"github.com/gin-contrib/cors"
 	"github.com/gin-contrib/sessions"
+	"github.com/gin-contrib/sessions/cookie"
 	"github.com/gin-contrib/static"
 	"github.com/gin-gonic/gin"
 	"github.com/markbates/goth"
@@ -136,11 +137,12 @@ func GetServer(db *abstraction.Database, config *model.Config) (*gin.Engine, err
 		if err != nil {
 			return nil, err
 		}
-		store := sessions.NewCookieStore([]byte(config.Moderation.AdminPassword))
+		store := cookie.NewStore([]byte(config.Moderation.AdminPassword))
 		store.Options(sessions.Options{
 			MaxAge: int(time.Second * time.Duration(config.Moderation.SessionDurationSeconds)), //30min
 			Path:   "/",
 		})
+		r.Use(sessions.Sessions("mouthful", store))
 		v1.GET("/admin/config", router.GetAdminConfig)
 		v1.PATCH("/admin/comments", sessions.Sessions(global.DefaultSessionName, store), router.UpdateComment)
 		v1.DELETE("/admin/comments", sessions.Sessions(global.DefaultSessionName, store), router.DeleteComment)

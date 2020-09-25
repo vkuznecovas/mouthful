@@ -1,6 +1,7 @@
 package api_test
 
 import (
+	"bytes"
 	"encoding/json"
 	"fmt"
 	"io/ioutil"
@@ -713,7 +714,7 @@ func CreateCommentReplyTo(t *testing.T, testDB abstraction.Database) {
 			assert.Len(t, comments, 2)
 			assert.Equal(t, global.ParseAndSaniziteMarkdown("body"), comments[0].Body)
 			assert.Nil(t, comments[0].ReplyTo)
-			assert.True(t, uuid.Equal(commentId, *comments[1].ReplyTo))
+			assert.True(t, bytes.Equal(commentId.Bytes(), comments[1].ReplyTo.Bytes()))
 		})
 }
 
@@ -1927,8 +1928,8 @@ func CreateCommentReplyToAReply(t *testing.T, testDB abstraction.Database) {
 			assert.Len(t, comments, 3)
 			assert.Equal(t, global.ParseAndSaniziteMarkdown("body"), comments[0].Body)
 			assert.Nil(t, comments[0].ReplyTo)
-			assert.True(t, uuid.Equal(commentId, *comments[1].ReplyTo))
-			assert.True(t, uuid.Equal(commentId, *comments[2].ReplyTo))
+			assert.True(t, bytes.Equal(commentId.Bytes(), comments[1].ReplyTo.Bytes()))
+			assert.True(t, bytes.Equal(commentId.Bytes(), comments[2].ReplyTo.Bytes()))
 		})
 }
 

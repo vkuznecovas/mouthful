@@ -2,6 +2,7 @@
 package dynamodb
 
 import (
+	"bytes"
 	"fmt"
 	"log"
 	"sort"
@@ -153,7 +154,7 @@ func (db *Database) CreateComment(body string, author string, path string, confi
 			return nil, err
 		}
 		// Check if the comment you're replying to actually is a part of the thread
-		if !uuid.Equal(comment.ThreadId, thread.Id) {
+		if !bytes.Equal(comment.ThreadId.Bytes(), thread.Id.Bytes()) {
 			return nil, global.ErrWrongReplyTo
 		}
 		// We allow for only a single layer of nesting. (Maybe just for now? who knows.)
@@ -266,7 +267,8 @@ func (db *Database) DeleteComment(id uuid.UUID) error {
 			if err != nil {
 				return err
 			}
-			if uuid.Equal(*cid, comment.Id) {
+
+			if bytes.Equal(cid.Bytes(), comment.Id.Bytes()) {
 				err = db.DB.Table(db.TablePrefix+global.DefaultDynamoDbCommentTableName).Update("ID", result[i].Id).Set("DeletedAt", deletedAt).Run()
 				if err != nil {
 					return err
@@ -365,7 +367,7 @@ func (db *Database) HardDeleteComment(commentId uuid.UUID) error {
 			if err != nil {
 				return err
 			}
-			if uuid.Equal(*cid, comment.Id) {
+			if bytes.Equal(cid.Bytes(), comment.Id.Bytes()) {
 				err = db.DB.Table(db.TablePrefix+global.DefaultDynamoDbCommentTableName).Delete("ID", result[i].Id).Run()
 				if err != nil {
 					return err
