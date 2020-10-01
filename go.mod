@@ -18,7 +18,7 @@ require (
 	github.com/mattn/go-sqlite3 v1.14.3
 	github.com/microcosm-cc/bluemonday v1.0.4
 	github.com/patrickmn/go-cache v2.1.0+incompatible
-	gopkg.in/russross/blackfriday.v2 v2.0.1
+	github.com/russross/blackfriday/v2 v2.0.1
 	github.com/shurcooL/sanitized_anchor_name v1.0.0 // indirect
 	github.com/spf13/afero v1.4.0
 	github.com/stretchr/testify v1.6.1
