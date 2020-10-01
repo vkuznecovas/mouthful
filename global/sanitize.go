@@ -2,7 +2,7 @@ package global
 
 import (
 	bluemonday "github.com/microcosm-cc/bluemonday"
-	blackfriday "github.com/russross/blackfriday/v2"
+	blackfriday "gopkg.in/russross/blackfriday.v2"
 )
 
 // ParseAndSaniziteMarkdown takes in a markdown string, parses it and sanitizes it with blue monday.

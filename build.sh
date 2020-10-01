@@ -21,9 +21,6 @@ npm run build
 cp -r ./build/* ../dist/static/
 cd ..
 
-# install deps
-dep ensure
-
 # build binary
 go build -tags=jsoniter -a -ldflags="-s -w" -installsuffix cgo -o dist/mouthful main.go
 chmod +x dist/mouthful
