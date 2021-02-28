@@ -18,7 +18,7 @@ require (
 	github.com/labstack/echo v3.3.10+incompatible // indirect
 	github.com/labstack/gommon v0.3.0 // indirect
 	github.com/lib/pq v1.8.0
-	github.com/markbates/goth v1.64.2
+	github.com/markbates/goth v1.67.1
 	github.com/mattn/go-sqlite3 v1.14.3
 	github.com/microcosm-cc/bluemonday v1.0.4
 	github.com/patrickmn/go-cache v2.1.0+incompatible
