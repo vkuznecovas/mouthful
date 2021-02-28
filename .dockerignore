@@ -1,2 +1,6 @@
-**
-!dist
+dist
+data
+goreleaser-build
+static
+client/build
+client/node_modules
