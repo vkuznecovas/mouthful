@@ -19,7 +19,7 @@
     "if-env": "^1.0.0",
     "jest": "^21.2.1",
     "node-sass": "^4.14.1",
-    "preact-cli": "^2.2.1",
+    "preact-cli": "^3.4.5",
     "preact-render-to-string": "^3.7.0",
     "preact-widget-scripts": "^0.6.0",
     "sass-loader": "^6.0.6"
