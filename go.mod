@@ -20,14 +20,12 @@ require (
 	github.com/lib/pq v1.8.0
 	github.com/markbates/goth v1.67.1
 	github.com/mattn/go-sqlite3 v1.14.3
-	github.com/microcosm-cc/bluemonday v1.0.4
+	github.com/microcosm-cc/bluemonday v1.0.20
 	github.com/patrickmn/go-cache v2.1.0+incompatible
 	github.com/russross/blackfriday/v2 v2.1.0
-	github.com/shurcooL/sanitized_anchor_name v1.0.0 // indirect
 	github.com/spf13/afero v1.4.0
 	github.com/stretchr/testify v1.6.1
 	github.com/ulule/limiter v2.2.2+incompatible
 	github.com/urfave/cli v1.22.4
-	google.golang.org/appengine v1.6.6 // indirect
 	gopkg.in/gin-gonic/gin.v1 v1.3.0 // indirect
 )
