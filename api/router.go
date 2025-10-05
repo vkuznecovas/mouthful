@@ -4,7 +4,6 @@ package api
 import (
 	"bytes"
 	"encoding/json"
-	"fmt"
 	"log"
 	"net/http"
 
@@ -249,30 +248,41 @@ func (r *Router) CreateComment(c *gin.Context) {
 		return
 	}
 
-	if r.config.Notification.Webhook.Enabled {
-		url := *r.config.Notification.Webhook.URL
-
-		go func() {
-			_, err := http.Post(
-				url,
-				"application/json",
-				bytes.NewBufferString(fmt.Sprintf(`{"message":"%s"}`, "Comment received")),
-			)
-
-			if err != nil {
-				log.Println(err)
-			}
-		}()
-	}
-
-	c.AbortWithStatusJSON(200, model.CreateCommentResponse{
+	response := model.CreateCommentResponse{
 		Id:      commentUID.String(),
 		Path:    createCommentBody.Path,
 		Body:    createCommentBody.Body,
 		Author:  createCommentBody.Author,
 		Email:   createCommentBody.Email,
 		ReplyTo: createCommentBody.ReplyTo,
-	})
+	}
+
+	if r.config.Notification.Webhook.Enabled {
+		url := *r.config.Notification.Webhook.URL
+
+		go func(url string, payload model.CreateCommentResponse) {
+			payloadBytes, err := json.Marshal(payload)
+			if err != nil {
+				log.Println(err)
+				return
+			}
+
+			resp, err := http.Post(
+				url,
+				"application/json",
+				bytes.NewBuffer(payloadBytes),
+			)
+
+			if err != nil {
+				log.Println(err)
+				return
+			}
+
+			defer resp.Body.Close()
+		}(url, response)
+	}
+
+	c.AbortWithStatusJSON(200, response)
 }
 
 // UpdateComment updates the provided comment in body
