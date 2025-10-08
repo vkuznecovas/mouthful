@@ -4,12 +4,15 @@ import (
 	"bytes"
 	"encoding/json"
 	"fmt"
+	"io"
 	"io/ioutil"
 	"net/http"
+	"net/http/httptest"
 	"net/url"
 	"os"
 	"strings"
 	"testing"
+	"time"
 
 	"github.com/gofrs/uuid"
 	"github.com/vkuznecovas/mouthful/global"
@@ -114,6 +117,7 @@ var testFunctions = [...]interface{}{
 	CreateCommentEmptyBody,
 	CreateCommentEmptyBodyAfterSanitization,
 	CreateCommentEmptyAuthor,
+	CreateCommentWebhook,
 	GetAdminConfig,
 	OauthPathsExist,
 	DeleteCommentHard,
@@ -2087,6 +2091,59 @@ func CreateCommentEmptyAuthor(t *testing.T, testDB abstraction.Database) {
 			assert.Nil(t, err)
 			assert.Equal(t, "\"Bad request\"", string(b))
 		})
+}
+
+func CreateCommentWebhook(t *testing.T, testDB abstraction.Database) {
+	received := make(chan model.CreateCommentResponse, 1)
+	dummyWebhook := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		defer r.Body.Close()
+		payloadBytes, err := io.ReadAll(r.Body)
+		assert.Nil(t, err)
+		var payload model.CreateCommentResponse
+		err = json.Unmarshal(payloadBytes, &payload)
+		assert.Nil(t, err)
+		received <- payload
+		w.WriteHeader(http.StatusOK)
+	}))
+	defer dummyWebhook.Close()
+
+	// temporary mutation of mouthful config
+	configCopy := config
+	configCopy.Notification.Webhook.Enabled = true
+	webhookURL := dummyWebhook.URL
+	configCopy.Notification.Webhook.URL = &webhookURL
+	//
+
+	server, err := api.GetServer(&testDB, &configCopy)
+	assert.Nil(t, err)
+	r := gofight.New()
+	commentBody := model.CreateCommentBody{
+		Path:   "/webhook/test",
+		Body:   "**body**",
+		Author: "webhook-tester",
+	}
+	bodyBytes, err := json.Marshal(commentBody)
+	assert.Nil(t, err)
+	var response model.CreateCommentResponse
+	r.POST("/v1/comments").
+		SetBody(string(bodyBytes[:])).
+		SetDebug(debug).
+		Run(server, func(r gofight.HTTPResponse, rq gofight.HTTPRequest) {
+			assert.Equal(t, http.StatusOK, r.Code)
+			err = json.Unmarshal(r.Body.Bytes(), &response)
+			assert.Nil(t, err)
+			assert.NotEmpty(t, response.Id)
+			assert.Equal(t, api.NormalizePath(commentBody.Path), response.Path)
+			assert.Equal(t, commentBody.Author, response.Author)
+			assert.Equal(t, global.ParseAndSaniziteMarkdown(commentBody.Body), response.Body)
+		})
+
+	select {
+	case payload := <-received:
+		assert.Equal(t, response, payload)
+	case <-time.After(time.Second):
+		assert.Fail(t, "webhook payload not received")
+	}
 }
 
 func GetAdminConfig(t *testing.T, testDB abstraction.Database) {
